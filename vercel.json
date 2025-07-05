@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -13,7 +18,11 @@
       "destination": "/api/index.js"
     },
     {
-      "source": "/setup", 
+      "source": "/setup",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/",
       "destination": "/api/index.js"
     }
   ]
