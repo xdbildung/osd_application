@@ -1,0 +1,25 @@
+[
+  {
+    "firstName": "test",
+    "lastName": "test",
+    "gender": "男",
+    "birthDate": "2000-11-11",
+    "nationality": "China",
+    "birthPlace": "test",
+    "email": "skee.chen@xuezaideguo.com",
+    "examLevel": "A1",
+    "phoneNumber": "15618401125",
+    "firstTimeExam": "是",
+    "passportNumber": "test",
+    "examDate": "2025年8月27日",
+    "examModules": "A1全科",
+    "signedDocument": {
+      "originalName": "SDIå¥¥å¾·èè¯ä¸­å¿æ¥åé¡»ç¥.docx",
+      "filename": "SDIå¥¥å¾·èè¯ä¸­å¿æ¥åé¡»ç¥-1751603001073-844790585.docx",
+      "size": 100425,
+      "mimetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "uploadPath": "/uploads/SDIå¥¥å¾·èè¯ä¸­å¿æ¥åé¡»ç¥-1751603001073-844790585.docx"
+    },
+    "timestamp": "2025-07-04T04:23:21.076Z"
+  }
+]

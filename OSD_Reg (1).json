@@ -1,0 +1,456 @@
+{
+  "name": "OSD_Reg",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "submit-registration",
+        "options": {
+          "noResponseBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -360,
+        300
+      ],
+      "id": "6e25cf24-813a-4be7-befc-6f80c0a3028f",
+      "name": "Webhook Trigger",
+      "webhookId": "6ff74a92-c06a-4505-9f87-29ce59bc13f4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process form data and attachments\nconst items = $input.all();\n\nfor (let item of items) {\n  // Handle nationality field\n  if (item.json.body.nationality === 'Other' && item.json.body.otherNationality) {\n    item.json.body.nationality = item.json.body.otherNationality;\n  }\n  \n  // Process exam sessions to determine exam level and date\n  if (item.json.body.examSessions) {\n    const sessions = Array.isArray(item.json.body.examSessions) ? \n      item.json.body.examSessions : [item.json.body.examSessions];\n    \n    // Extract exam levels and venues\n    const levels = new Set();\n    const venues = new Set();\n    const examDetails = [];\n    \n    sessions.forEach(session => {\n      const parts = session.split('-');\n      if (parts.length >= 3) {\n        const venue = parts[0];\n        const level = parts[1];\n        const module = parts.slice(2).join('-');\n        \n        venues.add(venue);\n        levels.add(level);\n        examDetails.push({\n          venue: venue,\n          level: level,\n          module: module,\n          date: venue === '北京' ? '2025年9月6日' : '2025年8月27日'\n        });\n      }\n    });\n    \n    // Set exam level (primary level)\n    item.json.body.examLevel = Array.from(levels).sort()[0] || 'N/A';\n    \n    // Set exam date based on venues\n    const examDates = Array.from(venues).map(venue => \n      venue === '北京' ? '北京-2025年9月6日' : '成都-2025年8月27日'\n    );\n    item.json.body.examDate = examDates.join(', ');\n    \n    // Store exam details for email\n    item.json.body.examDetails = examDetails;\n  }\n  \n  // Process signed document attachment\n  if (item.json.body.signedDocument && item.json.body.signedDocument.content) {\n    const attachmentData = item.json.body.signedDocument;\n    \n    // Convert base64 to binary buffer\n    const binaryBuffer = Buffer.from(attachmentData.content, 'base64');\n    \n    // Create binary data property\n    item.binary = item.binary || {};\n    item.binary.attachment = {\n      data: binaryBuffer,\n      mimeType: attachmentData.mimeType || 'application/octet-stream',\n      fileName: attachmentData.filename || 'signed_document'\n    };\n  }\n  \n  // Process passport upload if present\n  if (item.json.body.passportUpload && item.json.body.passportUpload.content) {\n    const passportData = item.json.body.passportUpload;\n    \n    // Convert base64 to binary buffer\n    const binaryBuffer = Buffer.from(passportData.content, 'base64');\n    \n    // Create binary data property for passport\n    item.binary = item.binary || {};\n    item.binary.passport = {\n      data: binaryBuffer,\n      mimeType: passportData.mimeType || 'application/octet-stream',\n      fileName: passportData.filename || 'passport'\n    };\n  }\n  \n  // Add timestamp if not present\n  if (!item.json.body.timestamp) {\n    item.json.body.timestamp = new Date().toISOString();\n  }\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        300
+      ],
+      "id": "389c4a0c-e251-4670-9554-c93cc7241994",
+      "name": "Process Form Data"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1GBu2AgIhKBJE5q34Hk6s6DL6fRaTW-yqiZMf8blVNd0",
+          "mode": "list",
+          "cachedResultName": "test_registration_sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GBu2AgIhKBJE5q34Hk6s6DL6fRaTW-yqiZMf8blVNd0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e7IBYNKiEvdZOscI0YaBK9uk6ReymltU0bWHJZ1e3D8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ChineseName": "={{ $json.body.lastName + ' ' + $json.body.firstName }}",
+            "FirstName": "={{ $json.body.firstName }}",
+            "LastName": "={{ $json.body.lastName }}",
+            "Gender": "={{ $json.body.gender }}",
+            "BirthDate": "={{ $json.body.birthDate }}",
+            "BirthPlace": "={{ $json.body.birthPlace }}",
+            "E-mail": "={{ $json.body.email }}",
+            "Level": "={{ $json.body.examLevel }}",
+            "B1_Listening": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('B1-听力') || $json.body.examSessions.join(',').includes('B1-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+            "Mobile": "={{ $json.body.phoneNumber }}",
+            "First_Time": "={{ $json.body.firstTimeExam }}",
+            "B1_Speaking": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('B1-口语') || $json.body.examSessions.join(',').includes('B1-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+            "Nationality": "={{ $json.body.nationality }}",
+            "B1_Reading": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('B1-阅读') || $json.body.examSessions.join(',').includes('B1-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+            "B1_Writing": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('B1-写作') || $json.body.examSessions.join(',').includes('B1-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+            "A2_Written": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('A2-笔试') || $json.body.examSessions.join(',').includes('A2-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+            "A2_Oral": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('A2-口试') || $json.body.examSessions.join(',').includes('A2-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+            "A1_Written": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('A1-笔试') || $json.body.examSessions.join(',').includes('A1-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+            "A1_Oral": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('A1-口试') || $json.body.examSessions.join(',').includes('A1-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+            "Reg_Time": "={{ $json.body.timestamp }}",
+            "Passport": "={{ $json.body.passportNumber }}",
+            "TestDate": "={{ $json.body.examDate }}",
+            "ExamSessions": "={{ $json.body.examSessions ? $json.body.examSessions.join(', ') : '' }}",
+            "SelectedVenues": "={{ $json.body.selectedVenues ? $json.body.selectedVenues.join(', ') : '' }}",
+            "PassportUploaded": "={{ $json.body.passportUpload ? 'TRUE' : 'FALSE' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ChineseName",
+              "displayName": "ChineseName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "FirstName",
+              "displayName": "FirstName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LastName",
+              "displayName": "LastName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Gender",
+              "displayName": "Gender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "BirthDate",
+              "displayName": "BirthDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nationality",
+              "displayName": "Nationality",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "BirthPlace",
+              "displayName": "BirthPlace",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Passport",
+              "displayName": "Passport",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Level",
+              "displayName": "Level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "B1_Listening",
+              "displayName": "B1_Listening",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "B1_Reading",
+              "displayName": "B1_Reading",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "B1_Writing",
+              "displayName": "B1_Writing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "B1_Speaking",
+              "displayName": "B1_Speaking",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "A2_Written",
+              "displayName": "A2_Written",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "A2_Oral",
+              "displayName": "A2_Oral",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "A1_Written",
+              "displayName": "A1_Written",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "A1_Oral",
+              "displayName": "A1_Oral",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mobile",
+              "displayName": "Mobile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First_Time",
+              "displayName": "First_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reg_Time",
+              "displayName": "Reg_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TestDate",
+              "displayName": "TestDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ExamSessions",
+              "displayName": "ExamSessions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "SelectedVenues",
+              "displayName": "SelectedVenues",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PassportUploaded",
+              "displayName": "PassportUploaded",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        140,
+        380
+      ],
+      "id": "0ae9d7c1-43cb-4f1f-9d8e-b6244db0e4e6",
+      "name": "Google Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OWrqKQaJ59Y0WeAD",
+          "name": "Skee's Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "info@sdi-osd.de",
+        "toEmail": "skee.chen@xuezaideguo.com",
+        "subject": "=新的奥德考试报名申请 - {{ $json.body.lastName }} {{ $json.body.firstName }}",
+        "html": "=<div><h2>新的奥德考试报名申请</h2></div><div><br></div><div><strong>学生信息：</strong></div><div>• 姓名：{{ $json.body.lastName }} {{ $json.body.firstName }}</div><div>• 性别：{{ $json.body.gender }}</div><div>• 出生日期：{{ $json.body.birthDate }}</div><div>• 国籍：{{ $json.body.nationality }}</div><div>• 出生地：{{ $json.body.birthPlace }}</div><div>• 邮箱：{{ $json.body.email }}</div><div>• 手机号码：{{ $json.body.phoneNumber }}</div><div>• 护照号码：{{ $json.body.passportNumber }}</div><div><br></div><div><strong>考试信息：</strong></div><div>• 主要等级：{{ $json.body.examLevel }}</div><div>• 考试场次：{{ $json.body.examSessions ? $json.body.examSessions.join(', ') : '无' }}</div><div>• 考试日期：{{ $json.body.examDate }}</div><div>• 首次参加：{{ $json.body.firstTimeExam }}</div><div><br></div><div><strong>报名时间：</strong> {{ $json.body.timestamp }}</div><div><br></div><div><strong>文件信息：</strong></div><div>• 签字文件：{{ $json.body.signedDocument ? $json.body.signedDocument.filename : '未上传' }}</div><div>• 护照文件：{{ $json.body.passportUpload ? $json.body.passportUpload.filename : '未上传' }}</div>",
+        "attachments": "attachment,passport",
+        "options": {}
+      },
+      "name": "Send Email to Admin",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        140,
+        120
+      ],
+      "id": "dacca265-a4a0-4321-b0ec-1080b05dd68f",
+      "credentials": {
+        "smtp": {
+          "id": "evEHcleKBaWVF93k",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "info@sdi-osd.de",
+        "toEmail": "={{ $json.body.email }}",
+        "subject": "={{ $json.body.lastName }} {{ $json.body.firstName }} - 奥德考试报名后续流程通知",
+        "html": "=<div><div>{{ $json.body.lastName }}, {{ $json.body.firstName }}同学，</div><div><br></div><div>您好！感谢您报名SDI奥德考试中心奥德考试。</div><div><br></div><div>以下为您的报名信息：</div><div>1、报名等级：{{ $json.body.examLevel }}等级考试</div><div>2、报名科目：{{ $json.body.examModules }}</div><div>3、护照信息：{{ $json.body.passportNumber }}</div><div>4、考试日期：{{ $json.body.examDate }}</div><div><br></div><div>若您尚未获得护照，请在<b><u>考试日期前至少14天</u></b>回复本邮件补充提交。若已提交护照，请忽略。</div><div><br></div><div>考前5-7天左右您的电子邮箱将收到一份考试确认函，请自行打印好该确认函，并在考试当天携带纸质考试确认函以及护照原件到达考点参加考试，复印件或其他证件均无效；不能出示纸质考试确认函及护照原件者，无法参加考试。</div><div><br></div><div>如有任何疑问，请通过邮件联系我们info@sdi-osd.de</div><div><br></div><div>--------------------------------------------</div><div>SDI Internationale Hochschule München</div><div>ÖSD Prüfungszentrum</div><div>Konsulatsstraße 01 610043 Chengdu&nbsp;</div><div>Kontakt: info@sdi-osd.de</div><div>慕尼黑应用语言大学</div><div>奥德考试中心</div></div><div><br></div>",
+        "options": {}
+      },
+      "name": "Send Email to Student",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        140,
+        260
+      ],
+      "id": "d745a906-553f-4851-bf79-6d7b887f6861",
+      "credentials": {
+        "smtp": {
+          "id": "evEHcleKBaWVF93k",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\": true, \"message\": \"报名成功！请查收邮件！\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        540,
+        380
+      ],
+      "id": "17e345fb-8cef-400c-9034-32fe6591515b",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Process Form Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Form Data": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email to Admin",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email to Student",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6f0ec075-cdcd-4fe1-b99b-7193f21cac7e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "62c4f474723b914af91e4af15e30298257d6540140abed5d09006251f9987da1"
+  },
+  "id": "ThG9oxXxEHkbCV5I",
+  "tags": []
+}

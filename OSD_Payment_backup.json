@@ -1,0 +1,466 @@
+{
+  "name": "OSD_Payment",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "submit-payment",
+        "options": {
+          "noResponseBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -1020,
+        120
+      ],
+      "id": "d07aeb57-322b-49c8-9a5e-aea7ffbcabfc",
+      "name": "Webhook Trigger",
+      "webhookId": "7fce1b61-5c28-4fc9-9991-cfda7a3f4399"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process payment proof data and attachments\nconst items = $input.all();\n\nfor (let item of items) {\n  // Handle nationality field\n  if (item.json.body.nationality === 'Other' && item.json.body.otherNationality) {\n    item.json.body.nationality = item.json.body.otherNationality;\n  }\n  \n  // Process exam sessions to determine exam level and exam date\n  if (item.json.body.examSessions) {\n    const sessions = Array.isArray(item.json.body.examSessions) ? \n      item.json.body.examSessions : [item.json.body.examSessions];\n    \n    // Extract exam levels and locations from Chinese format\n    const levels = new Set();\n    const locations = new Set();\n    const examDetails = [];\n    \n    sessions.forEach(session => {\n      const parts = session.split('-');\n      if (parts.length >= 3) {\n        const location = parts[0];  // 北京, 成都\n        const level = parts[1];     // A1, A2\n        const module = parts[2];    // 全科, 笔试, 口试\n        \n        levels.add(level);\n        locations.add(location);\n        examDetails.push({\n          location: location,\n          level: level,\n          module: module,\n          session: session\n        });\n      }\n    });\n    \n    // Set exam level\n    if (!item.json.body.examLevel || item.json.body.examLevel === '') {\n      item.json.body.examLevel = Array.from(levels).sort()[0] || 'N/A';\n    }\n    \n    // Set exam date based on selected locations\n    let examDate = 'TBD';\n    const locationArray = Array.from(locations);\n    \n    if (locationArray.includes('北京') && locationArray.includes('成都')) {\n      examDate = '2025/8/27 (成都), 2025/9/6 (北京)';\n    } else if (locationArray.includes('北京')) {\n      examDate = '2025/9/6';\n    } else if (locationArray.includes('成都')) {\n      examDate = '2025/8/27';\n    }\n    \n    item.json.body.examDate = examDate;\n    item.json.body.examDetails = examDetails;\n    item.json.body.examSessionsDisplay = sessions.join(', ');\n  } else {\n    item.json.body.examDate = 'TBD';\n    item.json.body.examSessionsDisplay = '无';\n  }\n  \n  // Process payment proof attachment\n  if (item.json.body.paymentProof && item.json.body.paymentProof.content) {\n    const paymentData = item.json.body.paymentProof;\n    \n    // Convert base64 to binary buffer\n    const binaryBuffer = Buffer.from(paymentData.content, 'base64');\n    \n    // Create binary data property for payment proof\n    item.binary = item.binary || {};\n    item.binary.paymentProof = {\n      data: binaryBuffer,\n      mimeType: paymentData.mimeType || 'application/octet-stream',\n      fileName: paymentData.filename || 'payment_proof'\n    };\n    \n    // Mark payment as uploaded\n    item.json.body.paymentUploaded = true;\n  } else {\n    item.json.body.paymentUploaded = false;\n  }\n  \n  // Process signed document if still present\n  if (item.json.body.signedDocument && item.json.body.signedDocument.content) {\n    const attachmentData = item.json.body.signedDocument;\n    const binaryBuffer = Buffer.from(attachmentData.content, 'base64');\n    \n    item.binary = item.binary || {};\n    item.binary.signedDocument = {\n      data: binaryBuffer,\n      mimeType: attachmentData.mimeType || 'application/octet-stream',\n      fileName: attachmentData.filename || 'signed_document'\n    };\n  }\n  \n  // Process passport upload if present\n  if (item.json.body.passportUpload && item.json.body.passportUpload.content) {\n    const passportData = item.json.body.passportUpload;\n    const binaryBuffer = Buffer.from(passportData.content, 'base64');\n    \n    item.binary = item.binary || {};\n    item.binary.passport = {\n      data: binaryBuffer,\n      mimeType: passportData.mimeType || 'application/octet-stream',\n      fileName: passportData.filename || 'passport'\n    };\n  }\n  \n  // Add payment submission timestamp\n  if (!item.json.body.paymentSubmissionTime) {\n    item.json.body.paymentSubmissionTime = new Date().toISOString();\n  }\n  \n  // Format timestamps for display\n  item.json.body.paymentSubmissionTimeFormatted = new Date(item.json.body.paymentSubmissionTime).toLocaleString('zh-CN');\n  item.json.body.originalSubmissionTimeFormatted = new Date(item.json.body.timestamp).toLocaleString('zh-CN');\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -820,
+        120
+      ],
+      "id": "3ea97c7f-273b-43af-a5a5-8b7b2ab7d840",
+      "name": "Process Payment Data"
+    },
+    {
+      "parameters": {
+        "fromEmail": "info@sdi-osd.de",
+        "toEmail": "={{ $json.body.email }}",
+        "subject": "=🎉 {{ $json.body.lastName }} {{ $json.body.firstName }} - SDI奥德考试报名成功确认函",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;\"><div style=\"text-align: center; margin-bottom: 30px;\"><h1 style=\"color: #F0B83F; font-size: 24px; margin: 0;\">🎉 奥德考试报名成功确认函</h1><hr style=\"border: none; height: 2px; background: linear-gradient(to right, #F0B83F, #FFE0B2); margin: 20px 0;\"></div><div style=\"margin-bottom: 20px;\"><strong>亲爱的 {{ $json.body.lastName }} {{ $json.body.firstName }} 同学：</strong></div><div style=\"margin-bottom: 20px;\">恭喜您！您已成功完成SDI奥德考试中心奥德考试的全部报名流程。</div><div style=\"background: #FFF8E1; padding: 20px; border-radius: 8px; border-left: 4px solid #F0B83F; margin: 20px 0;\"><h3 style=\"color: #F0B83F; margin-top: 0;\">📋 您的报名信息</h3><p><strong>报名等级：</strong>{{ $json.body.examLevel }}等级考试</p><p><strong>报名科目：</strong>{{ $json.body.examSessionsDisplay }}</p><p><strong>考试日期：</strong>{{ $json.body.examDate }}</p><p><strong>护照号码：</strong>{{ $json.body.passportNumber }}</p><p><strong>报名时间：</strong>{{ $json.body.originalSubmissionTimeFormatted }}</p><p><strong>付费确认时间：</strong>{{ $json.body.paymentSubmissionTimeFormatted }}</p></div><div style=\"background: #FFE0B2; padding: 20px; border-radius: 8px; margin: 20px 0;\"><h3 style=\"color: #E65100; margin-top: 0;\">⚠️ 重要提醒</h3><ol><li><strong>打印此邮件：</strong>请务必将此确认函打印出来，考试当天必须携带纸质版。</li><li><strong>携带证件：</strong>考试当天请携带护照原件，复印件无效。</li><li><strong>到达时间：</strong>请提前30分钟到达考场。</li><li><strong>考试确认函：</strong>考前5-7天您将收到正式的考试确认函，请同样打印并携带。</li></ol></div><div style=\"background: #E3F2FD; padding: 20px; border-radius: 8px; margin: 20px 0;\"><h3 style=\"color: #1976D2; margin-top: 0;\">📍 考场信息</h3><p>具体考场地址和注意事项将在考试确认函中详细说明。</p></div><div style=\"margin: 30px 0;\"><p>若您尚未获得护照，请在<strong><u>考试日期前至少14天</u></strong>回复本邮件补充提交。</p></div><div style=\"margin: 30px 0;\"><p>如有任何疑问，请通过邮件联系我们：<a href=\"mailto:info@sdi-osd.de\" style=\"color: #F0B83F;\">info@sdi-osd.de</a></p></div><hr style=\"border: none; height: 1px; background: #ddd; margin: 30px 0;\"><div style=\"font-size: 14px; color: #666; text-align: center;\"><p><strong>SDI Internationale Hochschule München</strong><br>ÖSD Prüfungszentrum<br>Konsulatsstraße 01, 610043 Chengdu<br>Kontakt: info@sdi-osd.de</p><p><strong>慕尼黑SDI语言大学</strong><br>奥德考试中心</p></div></div>",
+        "options": {}
+      },
+      "name": "Send Success Email to Student",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        120
+      ],
+      "id": "622c19f8-fd30-48e0-aabb-f3ecd94c36d2",
+      "credentials": {
+        "smtp": {
+          "id": "evEHcleKBaWVF93k",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "info@sdi-osd.de",
+        "toEmail": "skee.chen@xuezaideguo.com",
+        "subject": "=💰 学生已完成付费 - {{ $json.body.lastName }} {{ $json.body.firstName }}",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\"><h2 style=\"color: #4CAF50;\">✅ 学生已完成付费</h2><div style=\"background: #E8F5E8; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>👤 学生信息</h3><p>• <strong>姓名：</strong>{{ $json.body.lastName }} {{ $json.body.firstName }}</p><p>• <strong>性别：</strong>{{ $json.body.gender }}</p><p>• <strong>出生日期：</strong>{{ $json.body.birthDate }}</p><p>• <strong>国籍：</strong>{{ $json.body.nationality }}</p><p>• <strong>出生地：</strong>{{ $json.body.birthPlace }}</p><p>• <strong>邮箱：</strong>{{ $json.body.email }}</p><p>• <strong>手机号码：</strong>{{ $json.body.phoneNumber }}</p><p>• <strong>护照号码：</strong>{{ $json.body.passportNumber }}</p></div><div style=\"background: #FFF3E0; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>📚 考试信息</h3><p>• <strong>考试场次：</strong>{{ $json.body.examSessionsDisplay }}</p><p>• <strong>考试日期：</strong>{{ $json.body.examDate }}</p><p>• <strong>考试等级：</strong>{{ $json.body.examLevel }}</p></div><div style=\"background: #E3F2FD; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>⏰ 时间信息</h3><p>• <strong>报名时间：</strong>{{ $json.body.originalSubmissionTimeFormatted }}</p><p>• <strong>付费时间：</strong>{{ $json.body.paymentSubmissionTimeFormatted }}</p></div><div style=\"background: #FFEBEE; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>📎 附件信息</h3><p>• <strong>付费凭证：</strong>{{ $json.body.paymentProof ? $json.body.paymentProof.filename : '未上传' }}</p><p>• <strong>签字文件：</strong>{{ $json.body.signedDocument ? $json.body.signedDocument.filename : '未上传' }}</p><p>• <strong>护照信息：</strong>{{ $json.body.passportUpload ? $json.body.passportUpload.filename : '未上传' }}</p></div><p style=\"margin-top: 30px; font-size: 14px; color: #666;\">请及时处理学生的付费确认，必要时可联系学生进行确认。</p></div>",
+        "attachments": "={{ $binary.paymentProof ? ($binary.passport ? ($binary.signedDocument ? 'paymentProof,passport,signedDocument' : 'paymentProof,passport') : ($binary.signedDocument ? 'paymentProof,signedDocument' : 'paymentProof')) : ($binary.passport ? ($binary.signedDocument ? 'passport,signedDocument' : 'passport') : ($binary.signedDocument ? 'signedDocument' : '')) }}",
+        "options": {}
+      },
+      "name": "Send Payment Alert to Admin",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -60
+      ],
+      "id": "3876a18c-86c8-4cb0-a6aa-b2d7c624e450",
+      "credentials": {
+        "smtp": {
+          "id": "evEHcleKBaWVF93k",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1GBu2AgIhKBJE5q34Hk6s6DL6fRaTW-yqiZMf8blVNd0",
+          "mode": "list",
+          "cachedResultName": "test_registration_sheet"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GBu2AgIhKBJE5q34Hk6s6DL6fRaTW-yqiZMf8blVNd0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Passport": "={{ $json.body.passportNumber }}",
+            "paymentUploaded": "={{ $json.body.paymentUploaded ? 'TRUE' : 'FALSE' }}"
+          },
+          "matchingColumns": [
+            "Passport"
+          ],
+          "schema": [
+            {
+              "id": "ChineseName",
+              "displayName": "ChineseName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FirstName",
+              "displayName": "FirstName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LastName",
+              "displayName": "LastName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Gender",
+              "displayName": "Gender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "BirthDate",
+              "displayName": "BirthDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nationality",
+              "displayName": "Nationality",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "BirthPlace",
+              "displayName": "BirthPlace",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Passport",
+              "displayName": "Passport",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mobile",
+              "displayName": "Mobile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "First_Time",
+              "displayName": "First_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "A2_BJ_Written",
+              "displayName": "A2_BJ_Written",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "A2_BJ_Oral",
+              "displayName": "A2_BJ_Oral",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "A1_BJ_Written",
+              "displayName": "A1_BJ_Written",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "A1_BJ_Oral",
+              "displayName": "A1_BJ_Oral",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "A2_CD_Written",
+              "displayName": "A2_CD_Written",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "A2_CD_Oral",
+              "displayName": "A2_CD_Oral",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "A1_CD_Written",
+              "displayName": "A1_CD_Written",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "A1_CD_Oral",
+              "displayName": "A1_CD_Oral",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TestDate",
+              "displayName": "TestDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PassportUploaded",
+              "displayName": "PassportUploaded",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reg_Time",
+              "displayName": "Reg_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "paymentUploaded",
+              "displayName": "paymentUploaded",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -520,
+        280
+      ],
+      "id": "6027bca3-92ab-43d8-90fb-b576073cdadf",
+      "name": "Update Payment Status in Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OWrqKQaJ59Y0WeAD",
+          "name": "Skee's Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"付费凭证上传成功！报名流程已完成。\",\n  \"data\": {\n    \"studentName\": \"{{ $json.body.lastName }} {{ $json.body.firstName }}\",\n    \"examDate\": \"{{ $json.body.examDate }}\",\n    \"examSessions\": \"{{ $json.body.examSessionsDisplay }}\",\n    \"paymentConfirmed\": true,\n    \"emailSent\": true,\n    \"timestamp\": \"{{ $json.body.paymentSubmissionTime }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -300,
+        120
+      ],
+      "id": "14f60174-3cf7-4cca-aece-23fea27f2780",
+      "name": "Respond Success to Frontend"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Process Payment Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Payment Data": {
+      "main": [
+        [
+          {
+            "node": "Send Success Email to Student",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Payment Alert to Admin",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Payment Status in Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Success Email to Student": {
+      "main": [
+        [
+          {
+            "node": "Respond Success to Frontend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Payment Alert to Admin": {
+      "main": [
+        [
+          {
+            "node": "Respond Success to Frontend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Payment Status in Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respond Success to Frontend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a4a8fac8-b3c0-424a-a6a1-cbf8d2af3542",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "62c4f474723b914af91e4af15e30298257d6540140abed5d09006251f9987da1"
+  },
+  "id": "w21ppoxXphu7og7S",
+  "tags": []
+}

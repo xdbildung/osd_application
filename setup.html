@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets集成设置 - SDI考试报名系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .setup-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .step-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .step-content {
+            margin-bottom: 15px;
+        }
+
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .copy-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            margin: 0 15px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+        }
+
+        .btn-success:hover {
+            background-color: #219a52;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google Sheets集成设置</h1>
+        
+        <div class="nav-links">
+            <a href="/">返回报名表</a>
+            <a href="/admin">管理面板</a>
+        </div>
+
+        <div class="setup-card">
+            <div class="warning">
+                <strong>重要提示：</strong>为了将表单数据自动保存到Google Sheets，您需要创建一个Google Apps Script Web应用。请按照以下步骤操作。
+            </div>
+
+            <div class="step">
+                <div class="step-title">步骤 1: 打开您的Google Sheets</div>
+                <div class="step-content">
+                    <p>点击下面的链接打开您的Google Sheets文档：</p>
+                    <a href="https://docs.google.com/spreadsheets/d/1e7IBYNKiEvdZOscI0YaBK9uk6ReymltU0bWHJZ1e3D8/edit?usp=sharing" target="_blank" style="color: #3498db; font-weight: bold;">
+                        📊 打开Google Sheets
+                    </a>
+                    <p style="margin-top: 10px;">确保表格中有正确的列标题。如果没有，系统会自动添加。</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">步骤 2: 创建Google Apps Script</div>
+                <div class="step-content">
+                    <ol>
+                        <li>在Google Sheets中，点击菜单 <strong>扩展程序</strong> → <strong>Apps Script</strong></li>
+                        <li>删除默认的 <code>myFunction()</code> 代码</li>
+                        <li>复制并粘贴下面的代码：</li>
+                    </ol>
+                    
+                    <div class="code-block" id="scriptCode">
+                        <button class="copy-btn" onclick="copyCode()">复制代码</button>
+                        <div id="codeContent">正在加载代码...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">步骤 3: 部署Web应用</div>
+                <div class="step-content">
+                    <ol>
+                        <li>粘贴代码后，点击 <strong>保存</strong> 按钮（💾）</li>
+                        <li>点击 <strong>部署</strong> → <strong>新建部署</strong></li>
+                        <li>在"类型"中选择 <strong>Web应用</strong></li>
+                        <li>在"执行身份"中选择 <strong>我</strong></li>
+                        <li>在"具有访问权限的用户"中选择 <strong>任何人</strong></li>
+                        <li>点击 <strong>部署</strong></li>
+                        <li>复制生成的Web应用URL</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">步骤 4: 配置Web应用URL</div>
+                <div class="step-content">
+                    <p>将您的Google Apps Script Web应用URL粘贴到下面：</p>
+                    <input type="url" id="webAppUrl" class="url-input" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                    <button class="btn btn-success" onclick="saveWebAppUrl()">保存配置</button>
+                    <div id="saveStatus"></div>
+                    
+                    <div class="warning">
+                        <strong>注意：</strong>由于安全限制，此配置只在当前浏览器会话中有效。如需永久配置，请在服务器上设置环境变量 <code>GOOGLE_APPS_SCRIPT_URL</code>。
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">步骤 5: 测试集成</div>
+                <div class="step-content">
+                    <p>配置完成后，您可以：</p>
+                    <ol>
+                        <li>填写一份测试表单</li>
+                        <li>检查Google Sheets是否收到数据</li>
+                        <li>在管理面板查看数据</li>
+                    </ol>
+                    <button class="btn" onclick="testIntegration()">测试连接</button>
+                    <div id="testResult"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时获取Google Apps Script代码
+        window.addEventListener('load', function() {
+            loadGoogleAppsScriptCode();
+        });
+
+        async function loadGoogleAppsScriptCode() {
+            try {
+                const response = await fetch('/api/google-apps-script');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('codeContent').textContent = data.scriptCode;
+                } else {
+                    document.getElementById('codeContent').textContent = '无法加载代码，请刷新页面重试。';
+                }
+            } catch (error) {
+                console.error('Error loading script code:', error);
+                document.getElementById('codeContent').textContent = '加载代码时出错：' + error.message;
+            }
+        }
+
+        function copyCode() {
+            const codeContent = document.getElementById('codeContent').textContent;
+            navigator.clipboard.writeText(codeContent).then(function() {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '已复制!';
+                btn.style.backgroundColor = '#27ae60';
+                
+                setTimeout(function() {
+                    btn.textContent = originalText;
+                    btn.style.backgroundColor = '#3498db';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('无法复制代码:', err);
+                alert('复制失败，请手动选择并复制代码');
+            });
+        }
+
+        function saveWebAppUrl() {
+            const url = document.getElementById('webAppUrl').value.trim();
+            const statusDiv = document.getElementById('saveStatus');
+            
+            if (!url) {
+                statusDiv.innerHTML = '<div class="warning">请输入有效的Web应用URL</div>';
+                return;
+            }
+            
+            // 验证URL格式
+            if (!url.startsWith('https://script.google.com/macros/s/') || !url.endsWith('/exec')) {
+                statusDiv.innerHTML = '<div class="warning">URL格式不正确。应该类似：https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec</div>';
+                return;
+            }
+            
+            // 保存到sessionStorage（临时存储）
+            sessionStorage.setItem('googleAppsScriptUrl', url);
+            statusDiv.innerHTML = '<div class="success">✓ Web应用URL已保存（临时）</div>';
+        }
+
+        async function testIntegration() {
+            const url = document.getElementById('webAppUrl').value.trim() || sessionStorage.getItem('googleAppsScriptUrl');
+            const resultDiv = document.getElementById('testResult');
+            
+            if (!url) {
+                resultDiv.innerHTML = '<div class="warning">请先配置Web应用URL</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div style="color: #3498db;">正在测试连接...</div>';
+            
+            try {
+                // 发送测试数据
+                const testData = {
+                    rowData: ['测试', 'Test', 'User', '男', '1990-01-01', 'China', 'Beijing', 'P123456', 'test@example.com', 'A1', '', '', '', '', '✓', '✓', '', '', '13800138000', '是', new Date().toLocaleString('zh-CN'), '2025年8月27日']
+                };
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = '<div class="success">✓ 连接测试成功！数据已成功写入Google Sheets。</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="warning">连接失败：${result.error || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="warning">连接测试失败：${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html> 

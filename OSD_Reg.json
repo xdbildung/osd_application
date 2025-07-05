@@ -1,0 +1,501 @@
+{
+  "name": "OSD_Reg",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "SDI成都奥德考试中心报名表",
+        "formDescription": "报名奥德考试请填写下列所有信息，后续报名步骤和报名注意事项将通过邮件发送给您报名填写的邮箱，请注意查收邮件！",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "名字（拼音）",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "姓氏（拼音）",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "性别",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "男"
+                  },
+                  {
+                    "option": "女"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "出生日期",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "国籍（英文，如: China）",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "出生地（拼音，请与护照保持一致）",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "邮箱地址",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "考试等级",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "A1"
+                  },
+                  {
+                    "option": "A2"
+                  },
+                  {
+                    "option": "B1"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "请选择所有要参加的考试模块",
+              "fieldType": "=dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "A1全科"
+                  },
+                  {
+                    "option": "单科A1笔试"
+                  },
+                  {
+                    "option": "单科A1口试"
+                  },
+                  {
+                    "option": "A2全科"
+                  },
+                  {
+                    "option": "单科A2笔试"
+                  },
+                  {
+                    "option": "单科A2口试"
+                  },
+                  {
+                    "option": "B1全科"
+                  },
+                  {
+                    "option": "单科B1-听力"
+                  },
+                  {
+                    "option": "单科B1-阅读"
+                  },
+                  {
+                    "option": "单科B1-口语"
+                  },
+                  {
+                    "option": "单科B1-写作"
+                  }
+                ]
+              },
+              "multiselect": true,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "手机号码",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "是否为第一次参加该等级考试",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "是"
+                  },
+                  {
+                    "option": "否"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "护照号码（若暂无护照，请填写“后补”）",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "报名考试日期",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "2025年8月27日"
+                  },
+                  {
+                    "option": "2025年9月6日"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        180
+      ],
+      "id": "943c68cf-072e-44e7-86c8-c93a51716c77",
+      "name": "On form submission",
+      "webhookId": "6ff74a92-c06a-4505-9f87-29ce59bc13f4"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1e7IBYNKiEvdZOscI0YaBK9uk6ReymltU0bWHJZ1e3D8",
+          "mode": "list",
+          "cachedResultName": "Registration",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e7IBYNKiEvdZOscI0YaBK9uk6ReymltU0bWHJZ1e3D8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e7IBYNKiEvdZOscI0YaBK9uk6ReymltU0bWHJZ1e3D8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "FirstName": "={{ $json['名字（拼音）'] }}",
+            "LastName": "={{ $json['姓氏（拼音）'] }}",
+            "Gender": "={{ $json['性别'] }}",
+            "BirthDate": "={{ $json['出生日期']}}",
+            "BirthPlace": "={{ $json['出生地（拼音，请与护照保持一致）'] }}",
+            "E-mail": "={{ $json['邮箱地址'] }}",
+            "Level": "={{ $json['考试等级'] }}",
+            "B1_Listening": "={{ $json['请选择所有要参加的考试模块'].includes('单科B1-听力') || $json['请选择所有要参加的考试模块'].includes('B1全科') ? 'TRUE' : 'FALSE' }}",
+            "Mobile": "={{ $json['手机号码'] }}",
+            "First_Time": "={{ $json['是否为第一次参加该等级考试'] }}",
+            "B1_Speaking": "={{ $json['请选择所有要参加的考试模块'].includes('单科B1-口语') || $json['请选择所有要参加的考试模块'].includes('B1全科') ? 'TRUE' : 'FALSE' }}",
+            "Nationality": "={{ $json['国籍（英文，如: China）'] }}",
+            "B1_Reading": "={{ $json['请选择所有要参加的考试模块'].includes('单科B1-阅读') || $json['请选择所有要参加的考试模块'].includes('B1全科') ? 'TRUE' : 'FALSE' }}",
+            "B1_Writing": "={{ $json['请选择所有要参加的考试模块'].includes('单科B1-写作') || $json['请选择所有要参加的考试模块'].includes('B1全科') ? 'TRUE' : 'FALSE' }}",
+            "A2_Written": "={{ $json['请选择所有要参加的考试模块'].includes('单科A2笔试') || $json['请选择所有要参加的考试模块'].includes('A2全科') ? 'TRUE' : 'FALSE' }}",
+            "A2_Oral": "={{ $json['请选择所有要参加的考试模块'].includes('单科A2口试') || $json['请选择所有要参加的考试模块'].includes('A2全科') ? 'TRUE' : 'FALSE' }}",
+            "A1_Written": "={{ $json['请选择所有要参加的考试模块'].includes('单科A1笔试') || $json['请选择所有要参加的考试模块'].includes('A1全科') ? 'TRUE' : 'FALSE' }}",
+            "A1_Oral": "={{ $json['请选择所有要参加的考试模块'].includes('单科A1口试') || $json['请选择所有要参加的考试模块'].includes('A1全科') ? 'TRUE' : 'FALSE' }}",
+            "Reg_Time": "={{ $json.submittedAt }}",
+            "Passport": "={{ $json['护照号码（若暂无护照，请填写“后补”）'] }}",
+            "TestDate": "={{ $json['报名考试日期'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "FirstName",
+              "displayName": "FirstName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LastName",
+              "displayName": "LastName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Gender",
+              "displayName": "Gender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "BirthDate",
+              "displayName": "BirthDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nationality",
+              "displayName": "Nationality",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "BirthPlace",
+              "displayName": "BirthPlace",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Passport",
+              "displayName": "Passport",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Level",
+              "displayName": "Level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "B1_Listening",
+              "displayName": "B1_Listening",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "B1_Reading",
+              "displayName": "B1_Reading",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "B1_Writing",
+              "displayName": "B1_Writing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "B1_Speaking",
+              "displayName": "B1_Speaking",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "A2_Written",
+              "displayName": "A2_Written",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "A2_Oral",
+              "displayName": "A2_Oral",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "A1_Written",
+              "displayName": "A1_Written",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "A1_Oral",
+              "displayName": "A1_Oral",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mobile",
+              "displayName": "Mobile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First_Time",
+              "displayName": "First_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reg_Time",
+              "displayName": "Reg_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TestDate",
+              "displayName": "TestDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        0,
+        260
+      ],
+      "id": "64664659-f12e-4f3e-910b-c29d12f66cbb",
+      "name": "Google Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "j1rmiLMJPNeLMvIB",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "info@sdi-osd.de",
+        "toEmail": "={{ $json['邮箱地址'] }}",
+        "subject": "={{ $json['姓氏（拼音）'] }} {{ $json['名字（拼音）'] }} - 奥德考试报名后续流程通知",
+        "text": "=",
+        "html": "=<div>{{ $json['姓氏（拼音）'] }}, {{ $json['名字（拼音）'] }}同学，</div><div><br></div><div>您好！感谢您报名SDI奥德考试中心奥德考试。</div><div><br></div><div>以下为您的报名信息：</div><div>1、报名等级：{{ $json['考试等级'] }}等级考试</div><div>2、报名科目：{{ $json['请选择所有要参加的考试模块'] }}</div><div>3、护照信息：{{ $json['护照号码（若暂无护照，请填写“后补”）'] }}</div><div>4、考试日期：{{ $json['报名考试日期'] }}</div><div><br></div><div>若以上<b><u>信息确认无误</u></b>，请完成<b><u>后续报名流程</u></b>：</div><div><br></div><div><b><font color=\"#ff0000\">步骤1</font></b>：阅读并签署报名须知，报名须知下载链接：https://docs.qq.com/doc/DYVd3akJFR2VsckVk</div><div><br></div><div><b><font color=\"#ff0000\">步骤2</font></b>：缴纳报名费用</div><div><br></div><div>报名缴费账户信息如下：</div><div>- 账户名称：成都学德教育科技有限公司</div><div>- 账户号码：161430801</div><div>- 收款银行：中国民生银行股份有限公司成都永丰支行</div><div>- 付款附言请备注：姓名+osd考试等级</div><div><br></div><div>报名费用为（人民币）：</div><div>- A1全科：1550元；A1笔试：950元；A1口试：600元</div><div>- A2全科：1650元；A2笔试：1000元；A2口试：650元</div><div>- B1全科：2000元；B1听力：600元；B1口语：600元；B1阅读：600元；B1写作：800元</div><div><br></div><div><b><font color=\"#ff0000\">步骤3</font></b>：扫描自己的护照个人信息页，确保个人信息无任何遮挡</div><div><br></div><div><b><font color=\"#ff0000\">步骤4</font></b>：将以下<b><font color=\"#ff0000\"><u>3个文件</u></font></b>传回至info@sdi-osd.de邮箱：</div><div><ol><li>签字后的报名须知</li><li>汇款缴费证明</li><li>本人护照个人信息页</li></ol></div><div><br></div><div>请注意，若目前<b><u>尚未</u></b>获得护照，请于<b><u>考试日期前7个自然日</u></b>前提交护照信息。</div><div><br></div><div>如有任何疑问，请通过邮件联系我们info@sdi-osd.de</div><div><br></div><div>--------------------------------------------</div><div>SDI Internationale Hochschule München</div><div>ÖSD Prüfungszentrum</div><div>Konsulatsstraße 01 610043 Chengdu&nbsp;</div><div>Kontakt: info@sdi-osd.de</div><div>慕尼黑应用语言大学</div><div>奥德考试中心<br></div>",
+        "attachments": "=",
+        "options": {}
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "32504c0e-3c93-4922-a97b-105d485f891d",
+      "credentials": {
+        "smtp": {
+          "id": "evEHcleKBaWVF93k",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "报名成功！请查收邮件！",
+        "completionMessage": "=感谢您的报名，我们已收到您的信息！\n\n\n后续报名步骤和注意事项已通过邮件发送到您填写的邮箱，请注意查收邮件。\n\n\n如有任何疑问，请通过邮件联系我们：info@sdi-osd.de",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        460
+      ],
+      "id": "75c7f5db-9205-4075-9fa1-d4f7b0201da5",
+      "name": "Form",
+      "webhookId": "10dd5a5a-02d1-47ec-8a73-12c1bbb1a7cf"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cfddba7a-6ea0-4e09-b35f-29d32ecb024e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "62c4f474723b914af91e4af15e30298257d6540140abed5d09006251f9987da1"
+  },
+  "id": "zgOgnwjlj7BNlF8t",
+  "tags": []
+}
