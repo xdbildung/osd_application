@@ -11,6 +11,12 @@ const app = express();
 let submissions = [];
 let paymentSubmissions = [];
 
+// 默认配置（减少对环境变量的依赖）
+const config = {
+    NODE_ENV: process.env.NODE_ENV || 'production',
+    WEBHOOK_URL: process.env.WEBHOOK_URL || 'https://n8n.talentdual.com/webhook/submit-payment'
+};
+
 // 配置multer使用内存存储
 const storage = multer.memoryStorage();
 const upload = multer({
