@@ -41,6 +41,10 @@ test-*.js
 test-*.md
 *test*.json
 
+# Vercel
+.vercel
+.vercel.json
+
 # 其他
 .cache/
 dist/
