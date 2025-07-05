@@ -15,10 +15,6 @@
     {
       "source": "/setup", 
       "destination": "/api/index.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/api/index.js"
     }
   ]
 } 
