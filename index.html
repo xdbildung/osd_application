@@ -378,7 +378,7 @@
     <!-- 版本信息页脚 -->
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">奥德考试报名系统 v1.6.4</span>
+            <span class="version-text">奥德考试报名系统 v1.6.5</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
@@ -395,227 +395,17 @@
     
     <script src="/script.js"></script>
     
-    <!-- 微信下载优化脚本 -->
+    <!-- 文件下载脚本 -->
     <script>
-        // 检测微信环境并添加下载提示
-        function isWeChatBrowser() {
-            return /MicroMessenger/i.test(navigator.userAgent);
-        }
-
-        // 检测移动端设备
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        // 强制在浏览器中打开链接（用于微信环境）
-        function openInBrowser(url) {
-            // 创建提示用户在浏览器中打开的遮罩
-            const maskDiv = document.createElement('div');
-            maskDiv.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.9);
-                z-index: 10000;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 20px;
-                box-sizing: border-box;
-            `;
-            
-            maskDiv.innerHTML = `
-                <div style="
-                    background: white;
-                    border-radius: 12px;
-                    padding: 24px;
-                    max-width: 380px;
-                    width: 100%;
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    text-align: center;
-                ">
-                    <div style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 16px;
-                        border-bottom: 1px solid #eee;
-                        padding-bottom: 12px;
-                    ">
-                        <h3 style="margin: 0; color: #333;">📱 请在浏览器中打开</h3>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
-                            background: none;
-                            border: none;
-                            font-size: 24px;
-                            cursor: pointer;
-                            color: #666;
-                            padding: 0;
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        ">×</button>
-                    </div>
-                    <div>
-                        <div style="
-                            background: #f8f9fa;
-                            border-radius: 8px;
-                            padding: 16px;
-                            margin: 12px 0;
-                            border-left: 4px solid #007bff;
-                        ">
-                            <p style="margin: 0 0 12px 0; color: #333;"><strong>为了更好的下载体验，请按以下步骤操作：</strong></p>
-                            <ol style="margin: 0; padding-left: 20px; color: #555; text-align: left;">
-                                <li>点击右上角"..."菜单</li>
-                                <li>选择"在浏览器中打开"</li>
-                                <li>在浏览器中重新点击下载按钮</li>
-                                <li>即可正常下载文件</li>
-                            </ol>
-                        </div>
-                        <p style="
-                            color: #666;
-                            font-size: 14px;
-                            margin: 12px 0 0 0;
-                        ">💡 浏览器环境下可以正常下载和保存文件</p>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
-                            background: #007bff;
-                            color: white;
-                            border: none;
-                            padding: 12px 24px;
-                            border-radius: 6px;
-                            margin-top: 16px;
-                            cursor: pointer;
-                            font-size: 16px;
-                        ">我知道了</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(maskDiv);
-            
-            // 尝试触发浏览器打开（某些情况下可能有效）
-            try {
-                window.location.href = url;
-            } catch (e) {
-                console.log('无法自动跳转到浏览器，需要用户手动操作');
-            }
-        }
-
-        // 添加微信下载提示
-        function showWeChatDownloadTip() {
-            if (!isWeChatBrowser()) return;
-            
-            // 创建提示弹窗
-            const tipDiv = document.createElement('div');
-            tipDiv.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.8);
-                z-index: 10000;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 20px;
-                box-sizing: border-box;
-            `;
-            
-            tipDiv.innerHTML = `
-                <div style="
-                    background: white;
-                    border-radius: 12px;
-                    padding: 24px;
-                    max-width: 380px;
-                    width: 100%;
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                ">
-                    <div style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 16px;
-                        border-bottom: 1px solid #eee;
-                        padding-bottom: 12px;
-                    ">
-                        <h3 style="margin: 0; color: #333;">📱 微信下载提示</h3>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
-                            background: none;
-                            border: none;
-                            font-size: 24px;
-                            cursor: pointer;
-                            color: #666;
-                            padding: 0;
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        ">×</button>
-                    </div>
-                    <div>
-                        <p style="margin: 0 0 12px 0; color: #333;"><strong>文件即将打开，您可以正常查看和下载！</strong></p>
-                        <div style="
-                            background: #f8f9fa;
-                            border-radius: 8px;
-                            padding: 16px;
-                            margin: 12px 0;
-                            border-left: 4px solid #28a745;
-                        ">
-                            <p style="margin: 0 0 8px 0; color: #333;"><strong>下载方法：</strong></p>
-                            <ol style="margin: 0; padding-left: 20px; color: #555;">
-                                <li>查看文件内容确认无误后</li>
-                                <li>点击右上角"..."菜单</li>
-                                <li>选择"用其他应用打开"</li>
-                                <li>选择"存储到文件"保存</li>
-                            </ol>
-                        </div>
-                        <p style="
-                            color: #666;
-                            font-size: 14px;
-                            margin: 12px 0 0 0;
-                            text-align: center;
-                        ">💡 文件大小约250KB，包含完整的报名须知内容</p>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(tipDiv);
-            
-            // 8秒后自动关闭
-            setTimeout(() => {
-                if (tipDiv.parentElement) {
-                    tipDiv.remove();
-                }
-            }, 8000);
-        }
-
-        // 处理下载按钮点击事件
+        // 统一的下载处理函数
         function handleDownloadClick(event) {
             event.preventDefault(); // 阻止默认行为
             
             const pdfUrl = '/SDI_exam_notification.pdf';
             const fullUrl = window.location.origin + pdfUrl;
             
-            // 检测环境并采取不同策略
-            if (isMobileDevice() && isWeChatBrowser()) {
-                // 移动端微信环境：提示用户在浏览器中打开
-                openInBrowser(fullUrl);
-            } else if (isMobileDevice()) {
-                // 移动端非微信环境：直接打开文件
-                window.location.href = pdfUrl;
-            } else {
-                // 电脑端：在新窗口打开
-                window.open(pdfUrl, '_blank', 'noopener,noreferrer');
-            }
+            // 统一在新窗口打开PDF文件
+            window.open(fullUrl, '_blank', 'noopener,noreferrer');
         }
 
         // 页面加载完成后添加事件监听
