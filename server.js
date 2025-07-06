@@ -6,7 +6,7 @@ const multer = require('multer');
 const GoogleSheetsService = require('./googleSheetsService');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // 初始化Google Sheets服务
 const googleSheetsService = new GoogleSheetsService();
@@ -57,6 +57,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
 app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(uploadsDir));
 
 // API endpoint for form submission with file upload
@@ -327,6 +328,24 @@ app.get('/api/google-apps-script', (req, res) => {
 5. 将Web应用URL配置到环境变量中
         `
     });
+});
+
+// API endpoint to get development configuration for local testing
+app.get('/api/dev-config', (req, res) => {
+    const devConfigPath = path.join(__dirname, 'dev-config.json');
+    
+    try {
+        if (fs.existsSync(devConfigPath)) {
+            const configContent = fs.readFileSync(devConfigPath, 'utf8');
+            const config = JSON.parse(configContent);
+            res.json(config);
+        } else {
+            res.json({ isDevelopment: false });
+        }
+    } catch (error) {
+        console.log('No dev-config.json found or error reading it, running in production mode');
+        res.json({ isDevelopment: false });
+    }
 });
 
 // 404 handler

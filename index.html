@@ -90,8 +90,8 @@
             </div>
 
             <div class="form-group">
-                <label for="passportNumber">护照号码（有效期须至少六个月；若暂无护照，请填写"后补"） <span class="required">*</span></label>
-                <input type="text" id="passportNumber" name="passportNumber" placeholder="后补" required>
+                <label for="passportNumber">护照号码（有效期须至少六个月；若暂无护照，可留空）</label>
+                <input type="text" id="passportNumber" name="passportNumber" placeholder="请输入护照号码或留空">
                 <div class="error-hint" id="passportNumber-error"></div>
             </div>
 
@@ -236,8 +236,8 @@
                 <div class="file-upload-container">
                     <div class="file-download-section">
                         <p class="file-instruction">请先下载模板文件，填写并签字后上传：</p>
-                        <a href="/public/SDI奥德考试中心报名须知.docx" class="download-btn" download="SDI奥德考试中心报名须知.docx">
-                            📄 下载：SDI奥德考试中心报名须知.docx
+                        <a href="/public/SDI_exam_notification.pdf" class="download-btn" download="SDI_exam_notification.pdf">
+                            📄 下载：SDI_exam_notification.pdf
                         </a>
                     </div>
                     <div class="file-upload-section">
@@ -276,7 +276,32 @@
             <div class="payment-section">
                 <h3>💰 缴费信息</h3>
                 <div class="payment-content">
-                    <div class="payment-details">
+                    <!-- 1. 考试费用模块 -->
+                    <div class="payment-module fee-module">
+                        <h4>考试费用（人民币）</h4>
+                        <div class="fee-info">
+                            <div class="fee-level">
+                                <strong>A1等级：</strong>
+                                <span>全科 1550元 | 笔试 950元 | 口试 600元</span>
+                            </div>
+                            <div class="fee-level">
+                                <strong>A2等级：</strong>
+                                <span>全科 1650元 | 笔试 1000元 | 口试 650元</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. 支付宝扫码模块 -->
+                    <div class="payment-module qr-module">
+                        <h4>支付宝扫码支付</h4>
+                        <div class="qr-container">
+                            <img src="/payment_QR_example.png" alt="收款二维码" class="qr-code">
+                            <p class="qr-caption">扫码支付</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 3. 银行转账模块 -->
+                    <div class="payment-module bank-module">
                         <h4>银行转账信息</h4>
                         <div class="bank-info">
                             <div class="bank-item">
@@ -298,26 +323,10 @@
                                 </span>
                             </div>
                         </div>
-                        
-                        <h4>考试费用（人民币）</h4>
-                        <div class="fee-info">
-                            <div class="fee-level">
-                                <strong>A1等级：</strong>
-                                <span>全科 1550元 | 笔试 950元 | 口试 600元</span>
-                            </div>
-                            <div class="fee-level">
-                                <strong>A2等级：</strong>
-                                <span>全科 1650元 | 笔试 1000元 | 口试 650元</span>
-                            </div>
-                        </div>
                     </div>
                     
-                    <div class="payment-qr">
-                        <h4>支付宝扫码支付</h4>
-                        <img src="/payment_QR_example.png" alt="收款二维码" class="qr-code">
-                        <p class="qr-caption">扫码支付</p>
-                        
-                        <!-- 总费用显示区域 -->
+                    <!-- 4. 应付总额模块 -->
+                    <div class="payment-module total-module">
                         <div id="totalAmount" class="total-amount">
                             <div class="amount-label">应付总额</div>
                             <div class="amount-value">¥ <span id="totalAmountValue">0</span></div>
@@ -356,7 +365,7 @@
     <!-- 版本信息页脚 -->
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">奥德考试报名系统 v1.2</span>
+            <span class="version-text">奥德考试报名系统 v1.3</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>

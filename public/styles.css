@@ -293,23 +293,54 @@ select {
 
 .payment-content {
     display: flex;
+    flex-wrap: wrap;
     gap: 30px;
     align-items: flex-start;
 }
 
-.payment-details {
-    flex: 1;
+/* 付费模块通用样式 */
+.payment-module {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E0E0E0;
 }
 
-.payment-details h4 {
+.payment-module h4 {
     color: #5D4037;
     font-size: 1.1em;
     margin-bottom: 15px;
-    margin-top: 20px;
+    margin-top: 0;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 2px solid #F0B83F;
+    padding-bottom: 10px;
 }
 
-.payment-details h4:first-child {
-    margin-top: 0;
+/* 桌面端布局 */
+.fee-module {
+    flex: 1;
+    min-width: 280px;
+}
+
+.qr-module {
+    flex: 0 0 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bank-module {
+    flex: 1;
+    min-width: 280px;
+}
+
+.total-module {
+    flex: 0 0 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .bank-info {
@@ -382,19 +413,11 @@ select {
     color: #4A148C;
 }
 
-.payment-qr {
+.qr-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 180px;
-}
-
-.payment-qr h4 {
-    color: #5D4037;
-    font-size: 1.1em;
-    margin-bottom: 15px;
-    text-align: center;
-    font-weight: 600;
+    width: 100%;
 }
 
 .qr-code {
@@ -701,9 +724,31 @@ input[type="file"] {
         gap: 20px;
     }
     
-    .payment-qr {
-        align-self: center;
-        min-width: auto;
+    /* 移动端模块显示顺序设置 */
+    .fee-module {
+        order: 1;
+        flex: none;
+        width: 100%;
+    }
+    
+    .qr-module {
+        order: 2;
+        flex: none;
+        width: 100%;
+        align-items: center;
+    }
+    
+    .bank-module {
+        order: 3;
+        flex: none;
+        width: 100%;
+    }
+    
+    .total-module {
+        order: 4;
+        flex: none;
+        width: 100%;
+        text-align: center;
     }
     
     .qr-code {
@@ -720,6 +765,22 @@ input[type="file"] {
         min-width: auto;
         margin-right: 0;
         margin-bottom: 5px;
+    }
+    
+    /* 移动端模块标题优化 */
+    .payment-module h4 {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    /* 移动端总额显示优化 */
+    .total-module .total-amount {
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%);
+        border-radius: 10px;
+        border: 2px solid #4CAF50;
     }
 }
 
