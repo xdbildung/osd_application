@@ -139,6 +139,7 @@
                 </div>
                 <div class="form-note">
                     💡 支持JPG、PNG、PDF格式，文件大小不超过5MB<br>
+                    🔧 大文件将自动压缩为JPG格式（小于1MB）
                 </div>
             </div>
 
@@ -378,7 +379,7 @@
     <!-- 版本信息页脚 -->
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">奥德考试报名系统 v1.6.7</span>
+            <span class="version-text">奥德考试报名系统 v1.6.8</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
@@ -393,8 +394,162 @@
         }
     </script>
     
-    <script src="/script.js"></script>
+        <script src="/script.js"></script>
     
-
+    <!-- 文件压缩处理脚本 -->
+    <script>
+        // 文件大小限制（1MB = 1024 * 1024 bytes）
+        const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+        const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
+        
+        // 图片压缩函数
+        function compressImage(file, maxSize = MAX_FILE_SIZE) {
+            return new Promise((resolve, reject) => {
+                // 检查文件类型
+                if (!file.type.startsWith('image/')) {
+                    reject(new Error('不支持的文件类型'));
+                    return;
+                }
+                
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    // 计算压缩比例
+                    let { width, height } = img;
+                    let quality = 0.9;
+                    
+                    // 如果图片太大，先缩小尺寸
+                    const maxDimension = 1920;
+                    if (width > maxDimension || height > maxDimension) {
+                        const ratio = Math.min(maxDimension / width, maxDimension / height);
+                        width *= ratio;
+                        height *= ratio;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // 绘制图片
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 压缩函数
+                    function compressWithQuality(quality) {
+                        return new Promise((resolve) => {
+                            canvas.toBlob((blob) => {
+                                resolve(blob);
+                            }, 'image/jpeg', quality);
+                        });
+                    }
+                    
+                    // 递归压缩直到文件大小符合要求
+                    async function compressRecursive(quality) {
+                        const blob = await compressWithQuality(quality);
+                        
+                        if (blob.size <= maxSize || quality <= 0.1) {
+                            resolve(blob);
+                        } else {
+                            // 继续压缩，降低质量
+                            await compressRecursive(quality - 0.1);
+                        }
+                    }
+                    
+                    compressRecursive(quality);
+                };
+                
+                img.onerror = () => reject(new Error('图片加载失败'));
+                img.src = URL.createObjectURL(file);
+            });
+        }
+        
+        // 处理护照文件上传
+        function handlePassportFileUpload(file) {
+            const fileInfo = document.getElementById('passportFileInfo');
+            const fileInput = document.getElementById('passportUpload');
+            
+            // 显示原始文件信息
+            const originalSize = (file.size / 1024 / 1024).toFixed(2);
+            fileInfo.innerHTML = `
+                <div style="color: #666; font-size: 14px; margin-top: 8px;">
+                    📄 原始文件：${file.name} (${originalSize}MB)
+                </div>
+            `;
+            
+            // 检查文件大小
+            if (file.size > MAX_UPLOAD_SIZE) {
+                fileInfo.innerHTML += `
+                    <div style="color: #dc3545; font-size: 14px; margin-top: 4px;">
+                        ❌ 文件过大，请选择小于5MB的文件
+                    </div>
+                `;
+                fileInput.value = '';
+                return;
+            }
+            
+            // 如果是图片且大于1MB，进行压缩
+            if (file.type.startsWith('image/') && file.size > MAX_FILE_SIZE) {
+                fileInfo.innerHTML += `
+                    <div style="color: #ffc107; font-size: 14px; margin-top: 4px;">
+                        ⏳ 正在压缩文件...
+                    </div>
+                `;
+                
+                compressImage(file).then(compressedBlob => {
+                    const compressedSize = (compressedBlob.size / 1024 / 1024).toFixed(2);
+                    
+                    // 创建新的File对象
+                    const compressedFile = new File([compressedBlob], 
+                        file.name.replace(/\.[^/.]+$/, '') + '_compressed.jpg', 
+                        { type: 'image/jpeg' }
+                    );
+                    
+                    // 更新文件输入
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(compressedFile);
+                    fileInput.files = dataTransfer.files;
+                    
+                    fileInfo.innerHTML = `
+                        <div style="color: #666; font-size: 14px; margin-top: 8px;">
+                            📄 原始文件：${file.name} (${originalSize}MB)
+                        </div>
+                        <div style="color: #28a745; font-size: 14px; margin-top: 4px;">
+                            ✅ 压缩完成：${compressedFile.name} (${compressedSize}MB)
+                        </div>
+                    `;
+                }).catch(error => {
+                    fileInfo.innerHTML += `
+                        <div style="color: #dc3545; font-size: 14px; margin-top: 4px;">
+                            ❌ 压缩失败：${error.message}
+                        </div>
+                    `;
+                    fileInput.value = '';
+                });
+            } else {
+                // 文件大小合适，显示成功信息
+                fileInfo.innerHTML += `
+                    <div style="color: #28a745; font-size: 14px; margin-top: 4px;">
+                        ✅ 文件大小合适，无需压缩
+                    </div>
+                `;
+            }
+        }
+        
+        // 页面加载完成后添加事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            const passportUpload = document.getElementById('passportUpload');
+            
+            if (passportUpload) {
+                passportUpload.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        handlePassportFileUpload(file);
+                    }
+                });
+            }
+        });
+    </script>
+    
+ 
 </body>
 </html> 
