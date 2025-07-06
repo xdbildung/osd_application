@@ -780,9 +780,9 @@ input[type="file"] {
     .total-module .total-amount {
         margin: 0;
         padding: 20px;
-        background: linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%);
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
         border-radius: 10px;
-        border: 2px solid #4CAF50;
+        border: 2px solid #FF8A65;
     }
 }
 
@@ -851,6 +851,8 @@ input[type="file"] {
     
     .total-module .total-amount {
         padding: 15px;
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        border: 2px solid #FF8A65;
     }
     
     .qr-code {
@@ -895,6 +897,8 @@ input[type="file"] {
     
     .total-module .total-amount {
         padding: 12px;
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        border: 2px solid #FF8A65;
     }
     
     .qr-code {

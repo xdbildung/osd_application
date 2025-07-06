@@ -13,7 +13,7 @@
       "typeVersion": 1.1,
       "position": [
         -1020,
-        120
+        140
       ],
       "id": "d07aeb57-322b-49c8-9a5e-aea7ffbcabfc",
       "name": "Webhook Trigger",
@@ -26,8 +26,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -820,
-        120
+        -800,
+        140
       ],
       "id": "3ea97c7f-273b-43af-a5a5-8b7b2ab7d840",
       "name": "Process Payment Data"
@@ -37,15 +37,15 @@
         "fromEmail": "info@sdi-osd.de",
         "toEmail": "={{ $json.body.email }}",
         "subject": "=🎉 {{ $json.body.lastName }} {{ $json.body.firstName }} - SDI奥德考试报名成功确认函",
-        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;\"><div style=\"text-align: center; margin-bottom: 30px;\"><h1 style=\"color: #F0B83F; font-size: 24px; margin: 0;\">🎉 奥德考试报名成功确认函</h1><hr style=\"border: none; height: 2px; background: linear-gradient(to right, #F0B83F, #FFE0B2); margin: 20px 0;\"></div><div style=\"margin-bottom: 20px;\"><strong>亲爱的 {{ $json.body.lastName }} {{ $json.body.firstName }} 同学：</strong></div><div style=\"margin-bottom: 20px;\">恭喜您！您已成功完成SDI奥德考试中心奥德考试的全部报名流程。</div><div style=\"background: #FFF8E1; padding: 20px; border-radius: 8px; border-left: 4px solid #F0B83F; margin: 20px 0;\"><h3 style=\"color: #F0B83F; margin-top: 0;\">📋 您的报名信息</h3><p><strong>报名等级：</strong>{{ $json.body.examLevel }}等级考试</p><p><strong>报名科目：</strong>{{ $json.body.examSessionsDisplay }}</p><p><strong>考试日期：</strong>{{ $json.body.examDate }}</p><p><strong>护照号码：</strong>{{ $json.body.passportNumber }}</p><p><strong>报名时间：</strong>{{ $json.body.originalSubmissionTimeFormatted }}</p><p><strong>付费确认时间：</strong>{{ $json.body.paymentSubmissionTimeFormatted }}</p></div><div style=\"background: #FFE0B2; padding: 20px; border-radius: 8px; margin: 20px 0;\"><h3 style=\"color: #E65100; margin-top: 0;\">⚠️ 重要提醒</h3><ol><li><strong>打印此邮件：</strong>请务必将此确认函打印出来，考试当天必须携带纸质版。</li><li><strong>携带证件：</strong>考试当天请携带护照原件，复印件无效。</li><li><strong>到达时间：</strong>请提前30分钟到达考场。</li><li><strong>考试确认函：</strong>考前5-7天您将收到正式的考试确认函，请同样打印并携带。</li></ol></div><div style=\"background: #E3F2FD; padding: 20px; border-radius: 8px; margin: 20px 0;\"><h3 style=\"color: #1976D2; margin-top: 0;\">📍 考场信息</h3><p>具体考场地址和注意事项将在考试确认函中详细说明。</p></div><div style=\"margin: 30px 0;\"><p>若您尚未获得护照，请在<strong><u>考试日期前至少14天</u></strong>回复本邮件补充提交。</p></div><div style=\"margin: 30px 0;\"><p>如有任何疑问，请通过邮件联系我们：<a href=\"mailto:info@sdi-osd.de\" style=\"color: #F0B83F;\">info@sdi-osd.de</a></p></div><hr style=\"border: none; height: 1px; background: #ddd; margin: 30px 0;\"><div style=\"font-size: 14px; color: #666; text-align: center;\"><p><strong>SDI Internationale Hochschule München</strong><br>ÖSD Prüfungszentrum<br>Konsulatsstraße 01, 610043 Chengdu<br>Kontakt: info@sdi-osd.de</p><p><strong>慕尼黑SDI语言大学</strong><br>奥德考试中心</p></div></div>",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;\"><div style=\"text-align: center; margin-bottom: 30px;\"><h1 style=\"color: #F0B83F; font-size: 24px; margin: 0;\">🎉 奥德考试报名成功确认函</h1><hr style=\"border: none; height: 2px; background: linear-gradient(to right, #F0B83F, #FFE0B2); margin: 20px 0;\"></div><div style=\"margin-bottom: 20px;\"><strong>亲爱的 {{ $json.body.lastName }} {{ $json.body.firstName }} 同学：</strong></div><div style=\"margin-bottom: 20px;\">恭喜您！您已成功完成SDI奥德考试中心奥德考试的全部报名流程。</div><div style=\"background: #FFF8E1; padding: 20px; border-radius: 8px; border-left: 4px solid #F0B83F; margin: 20px 0;\"><h3 style=\"color: #F0B83F; margin-top: 0;\">📋 您的报名信息</h3><p><strong>申请编号：</strong>{{ $json.body.applicationID }}</p><p><strong>报名等级：</strong>{{ $json.body.examLevel }}等级考试</p><p><strong>报名科目：</strong>{{ $json.body.examSessionsDisplay }}</p><p><strong>考试日期：</strong>{{ $json.body.examDate }}</p><p><strong>护照号码：</strong>{{ $json.body.passportNumber }}</p><p><strong>报名时间：</strong>{{ $json.body.originalSubmissionTimeFormatted }}</p><p><strong>付费确认时间：</strong>{{ $json.body.paymentSubmissionTimeFormatted }}</p></div><div style=\"background: #FFE0B2; padding: 20px; border-radius: 8px; margin: 20px 0;\"><h3 style=\"color: #E65100; margin-top: 0;\">⚠️ 重要提醒</h3><ol><li><strong>打印此邮件：</strong>请务必将此确认函打印出来，考试当天必须携带纸质版。</li><li><strong>携带证件：</strong>考试当天请携带护照原件，复印件无效。</li><li><strong>到达时间：</strong>请提前30分钟到达考场。</li><li><strong>考试确认函：</strong>考前5-7天您将收到正式的考试确认函，请同样打印并携带。</li></ol></div><div style=\"background: #E3F2FD; padding: 20px; border-radius: 8px; margin: 20px 0;\"><h3 style=\"color: #1976D2; margin-top: 0;\">📍 考场信息</h3><p>具体考场地址和注意事项将在考试确认函中详细说明。</p></div><div style=\"margin: 30px 0;\"><p>若您尚未获得护照，请在<strong><u>考试日期前至少14天</u></strong>回复本邮件补充提交。</p></div><div style=\"margin: 30px 0;\"><p>如有任何疑问，请通过邮件联系我们：<a href=\"mailto:info@sdi-osd.de\" style=\"color: #F0B83F;\">info@sdi-osd.de</a></p></div><hr style=\"border: none; height: 1px; background: #ddd; margin: 30px 0;\"><div style=\"font-size: 14px; color: #666; text-align: center;\"><p><strong>SDI Internationale Hochschule München</strong><br>Kontakt: info@sdi-osd.de</p><p><strong>慕尼黑SDI语言大学</strong><br>奥德考试中心</p></div></div>",
         "options": {}
       },
       "name": "Send Success Email to Student",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 1,
       "position": [
-        -520,
-        120
+        -580,
+        140
       ],
       "id": "622c19f8-fd30-48e0-aabb-f3ecd94c36d2",
       "credentials": {
@@ -60,7 +60,7 @@
         "fromEmail": "info@sdi-osd.de",
         "toEmail": "skee.chen@xuezaideguo.com",
         "subject": "=💰 学生已完成付费 - {{ $json.body.lastName }} {{ $json.body.firstName }}",
-        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\"><h2 style=\"color: #4CAF50;\">✅ 学生已完成付费</h2><div style=\"background: #E8F5E8; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>👤 学生信息</h3><p>• <strong>姓名：</strong>{{ $json.body.lastName }} {{ $json.body.firstName }}</p><p>• <strong>性别：</strong>{{ $json.body.gender }}</p><p>• <strong>出生日期：</strong>{{ $json.body.birthDate }}</p><p>• <strong>国籍：</strong>{{ $json.body.nationality }}</p><p>• <strong>出生地：</strong>{{ $json.body.birthPlace }}</p><p>• <strong>邮箱：</strong>{{ $json.body.email }}</p><p>• <strong>手机号码：</strong>{{ $json.body.phoneNumber }}</p><p>• <strong>护照号码：</strong>{{ $json.body.passportNumber }}</p></div><div style=\"background: #FFF3E0; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>📚 考试信息</h3><p>• <strong>考试场次：</strong>{{ $json.body.examSessionsDisplay }}</p><p>• <strong>考试日期：</strong>{{ $json.body.examDate }}</p><p>• <strong>考试等级：</strong>{{ $json.body.examLevel }}</p></div><div style=\"background: #E3F2FD; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>⏰ 时间信息</h3><p>• <strong>报名时间：</strong>{{ $json.body.originalSubmissionTimeFormatted }}</p><p>• <strong>付费时间：</strong>{{ $json.body.paymentSubmissionTimeFormatted }}</p></div><div style=\"background: #FFEBEE; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>📎 附件信息</h3><p>• <strong>付费凭证：</strong>{{ $json.body.paymentProof ? $json.body.paymentProof.filename : '未上传' }}</p><p>• <strong>签字文件：</strong>{{ $json.body.signedDocument ? $json.body.signedDocument.filename : '未上传' }}</p><p>• <strong>护照信息：</strong>{{ $json.body.passportUpload ? $json.body.passportUpload.filename : '未上传' }}</p></div><p style=\"margin-top: 30px; font-size: 14px; color: #666;\">请及时处理学生的付费确认，必要时可联系学生进行确认。</p></div>",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\"><h2 style=\"color: #4CAF50;\">✅ 学生已完成付费</h2><div style=\"background: #E8F5E8; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>👤 学生信息</h3><p>• <strong>申请编号：</strong>{{ $json.body.applicationID }} </p><p>• <strong>姓名：</strong>{{ $json.body.lastName }} {{ $json.body.firstName }}</p><p>• <strong>性别：</strong>{{ $json.body.gender }}</p><p>• <strong>出生日期：</strong>{{ $json.body.birthDate }}</p><p>• <strong>国籍：</strong>{{ $json.body.nationality }}</p><p>• <strong>出生地：</strong>{{ $json.body.birthPlace }}</p><p>• <strong>邮箱：</strong>{{ $json.body.email }}</p><p>• <strong>手机号码：</strong>{{ $json.body.phoneNumber }}</p><p>• <strong>护照号码：</strong>{{ $json.body.passportNumber }}</p></div><div style=\"background: #FFF3E0; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>📚 考试信息</h3><p>• <strong>考试场次：</strong>{{ $json.body.examSessionsDisplay }}</p><p>• <strong>考试日期：</strong>{{ $json.body.examDate }}</p><p>• <strong>考试等级：</strong>{{ $json.body.examLevel }}</p></div><div style=\"background: #E3F2FD; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>⏰ 时间信息</h3><p>• <strong>报名时间：</strong>{{ $json.body.originalSubmissionTimeFormatted }}</p><p>• <strong>付费时间：</strong>{{ $json.body.paymentSubmissionTimeFormatted }}</p></div><div style=\"background: #FFEBEE; padding: 15px; border-radius: 8px; margin: 20px 0;\"><h3>📎 附件信息</h3><p>• <strong>付费凭证：</strong>{{ $json.body.paymentProof ? $json.body.paymentProof.filename : '未上传' }}</p><p>• <strong>签字文件：</strong>{{ $json.body.signedDocument ? $json.body.signedDocument.filename : '未上传' }}</p><p>• <strong>护照信息：</strong>{{ $json.body.passportUpload ? $json.body.passportUpload.filename : '未上传' }}</p></div><p style=\"margin-top: 30px; font-size: 14px; color: #666;\">请及时处理学生的付费确认，必要时可联系学生进行确认。</p></div>",
         "attachments": "={{ $binary.paymentProof ? ($binary.passport ? ($binary.signedDocument ? 'paymentProof,passport,signedDocument' : 'paymentProof,passport') : ($binary.signedDocument ? 'paymentProof,signedDocument' : 'paymentProof')) : ($binary.passport ? ($binary.signedDocument ? 'passport,signedDocument' : 'passport') : ($binary.signedDocument ? 'signedDocument' : '')) }}",
         "options": {}
       },
@@ -68,7 +68,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 1,
       "position": [
-        -520,
+        -580,
         -60
       ],
       "id": "3876a18c-86c8-4cb0-a6aa-b2d7c624e450",
@@ -98,11 +98,11 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Passport": "={{ $json.body.passportNumber }}",
-            "paymentUploaded": "={{ $json.body.paymentUploaded ? 'TRUE' : 'FALSE' }}"
+            "paymentUploaded": "={{ $json.body.paymentUploaded ? 'TRUE' : 'FALSE' }}",
+            "applicationID": "={{ $json.body.applicationID }}"
           },
           "matchingColumns": [
-            "Passport"
+            "applicationID"
           ],
           "schema": [
             {
@@ -179,7 +179,7 @@
               "id": "Passport",
               "displayName": "Passport",
               "required": false,
-              "defaultMatch": true,
+              "defaultMatch": false,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true,
@@ -336,6 +336,16 @@
               "removed": false
             },
             {
+              "id": "applicationID",
+              "displayName": "applicationID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
               "id": "row_number",
               "displayName": "row_number",
               "required": false,
@@ -355,8 +365,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        -520,
-        280
+        -580,
+        340
       ],
       "id": "6027bca3-92ab-43d8-90fb-b576073cdadf",
       "name": "Update Payment Status in Sheets",
@@ -377,8 +387,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        -300,
-        120
+        -360,
+        140
       ],
       "id": "14f60174-3cf7-4cca-aece-23fea27f2780",
       "name": "Respond Success to Frontend"
@@ -456,7 +466,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a4a8fac8-b3c0-424a-a6a1-cbf8d2af3542",
+  "versionId": "ae2e5194-6c40-431c-b587-55a9335175c3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "62c4f474723b914af91e4af15e30298257d6540140abed5d09006251f9987da1"

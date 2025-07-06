@@ -76,8 +76,9 @@ app.post('/api/submit', upload.single('signedDocument'), async (req, res) => {
             };
         }
         
-        // Add timestamp
-        formData.timestamp = new Date().toISOString();
+            // Add timestamp - 使用北京时间
+    const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
+    formData.timestamp = beijingTime.toISOString();
         
         // Save to file (in a real application, you'd save to a database)
         const submissionsFile = path.join(__dirname, 'submissions.json');
@@ -166,8 +167,9 @@ app.post('/api/submit-payment-proof', upload.single('paymentProof'), async (req,
             };
         }
         
-        // Add timestamp
-        paymentData.paymentSubmissionTime = new Date().toISOString();
+            // Add timestamp - 使用北京时间
+    const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
+    paymentData.paymentSubmissionTime = beijingTime.toISOString();
         
         // Save to payment submissions file
         const paymentsFile = path.join(__dirname, 'payment_submissions.json');

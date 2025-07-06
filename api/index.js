@@ -65,8 +65,9 @@ app.post('/api/submit', upload.single('signedDocument'), async (req, res) => {
             };
         }
         
-        // 添加时间戳
-        formData.timestamp = new Date().toISOString();
+            // 添加时间戳 - 使用北京时间
+    const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
+    formData.timestamp = beijingTime.toISOString();
         
         // 存储到内存数组
         submissions.push(formData);
@@ -110,8 +111,9 @@ app.post('/api/submit-payment-proof', upload.single('paymentProof'), async (req,
             };
         }
         
-        // 添加时间戳
-        paymentData.paymentSubmissionTime = new Date().toISOString();
+            // 添加时间戳 - 使用北京时间
+    const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
+    paymentData.paymentSubmissionTime = beijingTime.toISOString();
         
         // 存储到内存数组
         paymentSubmissions.push(paymentData);

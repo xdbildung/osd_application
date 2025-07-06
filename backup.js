@@ -5,7 +5,9 @@ const archiver = require('archiver');
 class ProjectBackup {
     constructor() {
         this.projectRoot = __dirname;
-        this.timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        // 使用北京时间
+        const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
+        this.timestamp = beijingTime.toISOString().replace(/[:.]/g, '-').slice(0, 19);
         this.backupName = `forms_backup_${this.timestamp}`;
         this.backupDir = path.join(this.projectRoot, 'backups');
         this.backupPath = path.join(this.backupDir, this.backupName);
@@ -85,7 +87,7 @@ class ProjectBackup {
     // 生成备份信息文件
     generateBackupInfo() {
         const backupInfo = {
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(new Date().getTime() + (8 * 60 * 60 * 1000)).toISOString(),
             backupName: this.backupName,
             projectName: 'SDI奥德考试报名表单系统',
             version: '1.0.0',
@@ -201,7 +203,7 @@ class ProjectBackup {
 - **压缩包**: ${zipInfo.zipPath}
 
 ---
-*备份完成时间: ${new Date().toLocaleString('zh-CN')}*
+        *备份完成时间: ${new Date(new Date().getTime() + (8 * 60 * 60 * 1000)).toLocaleString('zh-CN')}*
         `.trim();
 
         const reportPath = path.join(this.backupDir, `${this.backupName}_REPORT.md`);

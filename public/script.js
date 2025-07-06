@@ -23,7 +23,7 @@ function getMobileInfo() {
 // 收集调试信息
 function collectDebugInfo(error, fileInfo) {
     return {
-        timestamp: new Date().toISOString(),
+        timestamp: getBeijingTime(),
         error: {
             name: error.name,
             message: error.message,
@@ -39,6 +39,29 @@ function collectDebugInfo(error, fileInfo) {
             } : null
         }
     };
+}
+
+// 北京时间工具函数
+function getBeijingTime() {
+    const now = new Date();
+    // 北京时间是UTC+8
+    const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+    return beijingTime.toISOString();
+}
+
+function getBeijingTimeString() {
+    const now = new Date();
+    // 北京时间是UTC+8
+    const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+    return beijingTime.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'Asia/Shanghai'
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -226,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 设置文件上传
-    setupFileUpload('signedDocument', 'fileInfo', 10 * 1024 * 1024, ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'application/pdf']);
+    setupFileUpload('signedDocument', 'fileInfo', 5 * 1024 * 1024, ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']);
     setupFileUpload('passportUpload', 'passportFileInfo', 10 * 1024 * 1024, ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']); // 提高护照上传限制
 
     // 清除错误提示
@@ -884,15 +907,15 @@ document.addEventListener('DOMContentLoaded', function() {
             showError('signedDocument', '请上传签字文件');
         } else {
             const file = signedDocumentFile.files[0];
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            const allowedTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'application/pdf'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
             
             if (file.size > maxSize) {
                 isValid = false;
-                showError('signedDocument', '文件大小不能超过10MB');
+                showError('signedDocument', '文件大小不能超过5MB');
             } else if (!allowedTypes.includes(file.type)) {
                 isValid = false;
-                showError('signedDocument', '请上传Word文档(.doc/.docx)或PDF文件');
+                showError('signedDocument', '请上传JPG、PNG或PDF文件');
             } else {
                 clearError('signedDocument');
             }
@@ -988,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', function() {
             examSessions: checkedSessions,
             selectedVenues: Array.from(document.querySelectorAll('input[name="selectedVenues"]:checked')).map(cb => cb.value),
             examDate: generateExamDateString(checkedSessions),
-            timestamp: new Date().toISOString()
+            timestamp: getBeijingTime()
         };
 
         // 处理文件上传 - 转换为base64
@@ -1013,12 +1036,47 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         };
 
-        // 处理签字文件
+        // 处理签字文件 - 转换为JPG格式
         const signedDocumentFile = document.getElementById('signedDocument').files[0];
         const passportFile = document.getElementById('passportUpload').files[0];
 
+        // 处理签字文件的新函数 - 转换为JPG并压缩
+        const processSignedDocument = (file) => {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve(null);
+                    return;
+                }
+                
+                console.log('🔄 开始处理签字文件，转换为JPG格式...');
+                
+                // 使用convertToJpgAndCompress函数将签字文件转换为JPG
+                convertToJpgAndCompress(file, 1024 * 1024) // 1MB目标大小
+                    .then(jpgFile => {
+                        console.log('✅ 签字文件转换成功:', jpgFile.name);
+                        
+                        // 转换为base64
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const base64Content = e.target.result.split(',')[1];
+                            resolve({
+                                filename: jpgFile.name,
+                                content: base64Content,
+                                mimeType: jpgFile.type,
+                                size: jpgFile.size
+                            });
+                        };
+                        reader.readAsDataURL(jpgFile);
+                    })
+                    .catch(error => {
+                        console.error('❌ 签字文件转换失败:', error);
+                        reject(error);
+                    });
+            });
+        };
+
         Promise.all([
-            processFile(signedDocumentFile),
+            processSignedDocument(signedDocumentFile),
             processFile(passportFile)
         ]).then(([signedDocument, passportUpload]) => {
             if (signedDocument) {
@@ -1088,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 存储提交数据到localStorage
                 localStorage.setItem('formSubmission', JSON.stringify({
                     ...submitData,
-                    timestamp: new Date().toISOString()
+                    timestamp: getBeijingTime()
                 }));
                 
                 // 滚动到成功消息
@@ -1230,7 +1288,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             mimeType: fileToUpload.type,
                             size: fileToUpload.size
                         },
-                        paymentSubmissionTime: new Date().toISOString(),
+                        paymentSubmissionTime: getBeijingTime(),
                         examDate: generateExamDateString(originalData.examSessions || [])
                     };
                     
@@ -1351,15 +1409,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             const completedData = {
                                 ...paymentData,
                                 registrationCompleted: true,
-                                completionTime: new Date().toISOString(),
+                                completionTime: getBeijingTime(),
                                 uploadSource: 'n8n'
                             };
                             localStorage.setItem('formSubmission', JSON.stringify(completedData));
                             
-                            // 滚动到顶部
-                            setTimeout(() => {
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }, 3000);
+                            // 滚动到顶部 - 已禁用，保持在当前位置
+                            // setTimeout(() => {
+                            //     window.scrollTo({ top: 0, behavior: 'smooth' });
+                            // }, 3000);
                         } else {
                             throw new Error(result.message || '上传失败');
                         }

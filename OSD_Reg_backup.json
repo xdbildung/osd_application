@@ -26,7 +26,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -180,
+        -160,
         240
       ],
       "id": "7cea26c9-7ed5-4ee1-a540-65043496c202",
@@ -73,7 +73,8 @@
             "A1_CD_Oral": "={{ $json.body.examSessions ? ($json.body.examSessions.join(',').includes('成都-A1-口试') || $json.body.examSessions.join(',').includes('成都-A1-全科') ? 'TRUE' : 'FALSE') : 'FALSE' }}",
             "TestDate": "={{ $json.body.examDate }}",
             "PassportUploaded": "={{ $json.body.passportUpload ? 'TRUE' : 'FALSE' }}",
-            "Reg_Time": "={{ $json.body.timestamp }}"
+            "Reg_Time": "={{ $json.body.timestamp }}",
+            "applicationID": "={{ $json.body.applicationID }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -274,6 +275,26 @@
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
+            },
+            {
+              "id": "paymentUploaded",
+              "displayName": "paymentUploaded",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "applicationID",
+              "displayName": "applicationID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -284,7 +305,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        120,
+        60,
         240
       ],
       "id": "5928b813-33da-48eb-82c4-9c92524aaa2c",
@@ -306,7 +327,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        360,
+        280,
         240
       ],
       "id": "a543102d-f857-45f1-9c8c-adaaaf393df5",
@@ -353,7 +374,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "b7d07430-2a28-4731-bd66-6e2626eebf06",
+  "versionId": "59e0a827-4055-4086-b467-a93c0a85643c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "62c4f474723b914af91e4af15e30298257d6540140abed5d09006251f9987da1"
