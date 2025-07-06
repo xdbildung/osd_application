@@ -279,6 +279,52 @@ document.addEventListener('DOMContentLoaded', function() {
         return `OSD-${month}${day}-${randomNum}`;
     }
 
+    // 图片压缩函数
+    function compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
+        return new Promise((resolve, reject) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = function() {
+                // 计算新的尺寸
+                let { width, height } = img;
+                
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width = Math.floor(width * ratio);
+                    height = Math.floor(height * ratio);
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 绘制和压缩图片
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            // 创建新的File对象
+                            const compressedFile = new File([blob], file.name, {
+                                type: file.type,
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        } else {
+                            reject(new Error('图片压缩失败'));
+                        }
+                    },
+                    file.type,
+                    quality
+                );
+            };
+            
+            img.onerror = () => reject(new Error('图片加载失败'));
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
     // 根据考试场次生成考试日期字符串
     function generateExamDateString(examSessions) {
         console.log('generateExamDateString 被调用，examSessions:', examSessions);
@@ -820,62 +866,229 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // 处理付费凭证文件
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Content = e.target.result.split(',')[1];
-                const paymentData = {
-                    ...originalData,
-                    paymentProof: {
-                        filename: file.name,
-                        content: base64Content,
-                        mimeType: file.type,
-                        size: file.size
-                    },
-                    paymentSubmissionTime: new Date().toISOString(),
-                    examDate: generateExamDateString(originalData.examSessions || [])
-                };
-                
-                // 提交付费凭证到n8n webhook
-                fetch('https://n8n.talentdual.com/webhook/submit-payment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(paymentData)
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP错误! 状态: ${response.status}`);
-                    }
+            const processUpload = (fileToUpload) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Content = e.target.result.split(',')[1];
+                    const paymentData = {
+                        ...originalData,
+                        paymentProof: {
+                            filename: fileToUpload.name,
+                            content: base64Content,
+                            mimeType: fileToUpload.type,
+                            size: fileToUpload.size
+                        },
+                        paymentSubmissionTime: new Date().toISOString(),
+                        examDate: generateExamDateString(originalData.examSessions || [])
+                    };
                     
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        return response.text().then(text => {
-                            if (text.includes('Workflow was started') || text.includes('success')) {
-                                return { success: true, message: text };
+                    // 提交付费凭证的函数
+                    function submitPaymentProof(paymentData) {
+                        // 首先尝试n8n webhook
+                        const submitToN8n = fetch('https://n8n.talentdual.com/webhook/submit-payment', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(paymentData),
+                            signal: AbortSignal.timeout(15000) // 15秒超时
+                        });
+
+                        // 创建本地API备选方案
+                        const submitToLocalAPI = () => {
+                            const formData = new FormData();
+                            
+                            // 添加所有字段
+                            Object.keys(paymentData).forEach(key => {
+                                if (key === 'paymentProof') {
+                                    // 创建blob文件用于FormData
+                                    const byteCharacters = atob(paymentData.paymentProof.content);
+                                    const byteNumbers = new Array(byteCharacters.length);
+                                    for (let i = 0; i < byteCharacters.length; i++) {
+                                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                    }
+                                    const byteArray = new Uint8Array(byteNumbers);
+                                    const blob = new Blob([byteArray], { type: paymentData.paymentProof.mimeType });
+                                    formData.append('paymentProof', blob, paymentData.paymentProof.filename);
+                                } else if (typeof paymentData[key] === 'object') {
+                                    formData.append(key, JSON.stringify(paymentData[key]));
+                                } else {
+                                    formData.append(key, paymentData[key]);
+                                }
+                            });
+                            
+                            return fetch('/api/submit-payment-proof', {
+                                method: 'POST',
+                                body: formData,
+                                signal: AbortSignal.timeout(30000) // 30秒超时
+                            });
+                        };
+
+                        // 执行双重上传机制
+                        submitToN8n
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`N8N服务器错误: ${response.status}`);
                             }
-                            throw new Error('服务器返回的不是JSON格式的响应');
+                            
+                            const contentType = response.headers.get('content-type');
+                            if (!contentType || !contentType.includes('application/json')) {
+                                return response.text().then(text => {
+                                    if (text.includes('Workflow was started') || text.includes('success')) {
+                                        return { success: true, message: text, source: 'n8n' };
+                                    }
+                                    throw new Error('N8N返回的不是JSON格式');
+                                });
+                            }
+                            
+                            return response.json().then(data => ({ ...data, source: 'n8n' }));
+                        })
+                        .then(result => {
+                            console.log('N8N webhook成功:', result);
+                            handleUploadSuccess(result, paymentData);
+                        })
+                        .catch(error => {
+                            console.warn('N8N webhook失败，尝试本地API:', error);
+                            
+                            // 显示切换到备选方案的提示
+                            showTemporaryMessage('外部服务连接失败，正在尝试备选方案...', 'warning');
+                            
+                            // 尝试本地API
+                            return submitToLocalAPI()
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error(`本地API错误: ${response.status}`);
+                                    }
+                                    return response.json();
+                                })
+                                .then(result => {
+                                    console.log('本地API成功:', result);
+                                    handleUploadSuccess({ ...result, source: 'local' }, paymentData);
+                                })
+                                .catch(localError => {
+                                    console.error('本地API也失败:', localError);
+                                    handleUploadError(localError);
+                                });
+                        })
+                        .catch(error => {
+                            console.error('所有上传方案都失败:', error);
+                            handleUploadError(error);
                         });
                     }
                     
-                    return response.json();
-                })
-                .then(result => {
-                    console.log('付费凭证上传响应:', result);
+                    // 处理上传成功
+                    function handleUploadSuccess(result, paymentData) {
+                        if (result.success || result.message === 'Workflow was started' || result.message.includes('付费凭证上传成功')) {
+                            // 上传成功
+                            uploadPaymentProofBtn.textContent = '✅ 报名完成！';
+                            uploadPaymentProofBtn.style.background = '#4CAF50';
+                            uploadPaymentProofBtn.disabled = true;
+                            
+                            // 隐藏上传区域
+                            const uploadSection = document.querySelector('.payment-upload-section');
+                            if (uploadSection) {
+                                uploadSection.style.display = 'none';
+                            }
+                            
+                            // 显示成功消息
+                            showSuccessMessage(result, paymentData);
+                            
+                            // 更新localStorage
+                            const completedData = {
+                                ...paymentData,
+                                registrationCompleted: true,
+                                completionTime: new Date().toISOString(),
+                                uploadSource: result.source
+                            };
+                            localStorage.setItem('formSubmission', JSON.stringify(completedData));
+                            
+                            // 滚动到顶部
+                            setTimeout(() => {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }, 3000);
+                        } else {
+                            throw new Error(result.message || '上传失败');
+                        }
+                    }
                     
-                    if (result.success || result.message === 'Workflow was started' || result.message.includes('付费凭证上传成功')) {
-                        // 上传成功
-                        uploadPaymentProofBtn.textContent = '✅ 报名完成！';
-                        uploadPaymentProofBtn.style.background = '#4CAF50';
-                        uploadPaymentProofBtn.disabled = true;
+                    // 处理上传错误
+                    function handleUploadError(error) {
+                        let errorMessage = '上传失败，请稍后重试。';
                         
-                        // 隐藏上传区域
-                        const uploadSection = document.querySelector('.payment-upload-section');
-                        if (uploadSection) {
-                            uploadSection.style.display = 'none';
+                        if (error.name === 'AbortError') {
+                            errorMessage = '网络请求超时，请检查网络连接后重试。';
+                        } else if (error.message.includes('网络')) {
+                            errorMessage = '网络连接失败，请检查网络状态后重试。';
+                        } else if (error.message.includes('服务器')) {
+                            errorMessage = '服务器暂时不可用，请稍后重试。';
                         }
                         
-                        // 显示完整的成功消息
+                        // 重置按钮状态
+                        resetUploadButton();
+                        
+                        // 显示错误消息
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'error-message';
+                        errorDiv.style.cssText = `
+                            background: #ffebee;
+                            border: 1px solid #f44336;
+                            color: #c62828;
+                            padding: 15px;
+                            margin: 10px 0;
+                            border-radius: 5px;
+                            text-align: center;
+                        `;
+                        errorDiv.innerHTML = `
+                            <strong>❌ ${errorMessage}</strong><br>
+                            <small>如问题持续，请联系 <a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a></small>
+                        `;
+                        
+                        const uploadSection = document.querySelector('.payment-upload-section');
+                        if (uploadSection) {
+                            uploadSection.insertAdjacentElement('afterend', errorDiv);
+                            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        
+                        // 10秒后自动隐藏错误消息
+                        setTimeout(() => {
+                            errorDiv.remove();
+                        }, 10000);
+                    }
+                    
+                    // 重置按钮状态
+                    function resetUploadButton() {
+                        uploadPaymentProofBtn.disabled = false;
+                        if (uploadPaymentProofBtn.textContent === '正在上传...') {
+                            uploadPaymentProofBtn.textContent = '完成缴费确认';
+                        }
+                    }
+                    
+                    // 显示临时消息
+                    function showTemporaryMessage(message, type = 'info') {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `temporary-message ${type}`;
+                        messageDiv.style.cssText = `
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            background: ${type === 'warning' ? '#ff9800' : '#2196F3'};
+                            color: white;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                            z-index: 9999;
+                            max-width: 300px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                        `;
+                        messageDiv.textContent = message;
+                        document.body.appendChild(messageDiv);
+                        
+                        setTimeout(() => {
+                            messageDiv.remove();
+                        }, 3000);
+                    }
+                    
+                    // 显示成功消息
+                    function showSuccessMessage(result, paymentData) {
                         const finalSuccessDiv = document.createElement('div');
                         finalSuccessDiv.className = 'final-success-message';
                         finalSuccessDiv.style.cssText = `
@@ -891,10 +1104,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         // 构建成功消息内容
                         const studentName = result.data ? result.data.studentName : `${paymentData.lastName} ${paymentData.firstName}`;
                         const examSessionsArray = result.data ? result.data.examSessions : (paymentData.examSessions || []);
-                        console.log('examSessionsArray:', examSessionsArray);
-                        console.log('paymentData.examDate:', paymentData.examDate);
                         const examDate = result.data ? result.data.examDate : (paymentData.examDate || generateExamDateString(examSessionsArray));
-                        console.log('最终的examDate:', examDate);
                         const examSessions = Array.isArray(examSessionsArray) ? examSessionsArray.join(', ') : examSessionsArray;
                         
                         finalSuccessDiv.innerHTML = `
@@ -909,6 +1119,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <p><strong>考试日期：</strong>${examDate}</p>
                                 <p><strong>报名科目：</strong>${examSessions}</p>
                                 <p><strong>付费状态：</strong><span style="color: #4CAF50; font-weight: bold;">✅ 已确认</span></p>
+                                ${result.source ? `<p><strong>处理方式：</strong>${result.source === 'n8n' ? '主要系统' : '备用系统'}</p>` : ''}
                             </div>
                             
                             <div style="background: #FFF3E0; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #FF9800;">
@@ -933,53 +1144,30 @@ document.addEventListener('DOMContentLoaded', function() {
                             successMessage.insertAdjacentElement('afterend', finalSuccessDiv);
                             finalSuccessDiv.scrollIntoView({ behavior: 'smooth' });
                         }
-                        
-                        // 更新localStorage，标记为完全完成
-                        const completedData = {
-                            ...paymentData,
-                            registrationCompleted: true,
-                            completionTime: new Date().toISOString()
-                        };
-                        localStorage.setItem('formSubmission', JSON.stringify(completedData));
-                        
-                        // 3秒后自动滚动到顶部，方便用户查看
-                        setTimeout(() => {
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }, 3000);
-                        
-                    } else {
-                        throw new Error(result.message || '上传失败');
-                    }
-                })
-                .catch(error => {
-                    console.error('付费凭证上传错误:', error);
-                    
-                    // 显示错误消息
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'error-message';
-                    errorDiv.textContent = '上传失败，请检查网络连接或稍后重试。如问题持续，请联系 info@sdi-osd.de';
-                    
-                    const uploadSection = document.querySelector('.payment-upload-section');
-                    if (uploadSection) {
-                        uploadSection.insertAdjacentElement('afterend', errorDiv);
-                        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                     
-                    // 5秒后自动隐藏错误消息
-                    setTimeout(() => {
-                        errorDiv.remove();
-                    }, 5000);
-                })
-                .finally(() => {
-                    // 重置按钮状态
-                    uploadPaymentProofBtn.disabled = false;
-                    if (uploadPaymentProofBtn.textContent === '正在上传...') {
-                        uploadPaymentProofBtn.textContent = '完成缴费确认';
-                    }
-                });
+                    // 开始上传
+                    submitPaymentProof(paymentData);
+                };
+                
+                reader.readAsDataURL(fileToUpload);
             };
             
-            reader.readAsDataURL(file);
+            // 检查是否需要压缩图片
+            if (file.type.startsWith('image/') && file.size > 2 * 1024 * 1024) {
+                console.log(`检测到大图片文件: ${Math.round(file.size/1024)}KB，正在压缩...`);
+                compressImage(file, 0.8, 1920, 1080)
+                    .then(compressedFile => {
+                        console.log(`图片压缩完成: ${Math.round(file.size/1024)}KB → ${Math.round(compressedFile.size/1024)}KB`);
+                        processUpload(compressedFile);
+                    })
+                    .catch(error => {
+                        console.warn('图片压缩失败，使用原文件:', error);
+                        processUpload(file);
+                    });
+            } else {
+                processUpload(file);
+            }
         });
     }
 }); 
