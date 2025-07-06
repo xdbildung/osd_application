@@ -1447,9 +1447,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div style="background: #FFF3E0; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #FF9800;">
                                 <h3 style="color: #E65100; margin-top: 0;">📧 重要提醒</h3>
                                 <ul style="text-align: left; margin: 0; padding-left: 20px;">
-                                    <li><strong>确认邮件：</strong>请检查您的邮箱，我们已发送报名成功确认函</li>
-                                    <li><strong>打印邮件：</strong>请将确认函打印出来，考试当天必须携带</li>
-                                    <li><strong>携带证件：</strong>考试当天请携带护照原件和纸质确认函</li>
+                                    <li><strong>确认邮件：</strong>请检查您的邮箱，我们已发送报名成功的信函，其附件《考试须知》须仔细阅读并签字。</li>
+                                    <li><strong>正式考试确认函：</strong>回传签字的《考试须知》后，您将在考前5-7天收到正式的《考试确认函》，其中将包含具体的考场地址和详细注意事项。</li>
+                                    <li><strong>打印文件：</strong>收到正式《考试确认函》后，请务必将其打印为纸质版。</li>
+                                    <li><strong>携带证件：</strong>考试当天必须携带护照原件及纸质版《考试确认函》。</li>
+                                    <li><strong>到达时间：</strong>请提前30分钟到达考场。</li>
                                 </ul>
                             </div>
                             

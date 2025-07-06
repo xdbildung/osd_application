@@ -345,7 +345,7 @@
     <!-- 版本信息页脚 -->
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">奥德考试报名系统 v1.7.1</span>
+            <span class="version-text">奥德考试报名系统 v1.7.2</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
@@ -455,15 +455,7 @@
             
             // 如果是图片且大于1MB，进行压缩
             if (file.type.startsWith('image/') && file.size > MAX_FILE_SIZE) {
-                fileInfo.innerHTML += `
-                    <div style="color: #ffc107; font-size: 14px; margin-top: 4px;">
-                        ⏳ 正在压缩文件...
-                    </div>
-                `;
-                
                 compressImage(file).then(compressedBlob => {
-                    const compressedSize = (compressedBlob.size / 1024 / 1024).toFixed(2);
-                    
                     // 创建新的File对象
                     const compressedFile = new File([compressedBlob], 
                         file.name.replace(/\.[^/.]+$/, '') + '_compressed.jpg', 
@@ -475,29 +467,11 @@
                     dataTransfer.items.add(compressedFile);
                     fileInput.files = dataTransfer.files;
                     
-                    fileInfo.innerHTML = `
-                        <div style="color: #666; font-size: 14px; margin-top: 8px;">
-                            📄 原始文件：${file.name} (${originalSize}MB)
-                        </div>
-                        <div style="color: #28a745; font-size: 14px; margin-top: 4px;">
-                            ✅ 压缩完成：${compressedFile.name} (${compressedSize}MB)
-                        </div>
-                    `;
+                    // 静默处理，不显示压缩信息
                 }).catch(error => {
-                    fileInfo.innerHTML += `
-                        <div style="color: #dc3545; font-size: 14px; margin-top: 4px;">
-                            ❌ 压缩失败：${error.message}
-                        </div>
-                    `;
+                    // 压缩失败时静默处理，不显示错误信息
                     fileInput.value = '';
                 });
-            } else {
-                // 文件大小合适，显示成功信息
-                fileInfo.innerHTML += `
-                    <div style="color: #28a745; font-size: 14px; margin-top: 4px;">
-                        ✅ 文件大小合适，无需压缩
-                    </div>
-                `;
             }
         }
         
