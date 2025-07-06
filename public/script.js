@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 设置文件上传
     setupFileUpload('signedDocument', 'fileInfo', 10 * 1024 * 1024, ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'application/pdf']);
-    setupFileUpload('passportUpload', 'passportFileInfo', 5 * 1024 * 1024, ['image/jpeg', 'image/png', 'application/pdf']);
+    setupFileUpload('passportUpload', 'passportFileInfo', 10 * 1024 * 1024, ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']); // 提高护照上传限制
 
     // 清除错误提示
     function clearError(fieldId) {
@@ -327,6 +327,245 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 图片压缩函数
+    // 统一文件转换和压缩函数：所有文件转为JPG格式并压缩到目标大小以下
+    function convertToJpgAndCompress(file, targetSize = 1024 * 1024) {
+        return new Promise((resolve, reject) => {
+            console.log(`🔄 开始转换文件为JPG: ${file.name}, 目标大小: ${Math.round(targetSize/1024)}KB`);
+            
+            // 检测设备类型
+            const isMobile = navigator.userAgent.includes('Mobile');
+            
+            // 设置超时机制
+            const timeoutId = setTimeout(() => {
+                reject(new Error('文件处理超时'));
+            }, 60000); // 60秒超时
+            
+            // PDF文件处理
+            if (file.type === 'application/pdf') {
+                console.log('📄 检测到PDF文件，转换为JPG图片...');
+                convertPdfToJpg(file, targetSize, isMobile)
+                    .then(jpgFile => {
+                        clearTimeout(timeoutId);
+                        resolve(jpgFile);
+                    })
+                    .catch(error => {
+                        clearTimeout(timeoutId);
+                        console.error('❌ PDF转换失败:', error);
+                        reject(new Error(`PDF文件处理失败: ${error.message}`));
+                    });
+                return;
+            }
+            
+            // 图片文件处理
+            if (file.type.startsWith('image/')) {
+                console.log('🖼️ 检测到图片文件，转换为JPG格式...');
+                convertImageToJpg(file, targetSize, isMobile)
+                    .then(jpgFile => {
+                        clearTimeout(timeoutId);
+                        resolve(jpgFile);
+                    })
+                    .catch(error => {
+                        clearTimeout(timeoutId);
+                        console.error('❌ 图片转换失败:', error);
+                        reject(new Error(`图片处理失败: ${error.message}`));
+                    });
+                return;
+            }
+            
+            // 不支持的格式
+            clearTimeout(timeoutId);
+            reject(new Error('不支持的文件格式'));
+        });
+    }
+    
+    // PDF转JPG函数
+    function convertPdfToJpg(file, targetSize, isMobile) {
+        return new Promise((resolve, reject) => {
+            console.log('📖 开始读取PDF文件...');
+            
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                const pdfData = new Uint8Array(e.target.result);
+                
+                // 检查是否支持PDF处理
+                if (typeof pdfjsLib === 'undefined') {
+                    console.warn('⚠️ PDF.js未加载，尝试替代方案...');
+                    // 替代方案：提示用户转换为图片格式
+                    reject(new Error('PDF处理库未加载，请将PDF转换为图片格式后再上传'));
+                    return;
+                }
+                
+                // 使用PDF.js处理PDF
+                pdfjsLib.getDocument({data: pdfData}).promise.then(pdf => {
+                    console.log(`📑 PDF加载成功，共${pdf.numPages}页，将转换第一页为JPG`);
+                    
+                    pdf.getPage(1).then(page => {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        
+                        // 计算合适的尺寸
+                        const viewport = page.getViewport({scale: isMobile ? 1.0 : 1.5});
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        
+                        page.render({canvasContext: context, viewport: viewport}).promise.then(() => {
+                            console.log('🖼️ PDF页面渲染完成，开始转换为JPG...');
+                            
+                            // 转换为JPG并压缩
+                            compressCanvasToJpg(canvas, targetSize, file.name.replace('.pdf', '.jpg'))
+                                .then(jpgFile => {
+                                    console.log(`✅ PDF转JPG成功: ${Math.round(jpgFile.size/1024)}KB`);
+                                    resolve(jpgFile);
+                                })
+                                .catch(error => {
+                                    console.error('❌ PDF转JPG压缩失败:', error);
+                                    reject(error);
+                                });
+                        }).catch(error => {
+                            console.error('❌ PDF页面渲染失败:', error);
+                            reject(new Error('PDF页面渲染失败'));
+                        });
+                    }).catch(error => {
+                        console.error('❌ PDF页面获取失败:', error);
+                        reject(new Error('PDF页面获取失败'));
+                    });
+                }).catch(error => {
+                    console.error('❌ PDF文档解析失败:', error);
+                    reject(new Error('PDF文档解析失败，可能文件已损坏'));
+                });
+            };
+            
+            fileReader.onerror = () => {
+                console.error('❌ PDF文件读取失败');
+                reject(new Error('PDF文件读取失败'));
+            };
+            
+            fileReader.readAsArrayBuffer(file);
+        });
+    }
+    
+    // 图片转JPG函数
+    function convertImageToJpg(file, targetSize, isMobile) {
+        return new Promise((resolve, reject) => {
+            console.log(`🖼️ 开始转换图片为JPG: ${file.type}`);
+            
+            const img = new Image();
+            const objectURL = URL.createObjectURL(file);
+            
+            img.onload = function() {
+                try {
+                    // 释放URL对象
+                    URL.revokeObjectURL(objectURL);
+                    
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 计算合适的尺寸（保持宽高比）
+                    let { width, height } = img;
+                    const maxDimension = isMobile ? 1200 : 1920;
+                    
+                    if (width > maxDimension || height > maxDimension) {
+                        const ratio = Math.min(maxDimension / width, maxDimension / height);
+                        width = Math.floor(width * ratio);
+                        height = Math.floor(height * ratio);
+                    }
+                    
+                    console.log(`📐 图片尺寸: ${img.width}x${img.height} → ${width}x${height}`);
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // 设置高质量渲染
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
+                    // 如果是PNG转JPG，先填充白色背景
+                    if (file.type === 'image/png') {
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, width, height);
+                    }
+                    
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 压缩为JPG
+                    const newFileName = file.name.replace(/\.(png|jpeg|jpg)$/i, '.jpg');
+                    compressCanvasToJpg(canvas, targetSize, newFileName)
+                        .then(jpgFile => {
+                            console.log(`✅ 图片转JPG成功: ${Math.round(jpgFile.size/1024)}KB`);
+                            resolve(jpgFile);
+                        })
+                        .catch(error => {
+                            console.error('❌ 图片转JPG压缩失败:', error);
+                            reject(error);
+                        });
+                } catch (error) {
+                    URL.revokeObjectURL(objectURL);
+                    console.error('❌ 图片处理过程中发生错误:', error);
+                    reject(new Error(`图片处理失败: ${error.message}`));
+                }
+            };
+            
+            img.onerror = () => {
+                URL.revokeObjectURL(objectURL);
+                console.error('❌ 图片加载失败');
+                reject(new Error('图片加载失败，请检查文件格式是否正确'));
+            };
+            
+            img.src = objectURL;
+        });
+    }
+    
+    // Canvas压缩为JPG的通用函数
+    function compressCanvasToJpg(canvas, targetSize, fileName) {
+        return new Promise((resolve, reject) => {
+            console.log(`🗜️ 开始压缩Canvas为JPG，目标大小: ${Math.round(targetSize/1024)}KB`);
+            
+            let quality = 0.8;
+            let attempt = 0;
+            const maxAttempts = 10;
+            
+            function tryCompress() {
+                attempt++;
+                console.log(`🔄 第${attempt}次压缩尝试，质量: ${(quality * 100).toFixed(0)}%`);
+                
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            reject(new Error('压缩失败：无法生成JPG文件'));
+                            return;
+                        }
+                        
+                        console.log(`📊 压缩结果: ${Math.round(blob.size/1024)}KB`);
+                        
+                        if (blob.size <= targetSize || attempt >= maxAttempts) {
+                            // 创建File对象
+                            const jpgFile = new File([blob], fileName, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            
+                            if (blob.size <= targetSize) {
+                                console.log(`✅ 压缩成功: ${Math.round(blob.size/1024)}KB (质量: ${(quality * 100).toFixed(0)}%)`);
+                            } else {
+                                console.log(`⚠️ 达到最大尝试次数，当前大小: ${Math.round(blob.size/1024)}KB`);
+                            }
+                            
+                            resolve(jpgFile);
+                        } else {
+                            // 调整质量继续压缩
+                            quality = Math.max(0.1, quality - 0.1);
+                            setTimeout(tryCompress, 100); // 稍微延迟避免阻塞
+                        }
+                    },
+                    'image/jpeg',
+                    quality
+                );
+            }
+            
+            tryCompress();
+        });
+    }
+
     function compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
         return new Promise((resolve, reject) => {
             console.log(`🎨 开始压缩图片: ${file.name}, 目标尺寸: ${maxWidth}x${maxHeight}, 质量: ${quality}`);
@@ -925,7 +1164,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (paymentProofInput && paymentProofInfo && uploadPaymentProofBtn) {
         // 设置付费凭证文件上传
-        setupFileUpload('paymentProof', 'paymentProofInfo', 5 * 1024 * 1024, ['image/jpeg', 'image/png', 'application/pdf']);
+        setupFileUpload('paymentProof', 'paymentProofInfo', 10 * 1024 * 1024, ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']); // 提高付费凭证上传限制
         
         // 为付费凭证文件添加预检查
         paymentProofInput.addEventListener('change', function() {
@@ -1238,102 +1477,55 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.readAsDataURL(fileToUpload);
             };
             
-            // 检查文件大小并进行必要的压缩
-            const maxSafeSize = 1024 * 1024; // 1MB安全限制（提高限制）
-            const maxAbsoluteSize = 5 * 1024 * 1024; // 5MB绝对限制
+            // 统一文件处理策略：所有文件都压缩转换为JPG格式，确保<1MB
+            const maxSafeSize = 5 * 1024 * 1024; // 5MB安全限制（提高限制）
+            const targetSize = 1024 * 1024; // 目标大小1MB
+            const maxAbsoluteSize = 10 * 1024 * 1024; // 10MB绝对限制
             console.log(`📎 文件信息: ${file.name}, 大小: ${Math.round(file.size/1024)}KB, 类型: ${file.type}`);
             console.log(`📱 用户设备: ${navigator.userAgent.includes('Mobile') ? '移动端' : '桌面端'}`);
             
             // 检查文件是否超过绝对限制
             if (file.size > maxAbsoluteSize) {
                 console.error(`❌ 文件过大: ${Math.round(file.size/1024)}KB，超过${Math.round(maxAbsoluteSize/1024/1024)}MB绝对限制`);
-                
-                // 重置按钮状态
-                uploadPaymentProofBtn.disabled = false;
-                if (uploadPaymentProofBtn.textContent === '正在上传...') {
-                    uploadPaymentProofBtn.textContent = '完成缴费确认';
-                }
-                
-                // 显示错误消息
+                resetUploadButton();
                 const errorMessage = `文件大小超过${Math.round(maxAbsoluteSize/1024/1024)}MB限制，请选择较小的文件。`;
                 showUploadError(errorMessage);
                 return;
             }
             
-            if (file.type.startsWith('image/') && file.size > maxSafeSize) {
-                console.log(`🔄 检测到大图片文件: ${Math.round(file.size/1024)}KB，超过${Math.round(maxSafeSize/1024)}KB限制，正在压缩...`);
-                
-                // 移动端使用更保守的压缩参数
-                const isMobile = navigator.userAgent.includes('Mobile');
-                let quality = isMobile ? 0.6 : 0.7;
-                let maxWidth = isMobile ? 800 : 1200;
-                let maxHeight = isMobile ? 800 : 1200;
-                
-                if (file.size > 2 * 1024 * 1024) { // 2MB以上
-                    quality = isMobile ? 0.4 : 0.5;
-                    maxWidth = isMobile ? 600 : 800;
-                    maxHeight = isMobile ? 600 : 800;
-                } else if (file.size > 1024 * 1024) { // 1MB以上
-                    quality = isMobile ? 0.5 : 0.6;
-                    maxWidth = isMobile ? 700 : 1000;
-                    maxHeight = isMobile ? 700 : 1000;
-                }
-                
-                console.log(`🎨 压缩参数: quality=${quality}, maxWidth=${maxWidth}, maxHeight=${maxHeight}`);
-                
-                compressImage(file, quality, maxWidth, maxHeight)
-                    .then(compressedFile => {
-                        console.log(`✅ 图片压缩完成: ${Math.round(file.size/1024)}KB → ${Math.round(compressedFile.size/1024)}KB`);
-                        if (compressedFile.size > maxSafeSize) {
-                            console.warn(`⚠️ 压缩后仍然过大，进行二次压缩...`);
-                            const secondQuality = isMobile ? 0.3 : 0.4;
-                            const secondMaxWidth = isMobile ? 400 : 600;
-                            const secondMaxHeight = isMobile ? 400 : 600;
-                            return compressImage(compressedFile, secondQuality, secondMaxWidth, secondMaxHeight);
-                        }
-                        return compressedFile;
-                    })
-                    .then(finalFile => {
-                        console.log(`🎯 最终文件大小: ${Math.round(finalFile.size/1024)}KB`);
-                        if (finalFile.size > maxSafeSize) {
-                            throw new Error(`文件压缩后仍然过大: ${Math.round(finalFile.size/1024)}KB`);
-                        }
-                        processUpload(finalFile);
-                    })
-                    .catch(error => {
-                        console.error('❌ 图片压缩失败:', error);
-                        
-                        // 重置按钮状态
-                        resetUploadButton();
-                        
-                        // 如果压缩失败，尝试直接上传原文件（如果不是太大）
-                        if (file.size <= maxAbsoluteSize) {
-                            console.log('🔄 压缩失败，尝试直接上传原文件...');
-                            processUpload(file);
-                        } else {
-                            const errorMessage = `图片文件过大，无法压缩到安全大小。请选择较小的图片文件（建议<1MB）。`;
-                            showUploadError(errorMessage);
-                        }
-                    });
-            } else if (file.size > maxSafeSize) {
-                console.warn(`⚠️ 非图片文件较大: ${Math.round(file.size/1024)}KB`);
-                
-                // 对于非图片文件，如果不超过绝对限制，也允许上传
-                if (file.size <= maxAbsoluteSize) {
-                    console.log('📤 非图片文件，直接上传...');
-                    processUpload(file);
-                } else {
-                    // 重置按钮状态
+            // 检查文件类型是否支持
+            const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            if (!supportedTypes.includes(file.type)) {
+                console.error(`❌ 不支持的文件类型: ${file.type}`);
+                resetUploadButton();
+                const errorMessage = `不支持的文件格式，请上传 JPG、PNG 或 PDF 文件。`;
+                showUploadError(errorMessage);
+                return;
+            }
+            
+            // 统一处理：所有文件都转换为JPG并压缩到1MB以下
+            console.log(`🔄 开始处理文件，目标: JPG格式，${Math.round(targetSize/1024)}KB以下`);
+            
+            convertToJpgAndCompress(file, targetSize)
+                .then(processedFile => {
+                    console.log(`✅ 文件处理完成: ${Math.round(file.size/1024)}KB → ${Math.round(processedFile.size/1024)}KB (JPG)`);
+                    processUpload(processedFile);
+                })
+                .catch(error => {
+                    console.error('❌ 文件处理失败:', error);
                     resetUploadButton();
                     
-                    const errorMessage = `文件大小超过限制（${Math.round(maxAbsoluteSize/1024/1024)}MB），请选择较小的文件。`;
+                    let errorMessage = '文件处理失败，请重试。';
+                    if (error.message.includes('PDF')) {
+                        errorMessage = 'PDF文件处理失败，建议转换为图片格式后再上传。';
+                    } else if (error.message.includes('格式')) {
+                        errorMessage = '文件格式不支持，请上传JPG、PNG或PDF文件。';
+                    } else if (error.message.includes('过大')) {
+                        errorMessage = '文件过大无法处理，请选择较小的文件。';
+                    }
+                    
                     showUploadError(errorMessage);
-                    return;
-                }
-            } else {
-                console.log(`✅ 文件大小合适，直接上传: ${Math.round(file.size/1024)}KB`);
-                processUpload(file);
-            }
+                });
             
             // 错误显示辅助函数
             function showUploadError(message) {
