@@ -1,4 +1,48 @@
+// 移动端检测和调试工具函数
+function getMobileInfo() {
+    const userAgent = navigator.userAgent;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+    const isAndroid = /Android/.test(userAgent);
+    const isWeChat = /MicroMessenger/i.test(userAgent);
+    
+    return {
+        isMobile,
+        isIOS,
+        isAndroid,
+        isWeChat,
+        userAgent: userAgent.substring(0, 100), // 截取前100个字符
+        screenSize: `${screen.width}x${screen.height}`,
+        viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+        connection: navigator.onLine ? '在线' : '离线',
+        memory: navigator.deviceMemory || '未知',
+        language: navigator.language
+    };
+}
+
+// 收集调试信息
+function collectDebugInfo(error, fileInfo) {
+    return {
+        timestamp: new Date().toISOString(),
+        error: {
+            name: error.name,
+            message: error.message,
+            stack: error.stack ? error.stack.substring(0, 200) : null
+        },
+        file: fileInfo,
+        device: getMobileInfo(),
+        performance: {
+            memory: window.performance && window.performance.memory ? {
+                used: Math.round(window.performance.memory.usedJSHeapSize / 1024 / 1024),
+                total: Math.round(window.performance.memory.totalJSHeapSize / 1024 / 1024),
+                limit: Math.round(window.performance.memory.jsHeapSizeLimit / 1024 / 1024)
+            } : null
+        }
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('📱 移动端检测信息:', getMobileInfo());
     const form = document.getElementById('registrationForm');
     const successMessage = document.getElementById('successMessage');
     const submitBtn = document.querySelector('.submit-btn');
@@ -285,46 +329,89 @@ document.addEventListener('DOMContentLoaded', function() {
     // 图片压缩函数
     function compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
         return new Promise((resolve, reject) => {
+            console.log(`🎨 开始压缩图片: ${file.name}, 目标尺寸: ${maxWidth}x${maxHeight}, 质量: ${quality}`);
+            
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const img = new Image();
             
+            // 设置超时机制，防止移动端卡住
+            const timeoutId = setTimeout(() => {
+                reject(new Error('图片压缩超时'));
+            }, 30000); // 30秒超时
+            
             img.onload = function() {
-                // 计算新的尺寸
-                let { width, height } = img;
-                
-                if (width > maxWidth || height > maxHeight) {
-                    const ratio = Math.min(maxWidth / width, maxHeight / height);
-                    width = Math.floor(width * ratio);
-                    height = Math.floor(height * ratio);
+                try {
+                    clearTimeout(timeoutId);
+                    
+                    // 计算新的尺寸
+                    let { width, height } = img;
+                    console.log(`📐 原始尺寸: ${width}x${height}`);
+                    
+                    if (width > maxWidth || height > maxHeight) {
+                        const ratio = Math.min(maxWidth / width, maxHeight / height);
+                        width = Math.floor(width * ratio);
+                        height = Math.floor(height * ratio);
+                        console.log(`📏 缩放后尺寸: ${width}x${height}, 缩放比例: ${ratio.toFixed(2)}`);
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // 移动端优化：使用更好的图片质量设置
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
+                    // 绘制和压缩图片
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 移动端容错处理
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                console.log(`✅ 图片压缩成功: ${Math.round(file.size/1024)}KB → ${Math.round(blob.size/1024)}KB`);
+                                
+                                // 创建新的File对象
+                                const compressedFile = new File([blob], file.name, {
+                                    type: file.type,
+                                    lastModified: Date.now()
+                                });
+                                resolve(compressedFile);
+                            } else {
+                                console.error('❌ Canvas.toBlob 返回空结果');
+                                reject(new Error('图片压缩失败：无法生成压缩后的图片'));
+                            }
+                        },
+                        file.type,
+                        quality
+                    );
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    console.error('❌ 图片压缩过程中发生错误:', error);
+                    reject(new Error(`图片压缩失败：${error.message}`));
                 }
-                
-                canvas.width = width;
-                canvas.height = height;
-                
-                // 绘制和压缩图片
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                canvas.toBlob(
-                    (blob) => {
-                        if (blob) {
-                            // 创建新的File对象
-                            const compressedFile = new File([blob], file.name, {
-                                type: file.type,
-                                lastModified: Date.now()
-                            });
-                            resolve(compressedFile);
-                        } else {
-                            reject(new Error('图片压缩失败'));
-                        }
-                    },
-                    file.type,
-                    quality
-                );
             };
             
-            img.onerror = () => reject(new Error('图片加载失败'));
-            img.src = URL.createObjectURL(file);
+            img.onerror = (error) => {
+                clearTimeout(timeoutId);
+                console.error('❌ 图片加载失败:', error);
+                reject(new Error('图片加载失败，请检查文件格式是否正确'));
+            };
+            
+            // 释放之前的URL对象
+            const objectURL = URL.createObjectURL(file);
+            
+            // 保存原始的onload处理函数
+            const originalOnload = img.onload;
+            
+            img.onload = function() {
+                // 先执行原始的onload处理
+                originalOnload.call(this);
+                // 然后释放URL对象
+                URL.revokeObjectURL(objectURL);
+            };
+            
+            img.src = objectURL;
         });
     }
 
@@ -919,28 +1006,35 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         const startTime = Date.now();
                         
+                        // 创建兼容的超时控制器
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => {
+                            controller.abort();
+                        }, 45000); // 45秒超时，给移动端更多时间
+                        
                         fetch('https://n8n.talentdual.com/webhook/submit-payment', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify(paymentData),
-                            signal: AbortSignal.timeout(30000) // 30秒超时
+                            signal: controller.signal
                         })
                         .then(response => {
+                            clearTimeout(timeoutId); // 清理超时定时器
                             const elapsedTime = Date.now() - startTime;
-                            console.log(`请求完成，耗时: ${elapsedTime}ms, 状态: ${response.status}`);
+                            console.log(`✅ 请求完成，耗时: ${elapsedTime}ms, 状态: ${response.status}`);
                             
                             if (!response.ok) {
                                 throw new Error(`服务器错误: HTTP ${response.status} - ${response.statusText}`);
                             }
                             
                             const contentType = response.headers.get('content-type');
-                            console.log('响应Content-Type:', contentType);
+                            console.log('📄 响应Content-Type:', contentType);
                             
                             if (!contentType || !contentType.includes('application/json')) {
                                 return response.text().then(text => {
-                                    console.log('收到非JSON响应:', text);
+                                    console.log('📝 收到非JSON响应:', text);
                                     if (text.includes('Workflow was started') || text.includes('success')) {
                                         return { success: true, message: text, source: 'n8n' };
                                     }
@@ -949,32 +1043,49 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             
                             return response.json().then(data => {
-                                console.log('收到JSON响应:', data);
+                                console.log('📊 收到JSON响应:', data);
                                 return { ...data, source: 'n8n' };
                             });
                         })
                         .then(result => {
-                            console.log('n8n webhook上传成功:', result);
+                            console.log('🎉 n8n webhook上传成功:', result);
                             handleUploadSuccess(result, paymentData);
                         })
                         .catch(error => {
+                            clearTimeout(timeoutId); // 清理超时定时器
                             const elapsedTime = Date.now() - startTime;
-                            console.error(`n8n webhook上传失败，耗时: ${elapsedTime}ms, 错误:`, error);
+                            console.error(`❌ n8n webhook上传失败，耗时: ${elapsedTime}ms, 错误:`, error);
                             
                             // 根据错误类型提供更具体的错误信息
                             let userMessage = '上传失败，请稍后重试。';
                             
                             if (error.name === 'AbortError') {
                                 userMessage = '网络请求超时，请检查网络连接后重试。';
+                                console.log('⏰ 网络超时，建议用户检查网络状态');
                             } else if (error.message.includes('HTTP 413')) {
                                 userMessage = '文件过大，请选择较小的文件后重试。';
+                                console.log('📦 文件过大，HTTP 413错误');
                             } else if (error.message.includes('HTTP 400')) {
                                 userMessage = '请求格式错误，请刷新页面后重试。';
+                                console.log('🔧 请求格式错误，HTTP 400');
                             } else if (error.message.includes('HTTP 500')) {
                                 userMessage = '服务器内部错误，请联系管理员。';
-                            } else if (error.message.includes('网络')) {
+                                console.log('🔥 服务器内部错误，HTTP 500');
+                            } else if (error.message.includes('网络') || error.message.includes('network')) {
                                 userMessage = '网络连接失败，请检查网络状态后重试。';
+                                console.log('🌐 网络连接问题');
+                            } else if (error.message.includes('Failed to fetch')) {
+                                userMessage = '网络连接失败，请检查网络状态后重试。';
+                                console.log('🔌 Fetch失败，可能是网络问题');
                             }
+                            
+                            console.log(`📱 移动端调试信息:`, {
+                                isMobile: navigator.userAgent.includes('Mobile'),
+                                userAgent: navigator.userAgent,
+                                errorName: error.name,
+                                errorMessage: error.message,
+                                networkConnection: navigator.onLine ? '在线' : '离线'
+                            });
                             
                             handleUploadError(new Error(userMessage));
                         });
@@ -1128,83 +1239,14 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             
             // 检查文件大小并进行必要的压缩
-            const maxSafeSize = 250 * 1024; // 250KB安全限制
-            console.log(`文件信息: ${file.name}, 大小: ${Math.round(file.size/1024)}KB, 类型: ${file.type}`);
+            const maxSafeSize = 1024 * 1024; // 1MB安全限制（提高限制）
+            const maxAbsoluteSize = 5 * 1024 * 1024; // 5MB绝对限制
+            console.log(`📎 文件信息: ${file.name}, 大小: ${Math.round(file.size/1024)}KB, 类型: ${file.type}`);
+            console.log(`📱 用户设备: ${navigator.userAgent.includes('Mobile') ? '移动端' : '桌面端'}`);
             
-            if (file.type.startsWith('image/') && file.size > maxSafeSize) {
-                console.log(`检测到大图片文件: ${Math.round(file.size/1024)}KB，超过${Math.round(maxSafeSize/1024)}KB限制，正在压缩...`);
-                
-                // 计算压缩参数以确保文件大小在安全范围内
-                let quality = 0.7;
-                let maxWidth = 1200;
-                let maxHeight = 1200;
-                
-                if (file.size > 1024 * 1024) { // 1MB以上
-                    quality = 0.5;
-                    maxWidth = 800;
-                    maxHeight = 800;
-                } else if (file.size > 500 * 1024) { // 500KB以上
-                    quality = 0.6;
-                    maxWidth = 1000;
-                    maxHeight = 1000;
-                }
-                
-                compressImage(file, quality, maxWidth, maxHeight)
-                    .then(compressedFile => {
-                        console.log(`图片压缩完成: ${Math.round(file.size/1024)}KB → ${Math.round(compressedFile.size/1024)}KB`);
-                        if (compressedFile.size > maxSafeSize) {
-                            console.warn(`压缩后仍然过大，进行二次压缩...`);
-                            return compressImage(compressedFile, 0.4, 600, 600);
-                        }
-                        return compressedFile;
-                    })
-                    .then(finalFile => {
-                        console.log(`最终文件大小: ${Math.round(finalFile.size/1024)}KB`);
-                        if (finalFile.size > maxSafeSize) {
-                            throw new Error(`文件压缩后仍然过大: ${Math.round(finalFile.size/1024)}KB`);
-                        }
-                        processUpload(finalFile);
-                    })
-                    .catch(error => {
-                        console.error('图片压缩失败:', error);
-                        
-                        // 重置按钮状态
-                        uploadPaymentProofBtn.disabled = false;
-                        if (uploadPaymentProofBtn.textContent === '正在上传...') {
-                            uploadPaymentProofBtn.textContent = '完成缴费确认';
-                        }
-                        
-                        // 显示错误消息
-                        const errorMessage = `图片文件过大，无法压缩到安全大小。请选择较小的图片文件（建议<200KB）。`;
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'error-message';
-                        errorDiv.style.cssText = `
-                            background: #ffebee;
-                            border: 1px solid #f44336;
-                            color: #c62828;
-                            padding: 15px;
-                            margin: 10px 0;
-                            border-radius: 5px;
-                            text-align: center;
-                        `;
-                        errorDiv.innerHTML = `
-                            <strong>❌ ${errorMessage}</strong><br>
-                            <small>如问题持续，请联系 <a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a></small>
-                        `;
-                        
-                        const uploadSection = document.querySelector('.payment-upload-section');
-                        if (uploadSection) {
-                            uploadSection.insertAdjacentElement('afterend', errorDiv);
-                            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                        
-                        // 15秒后自动隐藏错误消息
-                        setTimeout(() => {
-                            errorDiv.remove();
-                        }, 15000);
-                    });
-            } else if (file.size > maxSafeSize) {
-                console.error(`非图片文件过大: ${Math.round(file.size/1024)}KB`);
+            // 检查文件是否超过绝对限制
+            if (file.size > maxAbsoluteSize) {
+                console.error(`❌ 文件过大: ${Math.round(file.size/1024)}KB，超过${Math.round(maxAbsoluteSize/1024/1024)}MB绝对限制`);
                 
                 // 重置按钮状态
                 uploadPaymentProofBtn.disabled = false;
@@ -1213,9 +1255,90 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // 显示错误消息
-                const errorMessage = `文件大小超过限制（${Math.round(maxSafeSize/1024)}KB），请选择较小的文件。`;
+                const errorMessage = `文件大小超过${Math.round(maxAbsoluteSize/1024/1024)}MB限制，请选择较小的文件。`;
+                showUploadError(errorMessage);
+                return;
+            }
+            
+            if (file.type.startsWith('image/') && file.size > maxSafeSize) {
+                console.log(`🔄 检测到大图片文件: ${Math.round(file.size/1024)}KB，超过${Math.round(maxSafeSize/1024)}KB限制，正在压缩...`);
+                
+                // 移动端使用更保守的压缩参数
+                const isMobile = navigator.userAgent.includes('Mobile');
+                let quality = isMobile ? 0.6 : 0.7;
+                let maxWidth = isMobile ? 800 : 1200;
+                let maxHeight = isMobile ? 800 : 1200;
+                
+                if (file.size > 2 * 1024 * 1024) { // 2MB以上
+                    quality = isMobile ? 0.4 : 0.5;
+                    maxWidth = isMobile ? 600 : 800;
+                    maxHeight = isMobile ? 600 : 800;
+                } else if (file.size > 1024 * 1024) { // 1MB以上
+                    quality = isMobile ? 0.5 : 0.6;
+                    maxWidth = isMobile ? 700 : 1000;
+                    maxHeight = isMobile ? 700 : 1000;
+                }
+                
+                console.log(`🎨 压缩参数: quality=${quality}, maxWidth=${maxWidth}, maxHeight=${maxHeight}`);
+                
+                compressImage(file, quality, maxWidth, maxHeight)
+                    .then(compressedFile => {
+                        console.log(`✅ 图片压缩完成: ${Math.round(file.size/1024)}KB → ${Math.round(compressedFile.size/1024)}KB`);
+                        if (compressedFile.size > maxSafeSize) {
+                            console.warn(`⚠️ 压缩后仍然过大，进行二次压缩...`);
+                            const secondQuality = isMobile ? 0.3 : 0.4;
+                            const secondMaxWidth = isMobile ? 400 : 600;
+                            const secondMaxHeight = isMobile ? 400 : 600;
+                            return compressImage(compressedFile, secondQuality, secondMaxWidth, secondMaxHeight);
+                        }
+                        return compressedFile;
+                    })
+                    .then(finalFile => {
+                        console.log(`🎯 最终文件大小: ${Math.round(finalFile.size/1024)}KB`);
+                        if (finalFile.size > maxSafeSize) {
+                            throw new Error(`文件压缩后仍然过大: ${Math.round(finalFile.size/1024)}KB`);
+                        }
+                        processUpload(finalFile);
+                    })
+                    .catch(error => {
+                        console.error('❌ 图片压缩失败:', error);
+                        
+                        // 重置按钮状态
+                        resetUploadButton();
+                        
+                        // 如果压缩失败，尝试直接上传原文件（如果不是太大）
+                        if (file.size <= maxAbsoluteSize) {
+                            console.log('🔄 压缩失败，尝试直接上传原文件...');
+                            processUpload(file);
+                        } else {
+                            const errorMessage = `图片文件过大，无法压缩到安全大小。请选择较小的图片文件（建议<1MB）。`;
+                            showUploadError(errorMessage);
+                        }
+                    });
+            } else if (file.size > maxSafeSize) {
+                console.warn(`⚠️ 非图片文件较大: ${Math.round(file.size/1024)}KB`);
+                
+                // 对于非图片文件，如果不超过绝对限制，也允许上传
+                if (file.size <= maxAbsoluteSize) {
+                    console.log('📤 非图片文件，直接上传...');
+                    processUpload(file);
+                } else {
+                    // 重置按钮状态
+                    resetUploadButton();
+                    
+                    const errorMessage = `文件大小超过限制（${Math.round(maxAbsoluteSize/1024/1024)}MB），请选择较小的文件。`;
+                    showUploadError(errorMessage);
+                    return;
+                }
+            } else {
+                console.log(`✅ 文件大小合适，直接上传: ${Math.round(file.size/1024)}KB`);
+                processUpload(file);
+            }
+            
+            // 错误显示辅助函数
+            function showUploadError(message) {
                 const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
+                errorDiv.className = 'error-message mobile-upload-error';
                 errorDiv.style.cssText = `
                     background: #ffebee;
                     border: 1px solid #f44336;
@@ -1224,27 +1347,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     margin: 10px 0;
                     border-radius: 5px;
                     text-align: center;
+                    font-size: 14px;
                 `;
                 errorDiv.innerHTML = `
-                    <strong>❌ ${errorMessage}</strong><br>
+                    <strong>❌ ${message}</strong><br>
                     <small>如问题持续，请联系 <a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a></small>
                 `;
                 
                 const uploadSection = document.querySelector('.payment-upload-section');
                 if (uploadSection) {
+                    // 移除之前的错误消息
+                    const existingError = uploadSection.querySelector('.mobile-upload-error');
+                    if (existingError) {
+                        existingError.remove();
+                    }
                     uploadSection.insertAdjacentElement('afterend', errorDiv);
                     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 
-                // 15秒后自动隐藏错误消息
+                // 20秒后自动隐藏错误消息
                 setTimeout(() => {
-                    errorDiv.remove();
-                }, 15000);
-                
-                return;
-            } else {
-                console.log(`文件大小合适，直接上传: ${Math.round(file.size/1024)}KB`);
-                processUpload(file);
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 20000);
             }
         });
     }
