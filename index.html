@@ -236,7 +236,7 @@
                 <div class="file-upload-container">
                     <div class="file-download-section">
                         <p class="file-instruction">请先下载模板文件，填写并签字后上传：</p>
-                        <a href="/download-pdf" class="download-btn" id="downloadPdfBtn">
+                        <a href="/SDI_exam_notification.pdf" class="download-btn" id="downloadPdfBtn">
                             📄 下载：SDI_exam_notification.pdf
                         </a>
                     </div>
@@ -400,5 +400,125 @@
     </script>
     
     <script src="/script.js"></script>
+    
+    <!-- 微信下载优化脚本 -->
+    <script>
+        // 检测微信环境并添加下载提示
+        function isWeChatBrowser() {
+            return /MicroMessenger/i.test(navigator.userAgent);
+        }
+
+        // 添加微信下载提示
+        function showWeChatDownloadTip() {
+            if (!isWeChatBrowser()) return;
+            
+            // 创建提示弹窗
+            const tipDiv = document.createElement('div');
+            tipDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+                z-index: 10000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                box-sizing: border-box;
+            `;
+            
+            tipDiv.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 12px;
+                    padding: 24px;
+                    max-width: 380px;
+                    width: 100%;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 16px;
+                        border-bottom: 1px solid #eee;
+                        padding-bottom: 12px;
+                    ">
+                        <h3 style="margin: 0; color: #333;">📱 微信下载提示</h3>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                            background: none;
+                            border: none;
+                            font-size: 24px;
+                            cursor: pointer;
+                            color: #666;
+                            padding: 0;
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">×</button>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 12px 0; color: #333;"><strong>文件即将打开，您可以正常查看和下载！</strong></p>
+                        <div style="
+                            background: #f8f9fa;
+                            border-radius: 8px;
+                            padding: 16px;
+                            margin: 12px 0;
+                            border-left: 4px solid #28a745;
+                        ">
+                            <p style="margin: 0 0 8px 0; color: #333;"><strong>下载方法：</strong></p>
+                            <ol style="margin: 0; padding-left: 20px; color: #555;">
+                                <li>查看文件内容确认无误后</li>
+                                <li>点击右上角"..."菜单</li>
+                                <li>选择"用其他应用打开"</li>
+                                <li>选择"存储到文件"保存</li>
+                            </ol>
+                        </div>
+                        <p style="
+                            color: #666;
+                            font-size: 14px;
+                            margin: 12px 0 0 0;
+                            text-align: center;
+                        ">💡 文件大小约250KB，包含完整的报名须知内容</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(tipDiv);
+            
+            // 8秒后自动关闭
+            setTimeout(() => {
+                if (tipDiv.parentElement) {
+                    tipDiv.remove();
+                }
+            }, 8000);
+        }
+
+        // 页面加载完成后添加事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadBtn = document.getElementById('downloadPdfBtn');
+            if (downloadBtn && isWeChatBrowser()) {
+                downloadBtn.addEventListener('click', function(e) {
+                    // 显示加载提示
+                    const originalText = this.textContent;
+                    this.textContent = '📄 正在打开...';
+                    this.style.opacity = '0.7';
+                    
+                    // 延时恢复并显示提示
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.opacity = '1';
+                        showWeChatDownloadTip();
+                    }, 1000);
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

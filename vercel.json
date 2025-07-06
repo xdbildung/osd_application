@@ -16,10 +16,7 @@
       "source": "/setup",
       "destination": "/api/index.js"
     },
-    {
-      "source": "/download-pdf",
-      "destination": "/api/index.js"
-    },
+
     {
       "source": "/((?!styles\\.css|script\\.js|payment_QR_example\\.png|SDI_exam_notification\\.pdf).*)",
       "destination": "/api/index.js"
