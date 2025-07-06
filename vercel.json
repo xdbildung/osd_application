@@ -17,7 +17,7 @@
       "destination": "/api/index.js"
     },
     {
-      "source": "/",
+      "source": "/((?!public).*)",
       "destination": "/api/index.js"
     }
   ],
