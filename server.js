@@ -250,13 +250,30 @@ app.get('/api/payment-submissions', (req, res) => {
 
 // Download template file
 app.get('/download-template', (req, res) => {
-    const templatePath = path.join(__dirname, 'public', 'SDI_exam_notification.docx');
+    const templatePath = path.join(__dirname, 'public', 'SDI奥德考试中心报名须知.docx');
     
     if (fs.existsSync(templatePath)) {
-        res.download(templatePath, 'SDI_exam_notification.docx', (err) => {
+        res.download(templatePath, 'SDI奥德考试中心报名须知.docx', (err) => {
             if (err) {
                 console.error('Error downloading template:', err);
-                res.status(500).send('Error downloading template file');
+                res.status(500).send(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>下载错误</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                            .error { color: #e74c3c; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1 class="error">文件下载失败</h1>
+                        <p>请联系管理员获取模板文件</p>
+                        <p>邮箱: info@sdi-osd.de</p>
+                        <a href="/">返回报名表</a>
+                    </body>
+                    </html>
+                `);
             }
         });
     } else {
@@ -264,19 +281,16 @@ app.get('/download-template', (req, res) => {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>模板文件未找到</title>
+                <title>文件未找到</title>
                 <style>
                     body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
                     .error { color: #e74c3c; }
-                    .info { color: #3498db; margin-top: 20px; }
                 </style>
             </head>
             <body>
                 <h1 class="error">模板文件未找到</h1>
-                <p>请联系管理员上传模板文件</p>
-                <div class="info">
-                    <p>文件应该放在: /public/SDI_exam_notification.docx</p>
-                </div>
+                <p>请联系管理员获取模板文件</p>
+                <p>邮箱: info@sdi-osd.de</p>
                 <a href="/">返回报名表</a>
             </body>
             </html>

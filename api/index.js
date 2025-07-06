@@ -148,26 +148,53 @@ app.get('/api/payment-submissions', (req, res) => {
 
 // 模板文件下载
 app.get('/download-template', (req, res) => {
-    res.status(200).send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>模板文件下载</title>
-            <style>
-                body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-                .info { color: #3498db; margin-top: 20px; }
-            </style>
-        </head>
-        <body>
-            <h1>模板文件下载</h1>
-            <p>请联系管理员获取模板文件</p>
-            <div class="info">
+    const filePath = path.join(__dirname, '..', 'public', 'SDI奥德考试中心报名须知.docx');
+    
+    // 检查文件是否存在
+    if (require('fs').existsSync(filePath)) {
+        res.download(filePath, 'SDI奥德考试中心报名须知.docx', (err) => {
+            if (err) {
+                console.error('文件下载错误:', err);
+                res.status(500).send(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>下载错误</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                            .error { color: #e74c3c; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1 class="error">文件下载失败</h1>
+                        <p>请联系管理员获取模板文件</p>
+                        <p>邮箱: info@sdi-osd.de</p>
+                        <a href="/">返回报名表</a>
+                    </body>
+                    </html>
+                `);
+            }
+        });
+    } else {
+        res.status(404).send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>文件未找到</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                    .error { color: #e74c3c; }
+                </style>
+            </head>
+            <body>
+                <h1 class="error">模板文件未找到</h1>
+                <p>请联系管理员获取模板文件</p>
                 <p>邮箱: info@sdi-osd.de</p>
-            </div>
-            <a href="/">返回报名表</a>
-        </body>
-        </html>
-    `);
+                <a href="/">返回报名表</a>
+            </body>
+            </html>
+        `);
+    }
 });
 
 // 主页面
