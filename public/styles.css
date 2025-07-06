@@ -551,38 +551,7 @@ select {
     background-color: #FFF3E0;
 }
 
-.file-download-section {
-    margin-bottom: 20px;
-}
 
-.file-instruction {
-    color: #5D4037;
-    margin-bottom: 10px;
-    font-weight: 500;
-}
-
-.download-btn {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #F0B83F;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(240, 184, 63, 0.3);
-}
-
-.download-btn:hover {
-    background-color: #FF8F00;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(240, 184, 63, 0.4);
-}
-
-.file-upload-section {
-    border-top: 1px solid #FFE0B2;
-    padding-top: 20px;
-}
 
 input[type="file"] {
     display: none;
@@ -651,70 +620,7 @@ input[type="file"] {
     margin-left: 10px;
 }
 
-/* 移动端上传选项样式 */
-.mobile-upload-options {
-    margin-bottom: 15px;
-}
 
-.upload-option-group {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.upload-option-btn {
-    width: 100%;
-    padding: 15px 20px;
-    background: linear-gradient(135deg, #F0B83F 0%, #FF8F00 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(240, 184, 63, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 50px;
-}
-
-.upload-option-btn:hover {
-    background: linear-gradient(135deg, #FF8F00 0%, #F0B83F 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(240, 184, 63, 0.3);
-}
-
-.upload-option-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 10px rgba(240, 184, 63, 0.2);
-}
-
-.upload-option-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.upload-option-btn.file-selected {
-    background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%) !important;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-}
-
-.upload-option-btn.file-selected:hover {
-    background: linear-gradient(135deg, #45A049 0%, #4CAF50 100%) !important;
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-}
-
-/* 桌面端样式 - 默认显示传统上传，隐藏移动端选项 */
-.mobile-upload-options {
-    display: none;
-}
-
-.traditional-upload {
-    display: block;
-}
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -862,25 +768,7 @@ input[type="file"] {
     }
     
     /* 移动端上传选项样式 */
-    .mobile-upload-options {
-        display: block;
-    }
-    
-    .traditional-upload {
-        display: none;
-    }
-    
-    .upload-option-group {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .upload-option-btn {
-        padding: 12px 16px;
-        font-size: 15px;
-        min-height: 45px;
-    }
+
     
     /* 移动端表单元素优化 */
     .form-group {
@@ -962,16 +850,7 @@ input[type="file"] {
         height: 160px;
     }
     
-    /* 超小屏幕移动端上传选项优化 */
-    .upload-option-btn {
-        padding: 10px 14px;
-        font-size: 14px;
-        min-height: 40px;
-    }
-    
-    .upload-option-group {
-        gap: 8px;
-    }
+
     
     /* 超小屏幕表单元素优化 */
     .form-group {

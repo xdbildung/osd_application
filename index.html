@@ -15,60 +15,6 @@
         
         <form id="registrationForm">
             <div class="form-group">
-                <label for="signedDocument">签字文件上传 <span class="required">*</span></label>
-                <div class="file-upload-container">
-                    <div class="file-download-section">
-                        <p class="file-instruction">【温馨提示】 请先下载、填写并签字扫描《考试须知》，再填写申请表，避免中途退出导致已填信息丢失。</p>
-                        <a href="/SDI_exam_notification.pdf" class="download-btn" download="SDI_exam_notification.pdf">
-                            📄 点击下载：《考试须知》文件
-                        </a>
-                        <div class="wechat-download-tip" style="
-                            background: #f8f9fa;
-                            border-left: 3px solid #6c757d;
-                            padding: 12px;
-                            margin-top: 12px;
-                            border-radius: 4px;
-                            font-size: 13px;
-                            color: #6c757d;
-                            line-height: 1.5;
-                        ">
-                            <div style="font-weight: 600; margin-bottom: 8px; color: #495057;">
-                                💡 IOS微信提示文件大小为0B且无法转发的解决方案
-                            </div>
-                            <div style="font-weight: 500; margin-bottom: 6px; color: #495057;">
-                                解决办法：
-                            </div>
-                            <ol style="margin: 0; padding-left: 20px;">
-                                <li>点击下载按钮后，选择"更多打开方式" > 选择 <strong>腾讯文档</strong> 或 <strong>金山文档</strong> 打开下载《考试须知》。</li>
-                                <li>点击下载按钮后，选择"用其他应用打开" > 选择 <strong>"保存到文件"</strong> 打开下载《考试须知》。</li>
-                            </ol>
-                        </div>
-                    </div>
-                    <div class="file-upload-section">
-                        <!-- 移动端优化的上传选项 -->
-                        <div class="mobile-upload-options">
-                            <div class="upload-option-group">
-                                <button type="button" class="upload-option-btn" id="galleryBtn">
-                                    📎 上传签字文件或照片
-                                </button>
-                            </div>
-                        </div>
-                        <!-- 隐藏的文件输入 -->
-                        <input type="file" id="signedDocument" name="signedDocument" accept=".jpg,.jpeg,.png,.pdf" required style="display: none;">
-                        <input type="file" id="signedDocumentCamera" name="signedDocumentCamera" accept="image/*" capture="environment" style="display: none;">
-                        <input type="file" id="signedDocumentGallery" name="signedDocumentGallery" accept="image/*" style="display: none;">
-                        
-                        <!-- 传统的文件上传标签（在移动端隐藏） -->
-                        <label for="signedDocument" class="file-upload-label traditional-upload">
-                            📎 选择已签字的文件（支持JPG、PNG、PDF）
-                        </label>
-                        <div class="file-info" id="fileInfo"></div>
-                    </div>
-                </div>
-                <div class="error-hint" id="signedDocument-error"></div>
-            </div>
-
-            <div class="form-group">
                 <label for="firstName">名字（拼音） <span class="required">*</span></label>
                 <input type="text" id="firstName" name="firstName" required>
                 <div class="error-hint" id="firstName-error"></div>
@@ -399,7 +345,7 @@
     <!-- 版本信息页脚 -->
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">奥德考试报名系统 v1.7.0</span>
+            <span class="version-text">奥德考试报名系统 v1.7.1</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>

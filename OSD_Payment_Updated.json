@@ -37,14 +37,15 @@
         "fromEmail": "info@sdi-osd.de",
         "toEmail": "={{ $json.body.email }}",
         "subject": "=🎉 {{ $json.body.lastName }} {{ $json.body.firstName }} - SDI奥德考试报名成功确认函",
-        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;\"><div style=\"text-align: center; margin-bottom: 30px;\"><h1 style=\"color: #F0B83F; font-size: 24px; margin: 0;\">🎉 奥德考试报名成功确认函</h1><hr style=\"border: none; height: 2px; background: linear-gradient(to right, #F0B83F, #FFE0B2); margin: 20px 0;\"></div><div style=\"margin-bottom: 20px;\"><strong>亲爱的 {{ $json.body.lastName }} {{ $json.body.firstName }} 同学：</strong></div><div style=\"margin-bottom: 20px;\">恭喜您！您已成功完成SDI奥德考试中心奥德考试的全部报名流程。</div><div style=\"background: #FFF8E1; padding: 20px; border-radius: 8px; border-left: 4px solid #F0B83F; margin: 20px 0;\"><h3 style=\"color: #F0B83F; margin-top: 0;\">📋 您的报名信息</h3><p><strong>申请编号：</strong>{{ $json.body.applicationID }}</p><p><strong>报名等级：</strong>{{ $json.body.examLevel }}等级考试</p><p><strong>报名科目：</strong>{{ $json.body.examSessionsDisplay }}</p><p><strong>考试日期：</strong>{{ $json.body.examDate }}</p><p><strong>护照号码：</strong>{{ $json.body.passportNumber }}</p><p><strong>报名时间：</strong>{{ $json.body.originalSubmissionTimeFormatted }}</p><p><strong>付费确认时间：</strong>{{ $json.body.paymentSubmissionTimeFormatted }}</p></div><div style=\"background: #FFE0B2; padding: 20px; border-radius: 8px; margin: 20px 0;\"><h3 style=\"color: #E65100; margin-top: 0;\">⚠️ 重要提醒</h3><ol><li><strong>打印此邮件：</strong>请务必将此确认函打印出来，考试当天必须携带纸质版。</li><li><strong>携带证件：</strong>考试当天请携带护照原件，复印件无效。</li><li><strong>到达时间：</strong>请提前30分钟到达考场。</li><li><strong>考试确认函：</strong>考前5-7天您将收到正式的考试确认函，请同样打印并携带。</li></ol></div><div style=\"background: #E3F2FD; padding: 20px; border-radius: 8px; margin: 20px 0;\"><h3 style=\"color: #1976D2; margin-top: 0;\">📍 考场信息</h3><p>具体考场地址和注意事项将在考试确认函中详细说明。</p></div><div style=\"margin: 30px 0;\"><p>若您尚未获得护照，请在<strong><u>考试日期前至少14天</u></strong>回复本邮件补充提交。</p></div><div style=\"margin: 30px 0;\"><p>如有任何疑问，请通过邮件联系我们：<a href=\"mailto:info@sdi-osd.de\" style=\"color: #F0B83F;\">info@sdi-osd.de</a></p></div><hr style=\"border: none; height: 1px; background: #ddd; margin: 30px 0;\"><div style=\"font-size: 14px; color: #666; text-align: center;\"><p><strong>SDI Internationale Hochschule München</strong><br>Kontakt: info@sdi-osd.de</p><p><strong>慕尼黑SDI语言大学</strong><br>奥德考试中心</p></div></div>",
+        "html": "=<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>重要通知：SDI奥德考试报名确认步骤</title>\n</head>\n<body>\n    <div style=\"font-family: Arial, 'Microsoft YaHei', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #ffffff;\">\n\n        <!-- 邮件主标题 -->\n        <div style=\"text-align: center; margin-bottom: 30px;\">\n            <h1 style=\"color: #F0B83F; font-size: 24px; margin: 0;\">🎉 报名成功 & 席位最终确认函</h1>\n            <hr style=\"border: none; height: 2px; background: linear-gradient(to right, #F0B83F, #FFE0B2); margin: 20px 0;\">\n        </div>\n\n        <!-- 称呼和祝贺 -->\n        <div style=\"margin-bottom: 20px; line-height: 1.6;\">\n            <strong>亲爱的 {{ $json.body.lastName }} {{ $json.body.firstName }} 同学：</strong>\n            <p style=\"margin-top: 10px;\">祝贺你！ 你已顺利完成SDI奥德考试中心奥德考试的报名及缴费流程，迈出了重要一步！</p>\n            <p>以下是您的报名信息，请核对：</p>\n        </div>\n\n        <!-- 报名信息模块 -->\n        <div style=\"background: #FFF8E1; padding: 20px; border-radius: 8px; border-left: 4px solid #F0B83F; margin: 20px 0;\">\n            <h3 style=\"color: #F0B83F; margin-top: 0;\">📋 您的报名信息</h3>\n            <p><strong>申请编号：</strong>{{ $json.body.applicationID }}</p>\n            <p><strong>报名等级：</strong>{{ $json.body.examLevel }}等级考试</p>\n            <p><strong>报名科目：</strong>{{ $json.body.examSessionsDisplay }}</p>\n            <p><strong>考试日期：</strong>{{ $json.body.examDate }}</p>\n            <p><strong>护照号码：</strong>{{ $json.body.passportNumber }}</p>\n            <p><strong>报名时间：</strong>{{ $json.body.originalSubmissionTimeFormatted }}</p>\n            <p><strong>付费确认时间：</strong>{{ $json.body.paymentSubmissionTimeFormatted }}</p>\n        </div>\n\n        <!-- 关键操作步骤模块 -->\n        <div style=\"background: #E3F2FD; padding: 20px; border-radius: 8px; margin: 20px 0;\">\n            <h3 style=\"color: #1976D2; margin-top: 0;\">🔑 下一步：最终确认您的考试席位</h3>\n            <p>为确保您的考试席位最终被确认，请务必完成以下关键步骤：</p>\n            <ol style=\"line-height: 1.8; padding-left: 25px;\">\n                <li><strong>下载附件：</strong> 请查收并下载本邮件附件中的《考试须知》。</li>\n                <li><strong>仔细阅读并签字：</strong> 请认真阅读文件内容，并在指定位置亲笔签名。</li>\n                <li><strong>回传签字文件：</strong> 请选择以下任一方式回传：\n                    <ul style=\"list-style-type: disc; margin-left: 20px; padding-left: 20px;\">\n                        <li><strong>方式一 (推荐)：</strong>将已签字的《考试须知》直接作为附件回复此邮件。</li>\n                        <li><strong>方式二：</strong>将已签字的《考试须知》提交给您的留学咨询老师，由其转交给我们。</li>\n                    </ul>\n                </li>\n            </ol>\n        </div>\n\n        <!-- 截止日期提醒模块 -->\n        <div style=\"background: #FFF3E0; padding: 20px; border-radius: 8px; border-left: 4px solid #E65100; margin: 20px 0;\">\n            <h3 style=\"color: #E65100; margin-top: 0;\">⚠️ 重要截止日期提醒</h3>\n            <p>请务必在 <strong>2025年8月5日 24:00 (北京时间)</strong> 前将签字文件发送给我们。</p>\n            <p><strong>若我们未能在截止日期前收到您的签字文件，将无法保证为您预留考试位置。</strong></p>\n        </div>\n        \n        <!-- 后续步骤及考试日提醒模块 -->\n        <div style=\"background: #F5F5F5; padding: 20px; border-radius: 8px; margin: 20px 0;\">\n            <h3 style=\"color: #333; margin-top: 0;\">📅 后续步骤及考试日提醒</h3>\n            <ul style=\"line-height: 1.8; padding-left: 25px;\">\n                <li><strong>正式考试确认函：</strong>完成上述签字步骤后，您将在考前5-7天收到正式的《考试确认函》，其中将包含具体的考场地址和详细注意事项。</li>\n                <li><strong>打印文件：</strong>收到正式《考试确认函》后，请务必将其打印为纸质版。</li>\n                <li><strong>携带证件：</strong>考试当天必须携带<strong>护照原件</strong>及<strong>纸质版《考试确认函》</strong>。</li>\n                <li><strong>到达时间：</strong>请提前30分钟到达考场。</li>\n            </ul>\n        </div>\n\n        <!-- 补充说明 -->\n        <div style=\"margin: 30px 0; line-height: 1.6;\">\n            <p>※ 若您在报名时未提交护照信息，请务必在<strong><u>考试日期前至少14天</u></strong>回复本邮件补充提交。</p>\n        </div>\n\n        <!-- 结尾祝福和联系方式 -->\n        <div style=\"margin: 30px 0; line-height: 1.6;\">\n            <p>请抓紧时间完成席位确认的关键步骤，祝您备考顺利！</p>\n            <p>如有任何疑问，请随时通过邮件联系我们：<a href=\"mailto:info@sdi-osd.de\" style=\"color: #F0B83F; text-decoration: none;\">info@sdi-osd.de</a></p>\n        </div>\n\n        <hr style=\"border: none; height: 1px; background: #ddd; margin: 30px 0;\">\n\n        <!-- 邮件页脚 -->\n        <div style=\"font-size: 14px; color: #666; text-align: center; line-height: 1.6;\">\n            <p><strong>SDI Internationale Hochschule München</strong><br>Kontakt: info@sdi-osd.de</p>\n            <p><strong>慕尼黑SDI语言大学</strong><br>奥德考试中心</p>\n        </div>\n\n    </div>\n</body>\n</html>\n",
+        "attachments": "notification",
         "options": {}
       },
       "name": "Send Success Email to Student",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 1,
       "position": [
-        -580,
+        -200,
         140
       ],
       "id": "622c19f8-fd30-48e0-aabb-f3ecd94c36d2",
@@ -68,7 +69,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 1,
       "position": [
-        -580,
+        -360,
         -60
       ],
       "id": "3876a18c-86c8-4cb0-a6aa-b2d7c624e450",
@@ -365,7 +366,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        -580,
+        -360,
         340
       ],
       "id": "6027bca3-92ab-43d8-90fb-b576073cdadf",
@@ -387,11 +388,40 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        -360,
+        100,
         140
       ],
       "id": "14f60174-3cf7-4cca-aece-23fea27f2780",
       "name": "Respond Success to Frontend"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1oIMEWuzNuj_8zwEY1-I9oDYPDMeVrP5y",
+          "mode": "list",
+          "cachedResultName": "SDI_exam_notification.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1oIMEWuzNuj_8zwEY1-I9oDYPDMeVrP5y/view?usp=drivesdk"
+        },
+        "options": {
+          "binaryPropertyName": "notification"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -480,
+        140
+      ],
+      "id": "1638b9bd-1b3b-41a7-9481-0f20174b77f4",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "zsMGAxLZF0nMTMQI",
+          "name": "Skee's google drive"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -411,17 +441,17 @@
       "main": [
         [
           {
-            "node": "Send Success Email to Student",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Send Payment Alert to Admin",
             "type": "main",
             "index": 0
           },
           {
             "node": "Update Payment Status in Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive",
             "type": "main",
             "index": 0
           }
@@ -460,13 +490,24 @@
           }
         ]
       ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Send Success Email to Student",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "ae2e5194-6c40-431c-b587-55a9335175c3",
+  "versionId": "4926da71-462e-4c26-99e5-eadba7a579f2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "62c4f474723b914af91e4af15e30298257d6540140abed5d09006251f9987da1"

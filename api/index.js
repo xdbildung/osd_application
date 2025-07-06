@@ -49,21 +49,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '..')));
 
 // API endpoint for form submission
-app.post('/api/submit', upload.single('signedDocument'), async (req, res) => {
+app.post('/api/submit', async (req, res) => {
     try {
         const formData = req.body;
-        
-        // 处理文件信息
-        if (req.file) {
-            formData.signedDocument = {
-                originalName: req.file.originalname,
-                filename: `${Date.now()}-${req.file.originalname}`,
-                size: req.file.size,
-                mimetype: req.file.mimetype,
-                // 在生产环境中，应该将文件上传到云存储
-                buffer: req.file.buffer.toString('base64')
-            };
-        }
         
             // 添加时间戳 - 使用北京时间
     const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
@@ -76,12 +64,7 @@ app.post('/api/submit', upload.single('signedDocument'), async (req, res) => {
         console.log('Form submission processed:', {
             localSave: 'Success (Memory)',
             dataCount: submissions.length,
-            formData: {
-                ...formData,
-                signedDocument: formData.signedDocument ? 
-                    `${formData.signedDocument.originalName} (${formData.signedDocument.filename})` : 
-                    'No file'
-            }
+            formData: formData
         });
         
         res.json({ 

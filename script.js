@@ -249,7 +249,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 设置文件上传
-    setupFileUpload('signedDocument', 'fileInfo', 5 * 1024 * 1024, ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']);
     setupFileUpload('passportUpload', 'passportFileInfo', 10 * 1024 * 1024, ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']); // 提高护照上传限制
 
     // 清除错误提示
@@ -900,27 +899,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // 验证签字文件上传
-        const signedDocumentFile = document.getElementById('signedDocument');
-        if (!signedDocumentFile.files.length) {
-            isValid = false;
-            showError('signedDocument', '请上传签字文件');
-        } else {
-            const file = signedDocumentFile.files[0];
-            const maxSize = 5 * 1024 * 1024; // 5MB
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-            
-            if (file.size > maxSize) {
-                isValid = false;
-                showError('signedDocument', '文件大小不能超过5MB');
-            } else if (!allowedTypes.includes(file.type)) {
-                isValid = false;
-                showError('signedDocument', '请上传JPG、PNG或PDF文件');
-            } else {
-                clearError('signedDocument');
-            }
-        }
-
         // 验证护照文件上传（可选）
         const passportFile = document.getElementById('passportUpload');
         if (passportFile.files.length > 0) {
@@ -1036,52 +1014,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         };
 
-        // 处理签字文件 - 转换为JPG格式
-        const signedDocumentFile = document.getElementById('signedDocument').files[0];
+        // 处理护照文件
         const passportFile = document.getElementById('passportUpload').files[0];
 
-        // 处理签字文件的新函数 - 转换为JPG并压缩
-        const processSignedDocument = (file) => {
-            return new Promise((resolve, reject) => {
-                if (!file) {
-                    resolve(null);
-                    return;
-                }
-                
-                console.log('🔄 开始处理签字文件，转换为JPG格式...');
-                
-                // 使用convertToJpgAndCompress函数将签字文件转换为JPG
-                convertToJpgAndCompress(file, 1024 * 1024) // 1MB目标大小
-                    .then(jpgFile => {
-                        console.log('✅ 签字文件转换成功:', jpgFile.name);
-                        
-                        // 转换为base64
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const base64Content = e.target.result.split(',')[1];
-                            resolve({
-                                filename: jpgFile.name,
-                                content: base64Content,
-                                mimeType: jpgFile.type,
-                                size: jpgFile.size
-                            });
-                        };
-                        reader.readAsDataURL(jpgFile);
-                    })
-                    .catch(error => {
-                        console.error('❌ 签字文件转换失败:', error);
-                        reject(error);
-                    });
-            });
-        };
-
         Promise.all([
-            processSignedDocument(signedDocumentFile),
             processFile(passportFile)
-        ]).then(([signedDocument, passportUpload]) => {
-            if (signedDocument) {
-                submitData.signedDocument = signedDocument;
-            }
+        ]).then(([passportUpload]) => {
             if (passportUpload) {
                 submitData.passportUpload = passportUpload;
             }
@@ -1209,165 +1147,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 初始化拖拽上传
-    setupDragAndDrop('signedDocument', 'signedDocument');
     setupDragAndDrop('passportUpload', 'passportUpload');
-    
-    // 移动端上传选项功能
-    setupMobileUploadOptions();
 
     // 页面加载完成后的初始化
     console.log('SDI奥德考试报名表单已加载');
     
     // 移动端上传选项功能
-    function setupMobileUploadOptions() {
-        console.log('📱 初始化移动端上传选项功能');
-        
-        const cameraBtn = document.getElementById('cameraBtn');
-        const galleryBtn = document.getElementById('galleryBtn');
-        const fileBtn = document.getElementById('fileBtn');
-        const signedDocumentInput = document.getElementById('signedDocument');
-        const cameraInput = document.getElementById('signedDocumentCamera');
-        const galleryInput = document.getElementById('signedDocumentGallery');
-        const fileInfo = document.getElementById('fileInfo');
-        
-        // 检查是否在移动设备上
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (cameraBtn && cameraInput) {
-            cameraBtn.addEventListener('click', function() {
-                console.log('📷 点击拍照按钮');
-                // 在移动设备上，使用带有capture属性的input
-                cameraInput.click();
-            });
-        }
-        
-        if (galleryBtn && galleryInput) {
-            galleryBtn.addEventListener('click', function() {
-                console.log('🖼️ 点击图库按钮');
-                // 使用普通的图像选择input
-                galleryInput.click();
-            });
-        }
-        
-        if (fileBtn && signedDocumentInput) {
-            fileBtn.addEventListener('click', function() {
-                console.log('📁 点击文件选择按钮');
-                // 使用支持所有文件类型的input
-                signedDocumentInput.click();
-            });
-        }
-        
-        // 处理相机拍照文件选择
-        if (cameraInput) {
-            cameraInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    console.log('📷 拍照文件选择:', {
-                        name: file.name,
-                        size: Math.round(file.size / 1024) + 'KB',
-                        type: file.type
-                    });
-                    
-                    // 将文件传递给主要的input
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    signedDocumentInput.files = dataTransfer.files;
-                    
-                    // 触发change事件
-                    signedDocumentInput.dispatchEvent(new Event('change'));
-                    
-                    // 更新文件信息显示
-                    if (fileInfo) {
-                        fileInfo.textContent = `📷 已拍照: ${file.name} (${Math.round(file.size / 1024)}KB)`;
-                        fileInfo.classList.add('show', 'success');
-                        fileInfo.classList.remove('error');
-                    }
-                    
-                    // 更新按钮状态
-                    updateUploadButtonStates(true);
-                }
-            });
-        }
-        
-        // 处理图库文件选择
-        if (galleryInput) {
-            galleryInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    console.log('🖼️ 图库文件选择:', {
-                        name: file.name,
-                        size: Math.round(file.size / 1024) + 'KB',
-                        type: file.type
-                    });
-                    
-                    // 将文件传递给主要的input
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    signedDocumentInput.files = dataTransfer.files;
-                    
-                    // 触发change事件
-                    signedDocumentInput.dispatchEvent(new Event('change'));
-                    
-                    // 更新文件信息显示
-                    if (fileInfo) {
-                        fileInfo.textContent = `🖼️ 已选择: ${file.name} (${Math.round(file.size / 1024)}KB)`;
-                        fileInfo.classList.add('show', 'success');
-                        fileInfo.classList.remove('error');
-                    }
-                    
-                    // 更新按钮状态
-                    updateUploadButtonStates(true);
-                }
-            });
-        }
-        
-        // 处理传统文件选择
-        if (signedDocumentInput) {
-            signedDocumentInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    console.log('📁 文件选择:', {
-                        name: file.name,
-                        size: Math.round(file.size / 1024) + 'KB',
-                        type: file.type
-                    });
-                    
-                    // 更新文件信息显示
-                    if (fileInfo) {
-                        fileInfo.textContent = `📁 已选择: ${file.name} (${Math.round(file.size / 1024)}KB)`;
-                        fileInfo.classList.add('show', 'success');
-                        fileInfo.classList.remove('error');
-                    }
-                    
-                    // 更新按钮状态
-                    updateUploadButtonStates(true);
-                }
-            });
-        }
-        
-        // 更新上传按钮状态
-        function updateUploadButtonStates(hasFile) {
-            const buttons = [cameraBtn, galleryBtn, fileBtn];
-            buttons.forEach(btn => {
-                if (btn) {
-                    if (hasFile) {
-                        btn.classList.add('file-selected');
-                        btn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45A049 100%)';
-                    } else {
-                        btn.classList.remove('file-selected');
-                        btn.style.background = 'linear-gradient(135deg, #F0B83F 0%, #FF8F00 100%)';
-                    }
-                }
-            });
-        }
-        
-        // 检查是否支持相机功能
-        if (isMobile && cameraBtn) {
-            console.log('📱 移动设备检测成功，启用相机功能');
-        } else if (cameraBtn) {
-            console.log('💻 桌面设备检测，相机功能可能有限');
-        }
-    }
+
 
     // 处理付费凭证上传
     const paymentProofInput = document.getElementById('paymentProof');

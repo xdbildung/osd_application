@@ -60,21 +60,10 @@ app.use(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(uploadsDir));
 
-// API endpoint for form submission with file upload
-app.post('/api/submit', upload.single('signedDocument'), async (req, res) => {
+// API endpoint for form submission
+app.post('/api/submit', async (req, res) => {
     try {
         const formData = req.body;
-        
-        // Add file information
-        if (req.file) {
-            formData.signedDocument = {
-                originalName: req.file.originalname,
-                filename: req.file.filename,
-                size: req.file.size,
-                mimetype: req.file.mimetype,
-                uploadPath: `/uploads/${req.file.filename}`
-            };
-        }
         
             // Add timestamp - 使用北京时间
     const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
@@ -128,12 +117,7 @@ app.post('/api/submit', upload.single('signedDocument'), async (req, res) => {
             console.log('Form submission processed:', {
                 localSave: 'Success',
                 googleSheets: googleSheetsStatus,
-                formData: {
-                    ...formData,
-                    signedDocument: formData.signedDocument ? 
-                        `${formData.signedDocument.originalName} (${formData.signedDocument.filename})` : 
-                        'No file'
-                }
+                formData: formData
             });
             
             res.json({ 
