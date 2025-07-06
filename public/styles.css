@@ -305,6 +305,8 @@ select {
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border: 1px solid #E0E0E0;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .payment-module h4 {
@@ -781,6 +783,123 @@ input[type="file"] {
         background: linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%);
         border-radius: 10px;
         border: 2px solid #4CAF50;
+    }
+}
+
+/* 超窄屏幕优化 (480px以下) */
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+        margin: 5px;
+    }
+    
+    .payment-content {
+        gap: 15px;
+    }
+    
+    .payment-module {
+        padding: 15px;
+        margin: 0;
+    }
+    
+    .bank-info {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .bank-item {
+        margin-bottom: 8px;
+    }
+    
+    .bank-item .label {
+        font-size: 0.9em;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .bank-item .value {
+        font-size: 0.9em;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+    }
+    
+    .bank-item.important {
+        padding: 8px;
+        margin-top: 8px;
+    }
+    
+    .fee-info {
+        padding: 12px;
+    }
+    
+    .fee-level {
+        padding: 6px 0;
+        font-size: 0.95em;
+    }
+    
+    .fee-level strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+    
+    .payment-module h4 {
+        font-size: 1.1em;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+    }
+    
+    .total-module .total-amount {
+        padding: 15px;
+    }
+    
+    .qr-code {
+        width: 160px;
+        height: 160px;
+    }
+}
+
+/* 极窄屏幕优化 (360px以下) */
+@media (max-width: 360px) {
+    .container {
+        padding: 8px;
+        margin: 3px;
+    }
+    
+    .payment-content {
+        gap: 12px;
+    }
+    
+    .payment-module {
+        padding: 12px;
+        margin: 0;
+    }
+    
+    .bank-info {
+        padding: 10px;
+    }
+    
+    .bank-item .label,
+    .bank-item .value {
+        font-size: 0.85em;
+    }
+    
+    .fee-level {
+        font-size: 0.9em;
+    }
+    
+    .payment-module h4 {
+        font-size: 1em;
+        margin-bottom: 12px;
+    }
+    
+    .total-module .total-amount {
+        padding: 12px;
+    }
+    
+    .qr-code {
+        width: 140px;
+        height: 140px;
     }
 }
 
