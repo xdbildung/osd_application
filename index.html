@@ -105,7 +105,8 @@
                     <div class="file-info" id="passportFileInfo"></div>
                 </div>
                 <div class="form-note">
-                    💡 支持jpg、png、pdf格式，文件大小不超过5MB
+                    💡 支持JPG、PNG、PDF格式，文件大小不超过10MB<br>
+                    📋 所有文件将自动转换为JPG格式并压缩至1MB以下
                 </div>
             </div>
 
@@ -350,7 +351,8 @@
                 </div>
                 
                 <div class="form-note">
-                    💡 支持jpg、png、pdf格式，文件大小不超过5MB
+                    💡 支持JPG、PNG、PDF格式，文件大小不超过10MB<br>
+                    📋 所有文件将自动转换为JPG格式并压缩至1MB以下
                 </div>
                 
                 <button type="button" id="uploadPaymentProof" class="upload-btn">
@@ -370,6 +372,16 @@
         </div>
     </footer>
 
+    <!-- PDF.js库用于PDF转换功能 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // 配置PDF.js worker
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            console.log('📚 PDF.js库加载成功，支持PDF转JPG功能');
+        }
+    </script>
+    
     <script src="/script.js"></script>
 </body>
 </html> 
