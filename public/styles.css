@@ -46,7 +46,7 @@ h1 {
 }
 
 .form-group {
-    margin-bottom: 25px;
+    margin-bottom: 18px;
 }
 
 label {
@@ -75,6 +75,8 @@ select {
     transition: all 0.3s ease;
     background-color: #FFFDF7;
     color: #5D4037;
+    height: 52px; /* 统一高度：padding(12px*2) + border(2px*2) + 内容高度 */
+    box-sizing: border-box;
 }
 
 input[type="text"]:focus,
@@ -98,6 +100,15 @@ select:hover {
 
 select {
     cursor: pointer;
+    /* 确保select元素与input元素高度完全一致 */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
 }
 
 .form-note {
@@ -870,6 +881,11 @@ input[type="file"] {
         font-size: 15px;
         min-height: 45px;
     }
+    
+    /* 移动端表单元素优化 */
+    .form-group {
+        margin-bottom: 15px;
+    }
 }
 
 /* 超窄屏幕优化 (480px以下) */
@@ -955,6 +971,11 @@ input[type="file"] {
     
     .upload-option-group {
         gap: 8px;
+    }
+    
+    /* 超小屏幕表单元素优化 */
+    .form-group {
+        margin-bottom: 12px;
     }
 }
 
