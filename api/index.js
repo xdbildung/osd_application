@@ -199,6 +199,71 @@ app.get('/download-template', (req, res) => {
     }
 });
 
+// 新增：专门的PDF下载路由 - 解决微信浏览器下载问题
+app.get('/download-pdf', (req, res) => {
+    const filePath = path.join(__dirname, '..', 'public', 'SDI_exam_notification.pdf');
+    
+    // 检查文件是否存在
+    if (require('fs').existsSync(filePath)) {
+        // 获取文件信息
+        const stats = require('fs').statSync(filePath);
+        const fileSize = stats.size;
+        
+        // 设置响应头 - 关键：强制下载而不是预览
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Length', fileSize);
+        res.setHeader('Content-Disposition', 'attachment; filename="SDI_exam_notification.pdf"');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        
+        // 发送文件
+        const fileStream = require('fs').createReadStream(filePath);
+        fileStream.pipe(res);
+        
+        fileStream.on('error', (err) => {
+            console.error('文件读取错误:', err);
+            res.status(500).send(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>下载错误</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                        .error { color: #e74c3c; }
+                    </style>
+                </head>
+                <body>
+                    <h1 class="error">文件下载失败</h1>
+                    <p>请联系管理员获取模板文件</p>
+                    <p>邮箱: info@sdi-osd.de</p>
+                    <a href="/">返回报名表</a>
+                </body>
+                </html>
+            `);
+        });
+    } else {
+        res.status(404).send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>文件未找到</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                    .error { color: #e74c3c; }
+                </style>
+            </head>
+            <body>
+                <h1 class="error">模板文件未找到</h1>
+                <p>请联系管理员获取模板文件</p>
+                <p>邮箱: info@sdi-osd.de</p>
+                <a href="/">返回报名表</a>
+            </body>
+            </html>
+        `);
+    }
+});
+
 // 主页面
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'index.html'));
