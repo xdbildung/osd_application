@@ -241,8 +241,27 @@
                         </a>
                     </div>
                     <div class="file-upload-section">
-                        <input type="file" id="signedDocument" name="signedDocument" accept=".jpg,.jpeg,.png,.pdf" required>
-                        <label for="signedDocument" class="file-upload-label">
+                        <!-- 移动端优化的上传选项 -->
+                        <div class="mobile-upload-options">
+                            <div class="upload-option-group">
+                                <button type="button" class="upload-option-btn" id="cameraBtn">
+                                    📷 拍照上传
+                                </button>
+                                <button type="button" class="upload-option-btn" id="galleryBtn">
+                                    🖼️ 从图库选择
+                                </button>
+                                <button type="button" class="upload-option-btn" id="fileBtn">
+                                    📁 选择文件
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 隐藏的文件输入 -->
+                        <input type="file" id="signedDocument" name="signedDocument" accept=".jpg,.jpeg,.png,.pdf" required style="display: none;">
+                        <input type="file" id="signedDocumentCamera" name="signedDocumentCamera" accept="image/*" capture="environment" style="display: none;">
+                        <input type="file" id="signedDocumentGallery" name="signedDocumentGallery" accept="image/*" style="display: none;">
+                        
+                        <!-- 传统的文件上传标签（在移动端隐藏） -->
+                        <label for="signedDocument" class="file-upload-label traditional-upload">
                             📎 选择已签字的文件（支持JPG、PNG、PDF）
                         </label>
                         <div class="file-info" id="fileInfo"></div>
@@ -365,7 +384,7 @@
     <!-- 版本信息页脚 -->
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">奥德考试报名系统 v1.5</span>
+            <span class="version-text">奥德考试报名系统 v1.6</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>

@@ -1211,9 +1211,163 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初始化拖拽上传
     setupDragAndDrop('signedDocument', 'signedDocument');
     setupDragAndDrop('passportUpload', 'passportUpload');
+    
+    // 移动端上传选项功能
+    setupMobileUploadOptions();
 
     // 页面加载完成后的初始化
     console.log('SDI奥德考试报名表单已加载');
+    
+    // 移动端上传选项功能
+    function setupMobileUploadOptions() {
+        console.log('📱 初始化移动端上传选项功能');
+        
+        const cameraBtn = document.getElementById('cameraBtn');
+        const galleryBtn = document.getElementById('galleryBtn');
+        const fileBtn = document.getElementById('fileBtn');
+        const signedDocumentInput = document.getElementById('signedDocument');
+        const cameraInput = document.getElementById('signedDocumentCamera');
+        const galleryInput = document.getElementById('signedDocumentGallery');
+        const fileInfo = document.getElementById('fileInfo');
+        
+        // 检查是否在移动设备上
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (cameraBtn && cameraInput) {
+            cameraBtn.addEventListener('click', function() {
+                console.log('📷 点击拍照按钮');
+                // 在移动设备上，使用带有capture属性的input
+                cameraInput.click();
+            });
+        }
+        
+        if (galleryBtn && galleryInput) {
+            galleryBtn.addEventListener('click', function() {
+                console.log('🖼️ 点击图库按钮');
+                // 使用普通的图像选择input
+                galleryInput.click();
+            });
+        }
+        
+        if (fileBtn && signedDocumentInput) {
+            fileBtn.addEventListener('click', function() {
+                console.log('📁 点击文件选择按钮');
+                // 使用支持所有文件类型的input
+                signedDocumentInput.click();
+            });
+        }
+        
+        // 处理相机拍照文件选择
+        if (cameraInput) {
+            cameraInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    console.log('📷 拍照文件选择:', {
+                        name: file.name,
+                        size: Math.round(file.size / 1024) + 'KB',
+                        type: file.type
+                    });
+                    
+                    // 将文件传递给主要的input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    signedDocumentInput.files = dataTransfer.files;
+                    
+                    // 触发change事件
+                    signedDocumentInput.dispatchEvent(new Event('change'));
+                    
+                    // 更新文件信息显示
+                    if (fileInfo) {
+                        fileInfo.textContent = `📷 已拍照: ${file.name} (${Math.round(file.size / 1024)}KB)`;
+                        fileInfo.classList.add('show', 'success');
+                        fileInfo.classList.remove('error');
+                    }
+                    
+                    // 更新按钮状态
+                    updateUploadButtonStates(true);
+                }
+            });
+        }
+        
+        // 处理图库文件选择
+        if (galleryInput) {
+            galleryInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    console.log('🖼️ 图库文件选择:', {
+                        name: file.name,
+                        size: Math.round(file.size / 1024) + 'KB',
+                        type: file.type
+                    });
+                    
+                    // 将文件传递给主要的input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    signedDocumentInput.files = dataTransfer.files;
+                    
+                    // 触发change事件
+                    signedDocumentInput.dispatchEvent(new Event('change'));
+                    
+                    // 更新文件信息显示
+                    if (fileInfo) {
+                        fileInfo.textContent = `🖼️ 已选择: ${file.name} (${Math.round(file.size / 1024)}KB)`;
+                        fileInfo.classList.add('show', 'success');
+                        fileInfo.classList.remove('error');
+                    }
+                    
+                    // 更新按钮状态
+                    updateUploadButtonStates(true);
+                }
+            });
+        }
+        
+        // 处理传统文件选择
+        if (signedDocumentInput) {
+            signedDocumentInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    console.log('📁 文件选择:', {
+                        name: file.name,
+                        size: Math.round(file.size / 1024) + 'KB',
+                        type: file.type
+                    });
+                    
+                    // 更新文件信息显示
+                    if (fileInfo) {
+                        fileInfo.textContent = `📁 已选择: ${file.name} (${Math.round(file.size / 1024)}KB)`;
+                        fileInfo.classList.add('show', 'success');
+                        fileInfo.classList.remove('error');
+                    }
+                    
+                    // 更新按钮状态
+                    updateUploadButtonStates(true);
+                }
+            });
+        }
+        
+        // 更新上传按钮状态
+        function updateUploadButtonStates(hasFile) {
+            const buttons = [cameraBtn, galleryBtn, fileBtn];
+            buttons.forEach(btn => {
+                if (btn) {
+                    if (hasFile) {
+                        btn.classList.add('file-selected');
+                        btn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45A049 100%)';
+                    } else {
+                        btn.classList.remove('file-selected');
+                        btn.style.background = 'linear-gradient(135deg, #F0B83F 0%, #FF8F00 100%)';
+                    }
+                }
+            });
+        }
+        
+        // 检查是否支持相机功能
+        if (isMobile && cameraBtn) {
+            console.log('📱 移动设备检测成功，启用相机功能');
+        } else if (cameraBtn) {
+            console.log('💻 桌面设备检测，相机功能可能有限');
+        }
+    }
 
     // 处理付费凭证上传
     const paymentProofInput = document.getElementById('paymentProof');
