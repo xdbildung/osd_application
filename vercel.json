@@ -17,19 +17,8 @@
       "destination": "/api/index.js"
     },
     {
-      "source": "/((?!public).*)",
+      "source": "/((?!styles\\.css|script\\.js|payment_QR_example\\.png).*)",
       "destination": "/api/index.js"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/public/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=86400"
-        }
-      ]
     }
   ]
 } 
