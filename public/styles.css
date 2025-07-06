@@ -1091,3 +1091,57 @@ input:focus, select:focus {
     color: white;
     font-size: 16px;
 }
+
+/* 版本信息页脚样式 */
+.version-footer {
+    background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+    color: white;
+    padding: 20px 0;
+    margin-top: 40px;
+    border-top: 3px solid #F0B83F;
+    box-shadow: 0 -4px 15px rgba(93, 64, 55, 0.1);
+}
+
+.version-info {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.version-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #F0B83F;
+    background: rgba(240, 184, 63, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(240, 184, 63, 0.3);
+}
+
+.copyright {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .version-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .version-text {
+        font-size: 13px;
+    }
+    
+    .copyright {
+        font-size: 12px;
+    }
+}
