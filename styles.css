@@ -1,65 +1,83 @@
-* {
+/* ===================================================================
+   ÖSD 报名系统样式表 v2.0 - 专业版
+   主色调: #003366 (大学蓝)
+   背景色: #f4f5f7 (中性灰)
+   文本色: #333333 (深灰)
+   =================================================================== */
+
+   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+    font-family: 'Helvetica Neue', Helvetica, Arial, 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background-color: #f4f5f7;
     line-height: 1.6;
-    color: #5D4037;
-    min-height: 100vh;
+    color: #333333;
 }
 
 .container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: white;
-    min-height: 100vh;
-    box-shadow: 0 10px 30px rgba(240, 184, 63, 0.15);
-    border-radius: 10px;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 h1 {
     text-align: center;
-    color: #F0B83F;
+    color: #003366;
     margin-bottom: 20px;
-    font-size: 2.2em;
-    border-bottom: 3px solid #F0B83F;
-    padding-bottom: 10px;
-    font-weight: 700;
-    text-shadow: 1px 1px 2px rgba(240, 184, 63, 0.2);
+    font-size: 2em;
+    border-bottom: 2px solid #003366;
+    padding-bottom: 15px;
+    font-weight: 600;
 }
 
 .description {
-    text-align: center;
+    text-align: left;
     margin-bottom: 30px;
     padding: 20px;
-    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
-    border-radius: 10px;
-    font-size: 1.1em;
-    color: #5D4037;
-    border: 2px solid #F0B83F;
-    box-shadow: 0 4px 15px rgba(240, 184, 63, 0.1);
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    font-size: 1em;
+    color: #333333;
+    border-left: 5px solid #0056b3;
+}
+
+fieldset {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+legend {
+    font-size: 1.25em;
+    font-weight: 600;
+    color: #003366;
+    padding: 0 15px;
 }
 
 .form-group {
-    margin-bottom: 18px;
+    margin-bottom: 20px;
 }
 
 label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #5D4037;
-    font-size: 1.05em;
+    color: #333333;
+    font-size: 1em;
 }
 
 .required {
-    color: #D84315;
+    color: #D9534F;
     font-weight: bold;
+    margin-left: 2px;
 }
 
 input[type="text"],
@@ -69,14 +87,13 @@ input[type="date"],
 select {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid #FFE0B2;
-    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
     font-size: 16px;
-    transition: all 0.3s ease;
-    background-color: #FFFDF7;
-    color: #5D4037;
-    height: 52px; /* 统一高度：padding(12px*2) + border(2px*2) + 内容高度 */
-    box-sizing: border-box;
+    transition: all 0.2s ease;
+    background-color: #f9fafb;
+    color: #333333;
+    height: 48px;
 }
 
 input[type="text"]:focus,
@@ -85,1244 +102,364 @@ input[type="tel"]:focus,
 input[type="date"]:focus,
 select:focus {
     outline: none;
-    border-color: #F0B83F;
-    box-shadow: 0 0 10px rgba(240, 184, 63, 0.3);
+    border-color: #0056b3;
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
     background-color: white;
-}
-
-input[type="text"]:hover,
-input[type="email"]:hover,
-input[type="tel"]:hover,
-input[type="date"]:hover,
-select:hover {
-    border-color: #F0B83F;
 }
 
 select {
     cursor: pointer;
-    /* 确保select元素与input元素高度完全一致 */
     appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 12px center;
     background-repeat: no-repeat;
     background-size: 16px;
-    padding-right: 40px;
 }
 
 .form-note {
-    margin-top: 8px;
+    margin-top: 10px;
     padding: 12px;
-    background-color: #FFF8E1;
-    border-left: 4px solid #F0B83F;
+    background-color: #f7f9fc;
+    border-left: 4px solid #0056b3;
     border-radius: 5px;
     font-size: 0.9em;
-    color: #5D4037;
+    color: #333;
 }
 
 .form-note a {
-    color: #F0B83F;
+    color: #0056b3;
     text-decoration: none;
     font-weight: 600;
 }
-
 .form-note a:hover {
     text-decoration: underline;
 }
 
 .error-hint {
-    color: #D84315;
+    color: #D9534F;
     font-size: 0.85em;
-    margin-top: 5px;
+    margin-top: 6px;
     min-height: 20px;
     font-weight: 500;
 }
 
-.venue-error {
-    color: #D84315;
-    font-size: 0.9em;
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #FFEBEE;
-    border: 1px solid #FFCDD2;
-    border-radius: 5px;
-    font-weight: 500;
-    text-align: center;
-}
-
-.exam-sessions {
-    background-color: #FFF8E1;
-    border-radius: 10px;
-    padding: 20px;
-    border: 2px solid #F0B83F;
-    margin-top: 10px;
-}
-
-.session-group {
-    margin-bottom: 30px;
-}
-
-.session-group:last-child {
-    margin-bottom: 0;
-}
-
-.session-group h3 {
-    color: #F0B83F;
-    font-size: 1.3em;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    background-color: white;
-    border-radius: 8px;
-    border: 1px solid #F0B83F;
-    text-align: center;
-    font-weight: 600;
-}
-
-.level-section {
-    margin-bottom: 20px;
-    background-color: white;
-    border-radius: 8px;
-    padding: 15px;
-    border: 1px solid #FFE0B2;
-}
-
-.level-section h4 {
-    color: #F57C00;
-    font-size: 1.1em;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.exam-type-group {
-    margin-left: 10px;
-}
-
-.single-modules {
-    margin-top: 8px;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    background-color: #FFFDF7;
-    border: 1px solid #FFE0B2;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 5px;
-}
-
-.checkbox-label:hover {
-    background-color: #FFF8E1;
-    border-color: #F0B83F;
-}
-
-.checkbox-label input[type="checkbox"] {
-    margin-right: 10px;
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: #F0B83F;
-}
-
-.checkbox-label input[type="checkbox"]:checked + span {
-    color: #F0B83F;
-    font-weight: 600;
-}
-
-.checkbox-label.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.checkbox-label.disabled input[type="checkbox"] {
-    cursor: not-allowed;
-}
-
-.submit-btn {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #F0B83F 0%, #FF8F00 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 20px;
-    box-shadow: 0 4px 15px rgba(240, 184, 63, 0.3);
-}
-
-.submit-btn:hover {
-    background: linear-gradient(135deg, #FF8F00 0%, #F0B83F 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(240, 184, 63, 0.4);
-}
-
-.submit-btn:active {
-    transform: translateY(0);
-}
-
-.success-message {
-    text-align: center;
-    padding: 40px 20px;
-    background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%);
-    border: 2px solid #4CAF50;
-    border-radius: 10px;
-    color: #2E7D32;
-    margin-top: 20px;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
-}
-
-.success-message h2 {
-    color: #2E7D32;
-    margin-bottom: 15px;
-    font-size: 1.8em;
-}
-
-/* 付费信息区域样式 */
-.payment-section {
-    background: white;
-    border-radius: 10px;
-    padding: 25px;
-    margin: 25px 0;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    text-align: left;
-}
-
-.payment-section h3 {
-    color: #F0B83F;
-    font-size: 1.4em;
-    margin-bottom: 20px;
-    text-align: center;
-    border-bottom: 2px solid #F0B83F;
-    padding-bottom: 10px;
-}
-
-.payment-content {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    align-items: flex-start;
-}
-
-/* 付费模块通用样式 */
-.payment-module {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border: 1px solid #E0E0E0;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.payment-module h4 {
-    color: #5D4037;
-    font-size: 1.1em;
-    margin-bottom: 15px;
-    margin-top: 0;
-    font-weight: 600;
-    text-align: center;
-    border-bottom: 2px solid #F0B83F;
-    padding-bottom: 10px;
-}
-
-/* 桌面端布局 */
-.fee-module {
-    flex: 1;
-    min-width: 280px;
-}
-
-.qr-module {
-    flex: 0 0 280px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.bank-module {
-    flex: 1;
-    min-width: 280px;
-}
-
-.total-module {
-    flex: 0 0 280px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.bank-info {
-    background: #FFF8E1;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid #FFE0B2;
-}
-
-.bank-item {
-    display: flex;
-    margin-bottom: 10px;
-    align-items: flex-start;
-}
-
-.bank-item:last-child {
-    margin-bottom: 0;
-}
-
-.bank-item.important {
-    background: #FFECB3;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
-    border: 1px solid #F0B83F;
-}
-
-.bank-item .label {
-    font-weight: 600;
-    color: #5D4037;
-    min-width: 80px;
-    margin-right: 10px;
-}
-
-.bank-item .value {
-    color: #3E2723;
-    flex: 1;
-}
-
-.bank-item small {
-    color: #795548;
-    font-size: 0.85em;
-}
-
-.fee-info {
-    background: #F3E5F5;
-    border-radius: 8px;
-    padding: 15px;
-    border: 1px solid #E1BEE7;
-}
-
-.fee-level {
-    margin-bottom: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #E1BEE7;
-}
-
-.fee-level:last-child {
-    margin-bottom: 0;
-    border-bottom: none;
-}
-
-.fee-level strong {
-    color: #7B1FA2;
-    margin-right: 10px;
-}
-
-.fee-level span {
-    color: #4A148C;
-}
-
-.qr-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-
-.qr-code {
-    width: 240px;
-    height: 240px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border: 2px solid #F0B83F;
-}
-
-.qr-caption {
-    margin-top: 10px;
-    color: #5D4037;
-    font-weight: 600;
-    font-size: 0.9em;
-}
-
-/* 上传付费凭证区域样式 */
-.payment-upload-section {
-    background: white;
-    border-radius: 10px;
-    padding: 25px;
-    margin: 25px 0;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    text-align: left;
-}
-
-.payment-upload-section h3 {
-    color: #F0B83F;
-    font-size: 1.4em;
-    margin-bottom: 15px;
-    text-align: center;
-    border-bottom: 2px solid #F0B83F;
-    padding-bottom: 10px;
-}
-
-.upload-instruction {
-    color: #5D4037;
-    margin-bottom: 20px;
-    font-size: 1em;
-    text-align: center;
-}
-
-.upload-btn {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 8px;
-    font-size: 1.1em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-    display: block;
-    margin: 20px auto 0;
-    min-width: 200px;
-}
-
-.upload-btn:hover {
-    background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-}
-
-.upload-btn:active {
-    transform: translateY(0);
-}
-
-.upload-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.contact-info {
-    background: #FFF8E1;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 20px;
-    border: 1px solid #FFE0B2;
-}
-
-.contact-info p {
-    margin: 0;
-    color: #5D4037;
-    font-size: 0.95em;
-}
-
-.contact-info a {
-    color: #F0B83F;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.contact-info a:hover {
-    text-decoration: underline;
-}
-
-.hidden {
-    display: none;
-}
-
-/* File upload styles */
-.file-upload-container {
-    border: 2px dashed #F0B83F;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    background-color: #FFF8E1;
-    transition: all 0.3s ease;
-    margin-top: 10px;
-}
-
-.file-upload-container:hover {
-    border-color: #FF8F00;
-    background-color: #FFF3E0;
-}
-
-
-
-input[type="file"] {
-    display: none;
-}
-
-.file-upload-label {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #FFF8E1;
-    border: 2px solid #F0B83F;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: #5D4037;
-    font-weight: 600;
-}
-
-.file-upload-label:hover {
-    background-color: #F0B83F;
-    color: white;
-}
-
-.file-info {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #E3F2FD;
-    border-radius: 5px;
-    font-size: 0.9em;
-    color: #1976D2;
-    display: none;
-}
-
-.file-info.show {
-    display: block;
-}
-
-.file-info.error {
-    background-color: #FFEBEE;
-    color: #D32F2F;
-}
-
-.file-info.success {
-    background-color: #E8F5E8;
-    color: #2E7D32;
-}
-
-.file-upload-container.drag-over {
-    border-color: #FF8F00;
-    background-color: #FFF3E0;
-}
-
-.file-upload-container.uploading {
-    pointer-events: none;
-    opacity: 0.7;
-}
-
-.file-upload-container.uploading .file-upload-label::after {
-    content: '';
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #F0B83F;
-    border-radius: 50%;
-    border-top-color: transparent;
-    animation: spin 1s linear infinite;
-    margin-left: 10px;
-}
-
-
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-        margin: 10px;
-        border-radius: 5px;
-    }
-    
-    h1 {
-        font-size: 1.8em;
-    }
-    
-    .description {
-        font-size: 1em;
-        padding: 15px;
-    }
-    
-    .session-selection {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .session-option {
-        padding: 15px;
-    }
-    
-    .session-option input[type="checkbox"] {
-        margin-right: 12px;
-        width: 18px;
-        height: 18px;
-    }
-    
-    .session-info strong {
-        font-size: 1em;
-    }
-    
-    .session-info small {
-        font-size: 0.85em;
-    }
-    
-    .venue-options {
-        padding: 15px;
-        margin-top: 15px;
-    }
-    
-    .venue-options label {
-        font-size: 1.1em;
-        margin-bottom: 12px;
-    }
-    
-    .exam-venue-container {
-        padding: 12px;
-    }
-    
-    .exam-sessions {
-        padding: 15px;
-    }
-    
-    .session-group h3 {
-        font-size: 1.1em;
-        padding: 8px 12px;
-    }
-    
-    .level-section {
-        padding: 12px;
-    }
-    
-    .level-section h4 {
-        font-size: 1em;
-    }
-    
-    .single-modules {
-        margin-left: 0;
-    }
-    
-    .checkbox-label {
-        padding: 10px;
-        font-size: 0.9em;
-    }
-    
-    /* 付费信息响应式样式 */
-    .payment-content {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    /* 移动端模块显示顺序设置 */
-    .fee-module {
-        order: 1;
-        flex: none;
-        width: 100%;
-    }
-    
-    .qr-module {
-        order: 2;
-        flex: none;
-        width: 100%;
-        align-items: center;
-    }
-    
-    .bank-module {
-        order: 3;
-        flex: none;
-        width: 100%;
-    }
-    
-    .total-module {
-        order: 4;
-        flex: none;
-        width: 100%;
-        text-align: center;
-    }
-    
-    .qr-code {
-        width: 192px;
-        height: 192px;
-    }
-    
-    .bank-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .bank-item .label {
-        min-width: auto;
-        margin-right: 0;
-        margin-bottom: 5px;
-    }
-    
-    /* 移动端模块标题优化 */
-    .payment-module h4 {
-        font-size: 1.2em;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    
-    /* 移动端总额显示优化 */
-    .total-module .total-amount {
-        margin: 0;
-        padding: 20px;
-        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-        border-radius: 10px;
-        border: 2px solid #FF8A65;
-    }
-    
-    /* 移动端上传选项样式 */
-
-    
-    /* 移动端表单元素优化 */
-    .form-group {
-        margin-bottom: 15px;
-    }
-}
-
-/* 超窄屏幕优化 (480px以下) */
-@media (max-width: 480px) {
-    .container {
-        padding: 10px;
-        margin: 5px;
-    }
-    
-    .payment-content {
-        gap: 15px;
-    }
-    
-    .payment-module {
-        padding: 15px;
-        margin: 0;
-    }
-    
-    .bank-info {
-        padding: 12px;
-        margin-bottom: 15px;
-    }
-    
-    .bank-item {
-        margin-bottom: 8px;
-    }
-    
-    .bank-item .label {
-        font-size: 0.9em;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-    }
-    
-    .bank-item .value {
-        font-size: 0.9em;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        line-height: 1.4;
-    }
-    
-    .bank-item.important {
-        padding: 8px;
-        margin-top: 8px;
-    }
-    
-    .fee-info {
-        padding: 12px;
-    }
-    
-    .fee-level {
-        padding: 6px 0;
-        font-size: 0.95em;
-    }
-    
-    .fee-level strong {
-        display: block;
-        margin-bottom: 4px;
-    }
-    
-    .payment-module h4 {
-        font-size: 1.1em;
-        margin-bottom: 15px;
-        padding-bottom: 8px;
-    }
-    
-    .total-module .total-amount {
-        padding: 15px;
-        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-        border: 2px solid #FF8A65;
-    }
-    
-    .qr-code {
-        width: 160px;
-        height: 160px;
-    }
-    
-
-    
-    /* 超小屏幕表单元素优化 */
-    .form-group {
-        margin-bottom: 12px;
-    }
-}
-
-/* 极窄屏幕优化 (360px以下) */
-@media (max-width: 360px) {
-    .container {
-        padding: 8px;
-        margin: 3px;
-    }
-    
-    .payment-content {
-        gap: 12px;
-    }
-    
-    .payment-module {
-        padding: 12px;
-        margin: 0;
-    }
-    
-    .bank-info {
-        padding: 10px;
-    }
-    
-    .bank-item .label,
-    .bank-item .value {
-        font-size: 0.85em;
-    }
-    
-    .fee-level {
-        font-size: 0.9em;
-    }
-    
-    .payment-module h4 {
-        font-size: 1em;
-        margin-bottom: 12px;
-    }
-    
-    .total-module .total-amount {
-        padding: 12px;
-        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-        border: 2px solid #FF8A65;
-    }
-    
-    .qr-code {
-        width: 140px;
-        height: 140px;
-    }
-}
-
-/* Form validation styles */
-input.invalid, select.invalid {
-    border-color: #D84315;
-    background-color: #FFEBEE;
-}
-
-input.valid, select.valid {
-    border-color: #4CAF50;
-    background-color: #E8F5E8;
-}
-
-/* Loading state */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.loading::after {
-    content: '';
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #F0B83F;
-    border-radius: 50%;
-    border-top-color: transparent;
-    animation: spin 1s linear infinite;
-    margin-left: 10px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Error message styles */
-.error-message {
-    background-color: #FFEBEE;
-    color: #D32F2F;
-    padding: 15px;
-    border: 1px solid #FFCDD2;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    text-align: center;
-    font-weight: 500;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.form-group {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-/* Accessibility improvements */
-.checkbox-label:focus-within {
-    outline: 2px solid #F0B83F;
-    outline-offset: 2px;
-}
-
-input:focus, select:focus {
-    outline: 2px solid #F0B83F;
-    outline-offset: 2px;
-}
-
-/* Print styles */
-@media print {
-    body {
-        background: white;
-    }
-    
-    .container {
-        box-shadow: none;
-        border: 1px solid #ccc;
-    }
-    
-    .submit-btn {
-        display: none;
-    }
-}
-
+/* 考试场次选择 */
 .session-selection {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
-    margin-top: 10px;
-    margin-bottom: 15px;
 }
 
 .session-option {
     display: flex;
     align-items: center;
-    padding: 20px;
-    background: linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%);
-    border: 2px solid #FFE0B2;
-    border-radius: 10px;
+    padding: 15px;
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
+    transition: all 0.2s ease;
 }
-
 .session-option:hover {
-    border-color: #F0B83F;
-    box-shadow: 0 4px 15px rgba(240, 184, 63, 0.2);
-    transform: translateY(-2px);
+    border-color: #0056b3;
+    background-color: #f7f9fc;
 }
-
-.session-option input[type="checkbox"] {
-    margin-right: 15px;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    accent-color: #F0B83F;
-}
-
-.session-option input[type="checkbox"]:checked + .session-info {
-    color: #F0B83F;
-}
-
-.session-option input[type="checkbox"]:checked {
-    box-shadow: 0 0 0 2px #F0B83F;
-}
-
 .session-option.selected {
-    border-color: #F0B83F;
-    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
-    box-shadow: 0 4px 15px rgba(240, 184, 63, 0.3);
+    border-color: #003366;
+    background-color: #e7f3fe;
+    box-shadow: 0 2px 6px rgba(0, 86, 179, 0.1);
 }
-
+.session-option input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #003366;
+}
 .session-info {
     display: flex;
     flex-direction: column;
-    color: #5D4037;
-    transition: color 0.3s ease;
 }
-
 .session-info strong {
-    font-size: 1.1em;
-    margin-bottom: 5px;
+    font-weight: 600;
 }
-
 .session-info small {
     font-size: 0.9em;
-    color: #8D6E63;
+    color: #555555;
 }
 
+/* 考场具体选项 */
 .venue-options {
-    background-color: #FFF8E1;
-    border-radius: 10px;
-    padding: 20px;
-    border: 2px solid #F0B83F;
-    margin-top: 20px;
-    animation: slideDown 0.3s ease-in-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.venue-options label {
-    color: #F0B83F;
-    font-size: 1.2em;
-    font-weight: 600;
-    margin-bottom: 15px;
-    display: block;
-}
-
-.exam-venue-container {
-    background-color: white;
+    background-color: #f7f9fc;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
-    padding: 15px;
-    border: 1px solid #FFE0B2;
-} 
-
-/* 申请ID显示区域样式 */
-.application-id-section {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-    color: white;
     padding: 20px;
-    border-radius: 12px;
-    margin: 20px 0;
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
-    border: 2px solid #66BB6A;
+    margin-top: 15px;
+}
+.venue-options > label {
+    font-size: 1.1em;
+    color: #003366;
+    font-weight: 600;
+}
+.level-section {
+    margin-bottom: 20px;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+}
+.level-section h4 {
+    color: #0056b3;
+    font-size: 1.05em;
+    margin-bottom: 10px;
+}
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+}
+.checkbox-label:hover {
+    background-color: #f7f9fc;
+    border-color: #0056b3;
+}
+.checkbox-label input[type="checkbox"] {
+    margin-right: 10px;
+}
+.checkbox-label input[type="checkbox"]:checked + span {
+    color: #003366;
+    font-weight: 600;
 }
 
+/* 文件上传 */
+.file-upload-container {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+}
+.file-upload-container:hover {
+    border-color: #0056b3;
+    background-color: #f7f9fc;
+}
+.file-upload-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #f7f9fc;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+.file-upload-label:hover {
+    background-color: #0056b3;
+    color: white;
+    border-color: #0056b3;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 20px;
+}
+.submit-btn:hover {
+    background-color: #0056b3;
+}
+.submit-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* 成功消息页面 */
+.hidden { display: none; }
+.success-message {
+    text-align: center;
+    padding: 40px 20px;
+    animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.success-message h2 {
+    color: #003366;
+    margin-bottom: 15px;
+    font-size: 1.8em;
+}
+.application-id-section {
+    background-color: #f7f9fc;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 25px 0;
+    border: 1px solid #d1d5db;
+}
 .application-id-section h3 {
     margin: 0 0 15px 0;
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: 600;
     text-align: center;
+    color: #003366;
 }
-
 .application-id {
-    background: rgba(255, 255, 255, 0.2);
+    background: white;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 6px;
     text-align: center;
-    margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid #e0e0e0;
 }
-
 .id-label {
     font-size: 14px;
-    font-weight: 500;
-    opacity: 0.9;
 }
-
 .id-value {
-    font-size: 18px;
+    font-size: 1.2em;
     font-weight: 700;
     letter-spacing: 1px;
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 8px 12px;
-    border-radius: 6px;
-    display: inline-block;
-    margin-left: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #003366;
+    margin-left: 8px;
 }
 
-.id-note {
-    font-size: 13px;
-    opacity: 0.9;
+/* 后续步骤 */
+.next-steps-section {
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    padding: 25px;
+    margin: 25px 0;
+    border-left: 5px solid #0056b3;
+}
+.next-steps-section h3 {
+    color: #003366;
+    font-size: 1.3em;
+    margin-bottom: 20px;
     text-align: center;
-    font-style: italic;
 }
-
-#paymentNoteExample {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 600;
-    color: #FF6B35;
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
 }
-
-/* 总费用显示区域样式 */
-.total-amount {
-    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+.step-item:last-child { border-bottom: none; }
+.step-number {
+    background-color: #003366;
     color: white;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-    margin-top: 20px;
-    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
-    border: 3px solid #FF8A65;
-    position: relative;
-    overflow: hidden;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
 }
-
-.total-amount::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-}
-
-.amount-label {
-    font-size: 14px;
-    font-weight: 600;
+.step-text h4 {
+    color: #0056b3;
     margin-bottom: 5px;
-    opacity: 0.9;
-    letter-spacing: 0.5px;
+    font-size: 1.05em;
 }
-
-.amount-value {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 5px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    letter-spacing: 1px;
+.step-text p {
+    margin: 0;
 }
-
-.amount-note {
-    font-size: 12px;
-    opacity: 0.8;
-    font-weight: 500;
-}
-
-/* 费用明细样式 */
-.fee-details {
-    background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
-    border-radius: 10px;
+/* 重要提醒 */
+.important-reminder {
+    background-color: #fffbe6;
+    border-radius: 8px;
     padding: 20px;
-    margin-top: 20px;
-    border: 2px solid #F0B83F;
-    box-shadow: 0 4px 15px rgba(240, 184, 63, 0.1);
+    margin: 25px 0;
+    border-left: 5px solid #ffc107;
 }
-
-.fee-details h4 {
-    color: #F0B83F;
-    font-size: 1.2em;
+.important-reminder h3 {
+    color: #856404;
     margin-bottom: 15px;
-    text-align: center;
+}
+.important-reminder ul {
+    list-style-type: none; padding: 0;
+}
+.important-reminder li {
+    margin-bottom: 8px;
+}
+.important-reminder li:last-child { margin-bottom: 0; }
+.important-reminder strong { color: #856404; }
+
+/* 操作按钮 */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+.action-btn {
+    padding: 12px 24px;
+    border-radius: 6px;
     font-weight: 600;
-    border-bottom: 2px solid #F0B83F;
-    padding-bottom: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
 }
-
-.fee-breakdown {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.fee-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background: white;
-    border-radius: 8px;
-    border: 1px solid #FFE0B2;
-    transition: all 0.3s ease;
-}
-
-.fee-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(240, 184, 63, 0.2);
-}
-
-.fee-total {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background: linear-gradient(135deg, #F0B83F 0%, #FFB74D 100%);
+.action-btn.primary {
+    background-color: #003366;
     color: white;
-    border-radius: 8px;
-    margin-top: 10px;
-    font-size: 1.1em;
-    box-shadow: 0 4px 15px rgba(240, 184, 63, 0.3);
+    border: 1px solid #003366;
 }
-
-.fee-description {
-    font-size: 14px;
-    color: #5D4037;
-    font-weight: 500;
+.action-btn.primary:hover { opacity: 0.85; }
+.action-btn.secondary {
+    background-color: #f0f0f0;
+    color: #333333;
+    border: 1px solid #d1d5db;
 }
+.action-btn.secondary:hover { background-color: #e0e0e0; }
 
-.fee-amount {
-    font-size: 16px;
-    font-weight: 600;
-    color: #F57C00;
-}
-
-.fee-total .fee-description,
-.fee-total .fee-amount {
-    color: white;
-    font-size: 16px;
-}
-
-/* 版本信息页脚样式 */
+/* 页脚 */
 .version-footer {
-    background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
-    color: white;
+    background-color: #333333;
+    color: #cccccc;
     padding: 20px 0;
     margin-top: 40px;
-    border-top: 3px solid #F0B83F;
-    box-shadow: 0 -4px 15px rgba(93, 64, 55, 0.1);
+    text-align: center;
 }
-
 .version-info {
-    max-width: 900px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
 }
-
-.version-text {
-    font-size: 14px;
-    font-weight: 600;
-    color: #F0B83F;
-    background: rgba(240, 184, 63, 0.1);
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid rgba(240, 184, 63, 0.3);
-}
-
-.copyright {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 400;
-}
+.version-text { font-weight: 600; }
+.copyright { font-size: 0.9em; margin-top: 5px; }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-    .version-info {
-        flex-direction: column;
-        text-align: center;
-        gap: 8px;
+    .container {
+        margin: 20px;
+        padding: 20px;
     }
-    
-    .version-text {
-        font-size: 13px;
+    h1 { font-size: 1.8em; }
+    legend { font-size: 1.15em; }
+    fieldset { padding: 20px; }
+}
+@media (max-width: 480px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
     }
-    
-    .copyright {
-        font-size: 12px;
-    }
+    body { font-size: 15px; }
+    h1 { font-size: 1.6em; }
+    legend { font-size: 1.1em; }
+    fieldset { padding: 15px; }
+    .action-buttons { flex-direction: column; }
 }

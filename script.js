@@ -65,7 +65,6 @@ function getBeijingTimeString() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📱 移动端检测信息:', getMobileInfo());
     const form = document.getElementById('registrationForm');
     const successMessage = document.getElementById('successMessage');
     const submitBtn = document.querySelector('.submit-btn');
@@ -291,6 +290,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 费用计算函数
     function calculateTotalFee(examSessions) {
+        // 输入验证
+        if (!examSessions || !Array.isArray(examSessions)) {
+            return {
+                totalFee: 0,
+                details: []
+            };
+        }
+        
         // 费用表 - 更新为新的考试选项格式
         const feeTable = {
             'A1_BJ_VIP': 2000,      // 北京A1全科（VIP专场）
@@ -394,6 +401,58 @@ document.addEventListener('DOMContentLoaded', function() {
             return examSessionNameMap[session] || session;
         }).join('、');
     }
+
+    // 生成费用明细HTML用于邮件内容
+    function generateFeeDetailsHtml(feeCalculation) {
+        // 输入验证
+        if (!feeCalculation || !feeCalculation.details || !Array.isArray(feeCalculation.details)) {
+            return '<div>暂无费用信息</div>';
+        }
+        
+        if (feeCalculation.details.length === 0) {
+            return '<div>未选择考试科目</div>';
+        }
+        
+        // 生成简化版费用明细HTML（避免特殊字符和复杂样式）
+        const feeItemsHtml = feeCalculation.details.map(detail => {
+            // 转义特殊字符，确保JSON安全
+            const safeDescription = detail.description.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            return `<div>${safeDescription}: ¥${detail.fee}</div>`;
+        }).join('');
+        
+        // 简化的费用明细HTML（避免复杂嵌套和特殊字符）
+        const simpleHtml = `<div>
+            <h3>报名费用明细</h3>
+            ${feeItemsHtml}
+            <div><strong>总计: ¥${feeCalculation.totalFee}</strong></div>
+            <p>请按照邮件指南完成缴费并上传付费凭证</p>
+        </div>`;
+        
+        return simpleHtml.trim();
+    }
+
+    // 生成银行转账信息HTML用于邮件内容
+    function generateBankTransferHtml(applicationID, totalFee) {
+        // 银行转账信息
+        const bankInfo = {
+            accountName: '成都学德教育科技有限公司',
+            accountNumber: '161430801',
+            bankName: '中国民生银行股份有限公司成都永丰支行',
+            reference: applicationID
+        };
+        
+        // 生成简化版银行转账信息HTML
+        const bankTransferHtml = `<div>
+            <h3>银行转账信息</h3>
+            <div><strong>账户名称：</strong>${bankInfo.accountName}</div>
+            <div><strong>账户号码：</strong>${bankInfo.accountNumber}</div>
+            <div><strong>收款银行：</strong>${bankInfo.bankName}</div>
+        </div>`;
+        
+        return bankTransferHtml.trim();
+    }
+
+
 
     // 图片压缩函数
     // 统一文件转换和压缩函数：所有文件转为JPG格式并压缩到目标大小以下
@@ -725,8 +784,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 根据考试场次生成考试日期字符串
     function generateExamDateString(examSessions) {
-        console.log('generateExamDateString 被调用，examSessions:', examSessions);
-        
         const cityDateMap = {
             'BJ': '2025/9/6',
             'CD': '2025/8/27'
@@ -735,18 +792,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // 提取所有涉及的城市
         const cities = new Set();
         examSessions.forEach(session => {
-            console.log('处理session:', session);
             // 新的格式：A1_BJ_VIP, A1_CD_Written 等
             if (session.includes('_BJ_')) {
                 cities.add('BJ');
-                console.log('添加城市到Set: 北京');
             } else if (session.includes('_CD_')) {
                 cities.add('CD');
-                console.log('添加城市到Set: 成都');
             }
         });
-        
-        console.log('提取到的城市:', Array.from(cities));
         
         // 根据城市生成日期字符串
         const cityDates = Array.from(cities).map(city => {
@@ -754,10 +806,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return `${cityDateMap[city]} (${cityName})`;
         }).sort(); // 按日期排序
         
-        const result = cityDates.length > 0 ? cityDates.join(', ') : '待定';
-        console.log('生成的日期字符串:', result);
-        
-        return result;
+        return cityDates.length > 0 ? cityDates.join(', ') : '待定';
     }
 
     // 显示费用明细
@@ -1013,11 +1062,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const checkedSessions = Array.from(document.querySelectorAll('input[name="examSessions"]:checked'))
             .map(cb => cb.value);
         
+
+        
         // 处理国籍数据
         const finalNationality = nationalitySelect.value === 'Other' ? otherNationalityInput.value : nationalitySelect.value;
 
         // 生成唯一的申请ID
         const applicationID = generateApplicationID();
+
+        // 计算费用信息
+        const feeCalculation = calculateTotalFee(checkedSessions);
+        
+        // 生成考试科目中文显示名称
+        const examSessionsDisplay = convertExamSessionsToChinese(checkedSessions);
+        
+        // 生成格式化时间戳
+        const originalSubmissionTimeFormatted = getBeijingTimeString();
+        
+        // 生成费用明细HTML用于邮件
+        const feeDetailsHtml = generateFeeDetailsHtml(feeCalculation);
+        
+        // 生成银行转账信息HTML用于邮件
+        const bankTransferHtml = generateBankTransferHtml(applicationID, feeCalculation.totalFee);
+
+        // 计算截止日期（当天日期+7天）
+        const deadlineDate = new Date();
+        deadlineDate.setDate(deadlineDate.getDate() + 7);
+        const deadlineDateString = deadlineDate.toISOString().split('T')[0]; // 格式: YYYY-MM-DD
 
         // 准备JSON数据对象
         const submitData = {
@@ -1036,8 +1107,23 @@ document.addEventListener('DOMContentLoaded', function() {
             examSessions: checkedSessions,
             selectedVenues: Array.from(document.querySelectorAll('input[name="selectedVenues"]:checked')).map(cb => cb.value),
             examDate: generateExamDateString(checkedSessions),
-            timestamp: getBeijingTime()
+            timestamp: getBeijingTime(),
+            deadlineDate: deadlineDateString, // 截止日期：当天日期+7天
+            // 添加费用信息用于邮件显示
+            feeCalculation: feeCalculation,
+            totalFee: feeCalculation ? feeCalculation.totalFee : 0,
+            feeDetails: feeCalculation ? feeCalculation.details : [],
+            // 直接提供可用于邮件的HTML内容
+            feeDetailsHtml: feeDetailsHtml,
+            // 银行转账信息HTML
+            bankTransferHtml: bankTransferHtml,
+            // 添加考试科目的中文显示名称
+            examSessionsDisplay: examSessionsDisplay,
+            // 添加格式化的时间戳用于邮件显示
+            originalSubmissionTimeFormatted: originalSubmissionTimeFormatted
         };
+        
+        console.log('📋 完整提交数据:', submitData);
 
         // 处理文件上传 - 转换为base64
         const processFile = (file) => {
@@ -1071,16 +1157,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitData.passportUpload = passportUpload;
             }
 
-            console.log('提交的表单数据：', submitData);
+            console.log('提交表单数据中...');
 
             // 提交表单数据到服务器
-                         return fetch('https://n8n.talentdual.com/webhook/submit-registration', {
-                 method: 'POST',
-                 headers: {
-                     'Content-Type': 'application/json',
-                 },
-                 body: JSON.stringify(submitData)
-             });
+            let jsonData;
+            try {
+                jsonData = JSON.stringify(submitData);
+            } catch (error) {
+                console.error('JSON序列化失败:', error);
+                throw new Error('数据序列化失败: ' + error.message);
+            }
+
+            // 提交表单数据到服务器
+            return fetch('https://n8n.talentdual.com/webhook/submit-registration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: jsonData
+            });
         })
         .then(response => {
             console.log('HTTP响应状态:', response.status, response.statusText);
@@ -1197,7 +1292,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setupDragAndDrop('passportUpload', 'passportUpload');
 
     // 页面加载完成后的初始化
-    console.log('SDI奥德考试报名表单已加载');
     
     // 移动端上传选项功能
 
@@ -1621,11 +1715,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const config = await response.json();
             
             if (config.isDevelopment && config.prefillData) {
-                console.log('🔧 开发模式：正在预填写表单数据...');
                 prefillForm(config.prefillData);
             }
         } catch (error) {
-            console.log('Dev config not available, running in production mode');
+            // 生产环境，无需处理
         }
     }
 
@@ -1665,7 +1758,5 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         }, 100);
-
-        console.log('✅ 表单预填写完成');
     }
 }); 

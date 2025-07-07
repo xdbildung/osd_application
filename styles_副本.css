@@ -1326,3 +1326,233 @@ input:focus, select:focus {
         font-size: 12px;
     }
 }
+
+/* 新增：成功页面步骤说明样式 */
+.next-steps-section {
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    border-radius: 12px;
+    padding: 25px;
+    margin: 25px 0;
+    border: 2px solid #2196F3;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
+}
+
+.next-steps-section h3 {
+    color: #1976D2;
+    font-size: 1.3em;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.steps-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #E3F2FD;
+    transition: all 0.3s ease;
+}
+
+.step-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.15);
+}
+
+.step-number {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+.step-text h4 {
+    color: #1976D2;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.step-text p {
+    color: #5D4037;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 重要提醒样式 */
+.important-reminder {
+    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+    border-radius: 12px;
+    padding: 25px;
+    margin: 25px 0;
+    border: 2px solid #FF9800;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.1);
+}
+
+.important-reminder h3 {
+    color: #E65100;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.important-reminder ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.important-reminder li {
+    background: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #FF9800;
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
+}
+
+.important-reminder li:last-child {
+    margin-bottom: 0;
+}
+
+.important-reminder strong {
+    color: #E65100;
+}
+
+.important-reminder a {
+    color: #F57C00;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.important-reminder a:hover {
+    text-decoration: underline;
+    color: #E65100;
+}
+
+/* 操作按钮样式 */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 30px 0 20px 0;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    min-width: 160px;
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.action-btn.primary:hover {
+    background: linear-gradient(135deg, #388E3C, #2E7D32);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.action-btn.secondary {
+    background: linear-gradient(135deg, #9E9E9E, #757575);
+    color: white;
+    box-shadow: 0 4px 15px rgba(158, 158, 158, 0.3);
+}
+
+.action-btn.secondary:hover {
+    background: linear-gradient(135deg, #757575, #616161);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(158, 158, 158, 0.4);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .steps-content {
+        gap: 15px;
+    }
+    
+    .step-item {
+        padding: 15px;
+        gap: 12px;
+    }
+    
+    .step-number {
+        width: 30px;
+        height: 30px;
+        font-size: 1em;
+    }
+    
+    .step-text h4 {
+        font-size: 1em;
+    }
+    
+    .step-text p {
+        font-size: 0.9em;
+    }
+    
+    .next-steps-section,
+    .important-reminder {
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .action-btn {
+        width: 100%;
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .next-steps-section h3,
+    .important-reminder h3 {
+        font-size: 1.1em;
+    }
+    
+    .step-item {
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9em;
+    }
+    
+    .important-reminder li {
+        padding: 12px;
+    }
+}
