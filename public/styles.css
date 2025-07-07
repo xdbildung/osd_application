@@ -1,0 +1,465 @@
+/* ===================================================================
+   ÖSD 报名系统样式表 v2.0 - 专业版
+   主色调: #003366 (大学蓝)
+   背景色: #f4f5f7 (中性灰)
+   文本色: #333333 (深灰)
+   =================================================================== */
+
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background-color: #f4f5f7;
+    line-height: 1.6;
+    color: #333333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 20px;
+    font-size: 2em;
+    border-bottom: 2px solid #003366;
+    padding-bottom: 15px;
+    font-weight: 600;
+}
+
+.description {
+    text-align: left;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    font-size: 1em;
+    color: #333333;
+    border-left: 5px solid #0056b3;
+}
+
+fieldset {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+legend {
+    font-size: 1.25em;
+    font-weight: 600;
+    color: #003366;
+    padding: 0 15px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333333;
+    font-size: 1em;
+}
+
+.required {
+    color: #D9534F;
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    background-color: #f9fafb;
+    color: #333333;
+    height: 48px;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+select:focus {
+    outline: none;
+    border-color: #0056b3;
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+    background-color: white;
+}
+
+select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+}
+
+.form-note {
+    margin-top: 10px;
+    padding: 12px;
+    background-color: #f7f9fc;
+    border-left: 4px solid #0056b3;
+    border-radius: 5px;
+    font-size: 0.9em;
+    color: #333;
+}
+
+.form-note a {
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: 600;
+}
+.form-note a:hover {
+    text-decoration: underline;
+}
+
+.error-hint {
+    color: #D9534F;
+    font-size: 0.85em;
+    margin-top: 6px;
+    min-height: 20px;
+    font-weight: 500;
+}
+
+/* 考试场次选择 */
+.session-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.session-option {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.session-option:hover {
+    border-color: #0056b3;
+    background-color: #f7f9fc;
+}
+.session-option.selected {
+    border-color: #003366;
+    background-color: #e7f3fe;
+    box-shadow: 0 2px 6px rgba(0, 86, 179, 0.1);
+}
+.session-option input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #003366;
+}
+.session-info {
+    display: flex;
+    flex-direction: column;
+}
+.session-info strong {
+    font-weight: 600;
+}
+.session-info small {
+    font-size: 0.9em;
+    color: #555555;
+}
+
+/* 考场具体选项 */
+.venue-options {
+    background-color: #f7f9fc;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 15px;
+}
+.venue-options > label {
+    font-size: 1.1em;
+    color: #003366;
+    font-weight: 600;
+}
+.level-section {
+    margin-bottom: 20px;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+}
+.level-section h4 {
+    color: #0056b3;
+    font-size: 1.05em;
+    margin-bottom: 10px;
+}
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+}
+.checkbox-label:hover {
+    background-color: #f7f9fc;
+    border-color: #0056b3;
+}
+.checkbox-label input[type="checkbox"] {
+    margin-right: 10px;
+}
+.checkbox-label input[type="checkbox"]:checked + span {
+    color: #003366;
+    font-weight: 600;
+}
+
+/* 文件上传 */
+.file-upload-container {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+}
+.file-upload-container:hover {
+    border-color: #0056b3;
+    background-color: #f7f9fc;
+}
+.file-upload-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #f7f9fc;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+.file-upload-label:hover {
+    background-color: #0056b3;
+    color: white;
+    border-color: #0056b3;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 20px;
+}
+.submit-btn:hover {
+    background-color: #0056b3;
+}
+.submit-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* 成功消息页面 */
+.hidden { display: none; }
+.success-message {
+    text-align: center;
+    padding: 40px 20px;
+    animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.success-message h2 {
+    color: #003366;
+    margin-bottom: 15px;
+    font-size: 1.8em;
+}
+.application-id-section {
+    background-color: #f7f9fc;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 25px 0;
+    border: 1px solid #d1d5db;
+}
+.application-id-section h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    text-align: center;
+    color: #003366;
+}
+.application-id {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+.id-label {
+    font-size: 14px;
+}
+.id-value {
+    font-size: 1.2em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    color: #003366;
+    margin-left: 8px;
+}
+
+/* 后续步骤 */
+.next-steps-section {
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    padding: 25px;
+    margin: 25px 0;
+    border-left: 5px solid #0056b3;
+}
+.next-steps-section h3 {
+    color: #003366;
+    font-size: 1.3em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+.step-item:last-child { border-bottom: none; }
+.step-number {
+    background-color: #003366;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+.step-text h4 {
+    color: #0056b3;
+    margin-bottom: 5px;
+    font-size: 1.05em;
+}
+.step-text p {
+    margin: 0;
+}
+/* 重要提醒 */
+.important-reminder {
+    background-color: #fffbe6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 25px 0;
+    border-left: 5px solid #ffc107;
+}
+.important-reminder h3 {
+    color: #856404;
+    margin-bottom: 15px;
+}
+.important-reminder ul {
+    list-style-type: none; padding: 0;
+}
+.important-reminder li {
+    margin-bottom: 8px;
+}
+.important-reminder li:last-child { margin-bottom: 0; }
+.important-reminder strong { color: #856404; }
+
+/* 操作按钮 */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+.action-btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+.action-btn.primary {
+    background-color: #003366;
+    color: white;
+    border: 1px solid #003366;
+}
+.action-btn.primary:hover { opacity: 0.85; }
+.action-btn.secondary {
+    background-color: #f0f0f0;
+    color: #333333;
+    border: 1px solid #d1d5db;
+}
+.action-btn.secondary:hover { background-color: #e0e0e0; }
+
+/* 页脚 */
+.version-footer {
+    background-color: #333333;
+    color: #cccccc;
+    padding: 20px 0;
+    margin-top: 40px;
+    text-align: center;
+}
+.version-info {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.version-text { font-weight: 600; }
+.copyright { font-size: 0.9em; margin-top: 5px; }
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+    h1 { font-size: 1.8em; }
+    legend { font-size: 1.15em; }
+    fieldset { padding: 20px; }
+}
+@media (max-width: 480px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    body { font-size: 15px; }
+    h1 { font-size: 1.6em; }
+    legend { font-size: 1.1em; }
+    fieldset { padding: 15px; }
+    .action-buttons { flex-direction: column; }
+}
