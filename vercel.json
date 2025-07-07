@@ -15,6 +15,10 @@
     {
       "source": "/setup",
       "destination": "/api/index.js"
+    },
+    {
+      "source": "/((?!styles\\.css|script\\.js|.*\\.png|.*\\.pdf|.*\\.jpg|.*\\.jpeg|.*\\.docx|.*\\.ico|favicon\\.ico).*)",
+      "destination": "/api/index.js"
     }
   ],
   "functions": {
