@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>奥德考试报名表</title>
+    <title>ÖSD德语水平考试 - 在线报名</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>奥德考试报名表</h1>
+        <h1>ÖSD 德语水平考试 - 在线报名</h1>
         <p class="description">
-            亲爱的同学们，欢迎报名参加慕尼黑SDI语言大学举办的奥德考试！✨
+            <strong>尊敬的考生：</strong><br>
+            欢迎使用慕尼黑SDI语言大学官方在线报名系统。请您仔细填写以下信息，确保所有内容准确无误。带有 <span class="required">*</span> 的为必填项。
         </p>
         
         <form id="registrationForm">
@@ -29,7 +30,7 @@
             <div class="form-group">
                 <label for="gender">性别 <span class="required">*</span></label>
                 <select id="gender" name="gender" required>
-                    <option value="">请选择...</option>
+                    <option value="">请选择性别</option>
                     <option value="male">男</option>
                     <option value="female">女</option>
                 </select>
@@ -40,6 +41,12 @@
                 <label for="birthDate">出生日期 <span class="required">*</span></label>
                 <input type="date" id="birthDate" name="birthDate" required>
                 <div class="error-hint" id="birthDate-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="birthPlace">出生地（拼音，请与护照保持一致） <span class="required">*</span></label>
+                <input type="text" id="birthPlace" name="birthPlace" required>
+                <div class="error-hint" id="birthPlace-error"></div>
             </div>
 
             <div class="form-group">
@@ -59,30 +66,45 @@
             </div>
 
             <div class="form-group">
-                <label for="birthPlace">出生地（拼音，请与护照保持一致） <span class="required">*</span></label>
-                <input type="text" id="birthPlace" name="birthPlace" required>
-                <div class="error-hint" id="birthPlace-error"></div>
-            </div>
-
-            <div class="form-group">
                 <label for="email">邮箱地址 <span class="required">*</span></label>
                 <input type="email" id="email" name="email" required>
                 <div class="form-note">
-                    📧 <strong>重要提醒：</strong>报名成功通知将通过邮件发送，请确保邮箱地址准确无误。如果在报名付费后一天内没有收到邮件，请联系 <a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a>
+                    <strong>重要：</strong>所有官方通知将通过此邮箱发送，请确保准确无误。若在提交申请后未能及时收到确认邮件，请联系 <a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a>。
                 </div>
                 <div class="error-hint" id="email-error"></div>
             </div>
 
             <div class="form-group">
-                <label for="phoneNumber">联系电话 <span class="required">*</span></label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="请输入8位座机号或11位手机号">
+                <label for="phoneNumber">手机号码 <span class="required">*</span></label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="请输入11位手机号码">
                 <div class="error-hint" id="phoneNumber-error"></div>
             </div>
 
-             <div class="form-group">
-                <label for="firstTimeExam">是否为第一次参加该等级考试 <span class="required">*</span></label>
+            <div class="form-group">
+                <label for="passportNumber">护照号码</label>
+                <input type="text" id="passportNumber" name="passportNumber" placeholder="若暂无护照，可留空">
+                 <div class="form-note">
+                    护照有效期须至少六个月。若您暂时无法提供，请务必于考前14天邮件补交。
+                </div>
+                <div class="error-hint" id="passportNumber-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="passportUpload">上传护照信息页</label>
+                <div class="file-upload-container">
+                    <input type="file" id="passportUpload" name="passportUpload" accept=".jpg,.jpeg,.png,.pdf" style="display:none;">
+                    <label for="passportUpload" class="file-upload-label">选择护照信息页文件（如有）</label>
+                    <div class="file-info" id="passportFileInfo"></div>
+                </div>
+                <div class="form-note">
+                    💡 支持JPG、PNG、PDF格式，文件大小不超过5MB<br>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="firstTimeExam">是否为首次参加该等级的ÖSD考试 <span class="required">*</span></label>
                 <select id="firstTimeExam" name="firstTimeExam" required>
-                    <option value="">请选择...</option>
+                    <option value="">请选择</option>
                     <option value="Yes">是</option>
                     <option value="No">否</option>
                 </select>
@@ -90,40 +112,20 @@
             </div>
 
             <div class="form-group">
-                <label for="passportNumber">护照号码（有效期须至少六个月；若暂无护照，可留空）</label>
-                <input type="text" id="passportNumber" name="passportNumber" placeholder="请输入护照号码或留空">
-                <div class="error-hint" id="passportNumber-error"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="passportUpload">上传护照信息页（如有）</label>
-                <div class="file-upload-container">
-                    <input type="file" id="passportUpload" name="passportUpload" accept=".jpg,.jpeg,.png,.pdf">
-                    <label for="passportUpload" class="file-upload-label">
-                        📎 选择护照信息页文件
-                    </label>
-                    <div class="file-info" id="passportFileInfo"></div>
-                </div>
-                <div class="form-note">
-                    💡 支持JPG、PNG、PDF格式，文件大小不超过5MB<br>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>报名考试场次 <span class="required">*</span></label>
+                <label>选择考试场次 <span class="required">*</span></label>
                 <div class="session-selection">
                     <label class="session-option">
                         <input type="checkbox" name="selectedVenues" value="北京" data-venue="北京" data-date="2025年9月6日">
                         <span class="session-info">
                             <strong>北京考场</strong>
-                            <small>2025年9月6日</small>
+                            <small>考试日期：2025年9月6日</small>
                         </span>
                     </label>
                     <label class="session-option">
                         <input type="checkbox" name="selectedVenues" value="成都" data-venue="成都" data-date="2025年8月27日">
                         <span class="session-info">
                             <strong>成都考场</strong>
-                            <small>2025年8月27日</small>
+                            <small>考试日期：2025年8月27日</small>
                         </span>
                     </label>
                 </div>
@@ -134,7 +136,7 @@
             </div>
 
             <div class="form-group venue-options" id="beijingOptions" style="display: none;">
-                <label>北京考场 - 2025年9月6日 考试选项</label>
+                <label>北京考场 - 2025年9月6日 考试科目</label>
                 <div class="exam-venue-container">
                     <div class="level-section">
                         <h4>A1等级</h4>
@@ -147,12 +149,12 @@
                     </div>
                 </div>
                 <div class="form-note">
-                    💡 北京考场仅提供A1全科VIP专场
+                    💡 北京考场仅提供 A1 全科 VIP 专场。
                 </div>
             </div>
 
             <div class="form-group venue-options" id="chengduOptions" style="display: none;">
-                <label>成都考场 - 2025年8月27日 考试选项</label>
+                <label>成都考场 - 2025年8月27日 考试科目</label>
                 <div class="exam-venue-container">
                     <div class="level-section">
                         <h4>A1等级</h4>
@@ -164,11 +166,11 @@
                             <div class="single-modules" style="margin-left: 20px;">
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="examSessions" value="A1_CD_Written" data-level="A1" data-location="成都" data-single="true">
-                                    <span>A1笔试</span>
+                                    <span>A1笔试（单科）</span>
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="examSessions" value="A1_CD_Oral" data-level="A1" data-location="成都" data-single="true">
-                                    <span>A1口试</span>
+                                    <span>A1口试（单科）</span>
                                 </label>
                             </div>
                         </div>
@@ -183,11 +185,11 @@
                             <div class="single-modules" style="margin-left: 20px;">
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="examSessions" value="A2_CD_Written" data-level="A2" data-location="成都" data-single="true">
-                                    <span>A2笔试</span>
+                                    <span>A2笔试（单科）</span>
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="examSessions" value="A2_CD_Oral" data-level="A2" data-location="成都" data-single="true">
-                                    <span>A2口试</span>
+                                    <span>A2口试（单科）</span>
                                 </label>
                             </div>
                         </div>
@@ -202,26 +204,26 @@
                             <div class="single-modules" style="margin-left: 20px;">
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="examSessions" value="B1_CD_Listening" data-level="B1" data-location="成都" data-single="true">
-                                    <span>B1听力</span>
+                                    <span>B1听力（单科）</span>
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="examSessions" value="B1_CD_Oral" data-level="B1" data-location="成都" data-single="true">
-                                    <span>B1口语</span>
+                                    <span>B1口语（单科）</span>
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="examSessions" value="B1_CD_Reading" data-level="B1" data-location="成都" data-single="true">
-                                    <span>B1阅读</span>
+                                    <span>B1阅读（单科）</span>
                                 </label>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="examSessions" value="B1_CD_Written" data-level="B1" data-location="成都" data-single="true">
-                                    <span>B1写作</span>
+                                    <span>B1写作（单科）</span>
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="form-note">
-                    💡 选择全科后，同等级的单科选项将自动禁用
+                    💡 选择全科后，同等级的单科选项将自动禁用。
                 </div>
             </div>
 
@@ -229,66 +231,56 @@
         </form>
 
         <div id="successMessage" class="success-message hidden">
-            <h2>报名申请提交成功！🎉</h2>
-            <p>感谢您的报名！我们已收到您的申请。</p>
+            <h2>报名申请已成功提交</h2>
+            <p>感谢您的报名，我们已收到您的申请，请记录您的申请编号并按邮件指引完成后续步骤。</p>
             
             <div class="application-id-section">
-                <h3>📋 您的申请编号</h3>
+                <h3>您的申请编号</h3>
                 <div class="application-id">
                     <span class="id-label">申请编号：</span>
                     <span class="id-value" id="applicationIdDisplay">---</span>
                 </div>
-                <div class="id-note">
-                    💡 请记录此编号，后续流程中会用到此编号进行身份确认
-                </div>
             </div>
             
             <div class="next-steps-section">
-                <h3>📧 接下来的步骤</h3>
+                <h3>后续重要步骤</h3>
                 <div class="steps-content">
                     <div class="step-item">
                         <div class="step-number">1</div>
                         <div class="step-text">
-                            <h4 style="text-align: center;">查收邮件</h4>
-                            <p style="text-align: center;">我们已向您的邮箱发送了详细的报名确认邮件，请注意查收。</p>
+                            <h4 style="text-align: left;">查收邮件</h4>
+                            <p style="text-align: left;">我们已向您的邮箱发送了包含付款详情和《考试须知》的确认邮件。</p>
                         </div>
                     </div>
                     <div class="step-item">
                         <div class="step-number">2</div>
                         <div class="step-text">
-                            <h4 style="text-align: center;">完成付费</h4>
-                            <p style="text-align: center;">邮件中包含详细的付费信息和二维码，请按照邮件指引完成考试费用支付。</p>
+                            <h4 style="text-align: left;">完成付款与文件签署</h4>
+                            <p style="text-align: left;">按照邮件指引完成考试费用支付，并签署回传《考试须知》。</p>
                         </div>
                     </div>
                     <div class="step-item">
                         <div class="step-number">3</div>
                         <div class="step-text">
-                            <h4 style="text-align: center;">签署文件</h4>
-                            <p style="text-align: center;">下载邮件附件中的《考试须知》，签字后回传给我们。</p>
-                        </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">4</div>
-                        <div class="step-text">
-                            <h4 style="text-align: center;">等待确认</h4>
-                            <p style="text-align: center;">完成上述步骤后，我们将在考前5-7天发送正式的考试确认函。</p>
+                            <h4 style="text-align: left;">接收最终考函</h4>
+                            <p style="text-align: left;">完成所有步骤后，我们将在考前7天左右发送包含具体考场信息的正式《考试确认函》。</p>
                         </div>
                     </div>
                 </div>
             </div>
             
             <div class="important-reminder">
-                <h3>⚠️ 重要提醒</h3>
+                <h3>重要提醒</h3>
                 <ul>
-                    <li><strong>邮件检查：</strong>如果10分钟内未收到邮件，请检查垃圾邮件文件夹</li>
-                    <li><strong>截止时间：</strong>请务必在2025年8月5日前完成所有确认步骤</li>
-                    <li><strong>联系方式：</strong>如有疑问，请联系 <a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a></li>
+                    <li><strong>检查邮箱：</strong>如若10分钟内未收到邮件，请检查您的垃圾邮件文件夹。</li>
+                    <li><strong>确定时限：</strong>请务必在2025年8月5日前完成所有确认步骤</li>
+                    <li><strong>官方联系：</strong>如有任何疑问，请通过邮件联系 <a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a>。</li>
                 </ul>
             </div>
             
             <div class="action-buttons">
                 <button type="button" class="action-btn primary" onclick="window.location.reload()">
-                    继续报名其他考试
+                    报名其他考试
                 </button>
                 <button type="button" class="action-btn secondary" onclick="window.close()">
                     关闭页面
@@ -300,7 +292,7 @@
 
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">奥德考试报名系统 v1.8.2</span>
+            <span class="version-text">ÖSD 考试报名系统 v1.8.3</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
