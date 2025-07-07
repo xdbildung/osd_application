@@ -291,42 +291,62 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 费用计算函数
     function calculateTotalFee(examSessions) {
-        // 费用表
+        // 费用表 - 更新为新的考试选项格式
         const feeTable = {
-            'A1': {
-                '全科': 1550,
-                '笔试': 950,
-                '口试': 600
-            },
-            'A2': {
-                '全科': 1650,
-                '笔试': 1000,
-                '口试': 650
-            }
+            'A1_BJ_VIP': 2000,      // 北京A1全科（VIP专场）
+            'A1_CD_Full': 1550,     // 成都A1全科
+            'A1_CD_Written': 950,   // 成都A1笔试
+            'A1_CD_Oral': 600,      // 成都A1口试
+            'A2_CD_Full': 1650,     // 成都A2全科
+            'A2_CD_Written': 1000,  // 成都A2笔试
+            'A2_CD_Oral': 650,      // 成都A2口试
+            'B1_CD_Full': 1600,     // 成都B1全科
+            'B1_CD_Listening': 400, // 成都B1听力
+            'B1_CD_Oral': 400,      // 成都B1口语
+            'B1_CD_Reading': 400,   // 成都B1阅读
+            'B1_CD_Written': 400    // 成都B1写作
         };
         
         let totalFee = 0;
         const feeDetails = [];
         
         examSessions.forEach(session => {
-            // 解析考试选项：格式为 "北京-A1-全科" 或 "成都-A2-笔试"
-            const parts = session.split('-');
-            if (parts.length === 3) {
-                const location = parts[0];
-                const level = parts[1];
-                const type = parts[2];
+            if (feeTable[session]) {
+                const fee = feeTable[session];
+                totalFee += fee;
                 
-                if (feeTable[level] && feeTable[level][type]) {
-                    const fee = feeTable[level][type];
-                    totalFee += fee;
-                    feeDetails.push({
-                        location: location,
-                        level: level,
-                        type: type,
-                        fee: fee,
-                        description: `${location} ${level}${type}`
-                    });
+                // 解析考试选项名称用于显示
+                let description = '';
+                if (session === 'A1_BJ_VIP') {
+                    description = '北京 A1全科（VIP专场）';
+                } else if (session === 'A1_CD_Full') {
+                    description = '成都 A1全科';
+                } else if (session === 'A2_CD_Full') {
+                    description = '成都 A2全科';
+                } else if (session === 'B1_CD_Full') {
+                    description = '成都 B1全科';
+                } else if (session.startsWith('A1_CD_')) {
+                    const type = session.includes('Written') ? '笔试' : '口试';
+                    description = `成都 A1${type}`;
+                } else if (session.startsWith('A2_CD_')) {
+                    const type = session.includes('Written') ? '笔试' : '口试';
+                    description = `成都 A2${type}`;
+                } else if (session.startsWith('B1_CD_')) {
+                    const typeMap = {
+                        'Listening': '听力',
+                        'Oral': '口语',
+                        'Reading': '阅读',
+                        'Written': '写作'
+                    };
+                    const type = typeMap[session.split('_')[2]] || session.split('_')[2];
+                    description = `成都 B1${type}`;
                 }
+                
+                feeDetails.push({
+                    session: session,
+                    fee: fee,
+                    description: description
+                });
             }
         });
         
@@ -346,6 +366,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const randomNum = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
         
         return `OSD-${month}${day}-${randomNum}`;
+    }
+
+    // 考试选项代码到中文名称的映射
+    const examSessionNameMap = {
+        'A1_BJ_VIP': '北京A1全科（VIP专场）',
+        'A1_CD_Full': '成都A1全科',
+        'A1_CD_Written': '成都A1笔试',
+        'A1_CD_Oral': '成都A1口试',
+        'A2_CD_Full': '成都A2全科',
+        'A2_CD_Written': '成都A2笔试',
+        'A2_CD_Oral': '成都A2口试',
+        'B1_CD_Full': '成都B1全科',
+        'B1_CD_Listening': '成都B1听力',
+        'B1_CD_Oral': '成都B1口语',
+        'B1_CD_Reading': '成都B1阅读',
+        'B1_CD_Written': '成都B1写作'
+    };
+
+    // 将考试选项代码转换为中文名称
+    function convertExamSessionsToChinese(examSessions) {
+        if (!examSessions || !Array.isArray(examSessions)) {
+            return '未选择考试科目';
+        }
+        
+        return examSessions.map(session => {
+            return examSessionNameMap[session] || session;
+        }).join('、');
     }
 
     // 图片压缩函数
@@ -681,22 +728,21 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('generateExamDateString 被调用，examSessions:', examSessions);
         
         const cityDateMap = {
-            '北京': '2025/9/6',
-            '成都': '2025/8/27'
+            'BJ': '2025/9/6',
+            'CD': '2025/8/27'
         };
         
         // 提取所有涉及的城市
         const cities = new Set();
         examSessions.forEach(session => {
             console.log('处理session:', session);
-            const parts = session.split('-');
-            if (parts.length === 3) {
-                const location = parts[0];
-                console.log('提取到的location:', location);
-                if (cityDateMap[location]) {
-                    cities.add(location);
-                    console.log('添加城市到Set:', location);
-                }
+            // 新的格式：A1_BJ_VIP, A1_CD_Written 等
+            if (session.includes('_BJ_')) {
+                cities.add('BJ');
+                console.log('添加城市到Set: 北京');
+            } else if (session.includes('_CD_')) {
+                cities.add('CD');
+                console.log('添加城市到Set: 成都');
             }
         });
         
@@ -704,7 +750,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 根据城市生成日期字符串
         const cityDates = Array.from(cities).map(city => {
-            return `${cityDateMap[city]} (${city})`;
+            const cityName = city === 'BJ' ? '北京' : '成都';
+            return `${cityDateMap[city]} (${cityName})`;
         }).sort(); // 按日期排序
         
         const result = cityDates.length > 0 ? cityDates.join(', ') : '待定';
@@ -1428,7 +1475,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const studentName = result.data ? result.data.studentName : `${paymentData.lastName} ${paymentData.firstName}`;
                         const examSessionsArray = result.data ? result.data.examSessions : (paymentData.examSessions || []);
                         const examDate = result.data ? result.data.examDate : (paymentData.examDate || generateExamDateString(examSessionsArray));
-                        const examSessions = Array.isArray(examSessionsArray) ? examSessionsArray.join(', ') : examSessionsArray;
+                        const examSessions = convertExamSessionsToChinese(examSessionsArray);
                         
                         finalSuccessDiv.innerHTML = `
                             <div style="text-align: center; margin-bottom: 25px;">

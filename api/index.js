@@ -17,6 +17,86 @@ const config = {
     WEBHOOK_URL: process.env.WEBHOOK_URL || 'https://n8n.talentdual.com/webhook/submit-payment'
 };
 
+// 考试选项代码到中文名称的映射
+const examSessionNameMap = {
+    'A1_BJ_VIP': '北京A1全科（VIP专场）',
+    'A1_CD_Full': '成都A1全科',
+    'A1_CD_Written': '成都A1笔试',
+    'A1_CD_Oral': '成都A1口试',
+    'A2_CD_Full': '成都A2全科',
+    'A2_CD_Written': '成都A2笔试',
+    'A2_CD_Oral': '成都A2口试',
+    'B1_CD_Full': '成都B1全科',
+    'B1_CD_Listening': '成都B1听力',
+    'B1_CD_Oral': '成都B1口语',
+    'B1_CD_Reading': '成都B1阅读',
+    'B1_CD_Written': '成都B1写作'
+};
+
+// 将考试选项代码转换为中文名称
+function convertExamSessionsToChinese(examSessions) {
+    if (!examSessions || !Array.isArray(examSessions)) {
+        return '未选择考试科目';
+    }
+    
+    return examSessions.map(session => {
+        return examSessionNameMap[session] || session;
+    }).join('、');
+}
+
+// 提取考试等级信息
+function extractExamLevels(examSessions) {
+    if (!examSessions || !Array.isArray(examSessions)) {
+        return [];
+    }
+    
+    const levels = new Set();
+    examSessions.forEach(session => {
+        if (session.startsWith('A1_')) {
+            levels.add('A1');
+        } else if (session.startsWith('A2_')) {
+            levels.add('A2');
+        } else if (session.startsWith('B1_')) {
+            levels.add('B1');
+        }
+    });
+    
+    return Array.from(levels).sort();
+}
+
+// 生成考试场次显示信息
+function generateExamSessionsDisplay(examSessions) {
+    if (!examSessions || !Array.isArray(examSessions)) {
+        return '未选择考试科目';
+    }
+    
+    return convertExamSessionsToChinese(examSessions);
+}
+
+// 生成考试日期信息
+function generateExamDate(examSessions) {
+    if (!examSessions || !Array.isArray(examSessions)) {
+        return '待定';
+    }
+    
+    const cityDateMap = {
+        'BJ': '2025/9/6 (北京)',
+        'CD': '2025/8/27 (成都)'
+    };
+    
+    const cities = new Set();
+    examSessions.forEach(session => {
+        if (session.includes('_BJ_')) {
+            cities.add('BJ');
+        } else if (session.includes('_CD_')) {
+            cities.add('CD');
+        }
+    });
+    
+    const cityDates = Array.from(cities).map(city => cityDateMap[city]).sort();
+    return cityDates.length > 0 ? cityDates.join('； ') : '待定';
+}
+
 // 配置multer使用内存存储
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -53,9 +133,17 @@ app.post('/api/submit', async (req, res) => {
     try {
         const formData = req.body;
         
-            // 添加时间戳 - 使用北京时间
-    const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
-    formData.timestamp = beijingTime.toISOString();
+        // 转换考试选项代码为中文名称
+        if (formData.examSessions) {
+            formData.examSessionsChinese = convertExamSessionsToChinese(formData.examSessions);
+            formData.examSessionsDisplay = generateExamSessionsDisplay(formData.examSessions);
+            formData.examLevel = extractExamLevels(formData.examSessions).join('、');
+            formData.examDate = generateExamDate(formData.examSessions);
+        }
+        
+        // 添加时间戳 - 使用北京时间
+        const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
+        formData.timestamp = beijingTime.toISOString();
         
         // 存储到内存数组
         submissions.push(formData);
@@ -64,6 +152,11 @@ app.post('/api/submit', async (req, res) => {
         console.log('Form submission processed:', {
             localSave: 'Success (Memory)',
             dataCount: submissions.length,
+            studentName: `${formData.firstName} ${formData.lastName}`,
+            examSessions: formData.examSessionsChinese || '未选择考试科目',
+            examSessionsDisplay: formData.examSessionsDisplay || '未选择考试科目',
+            examLevel: formData.examLevel || '未选择等级',
+            examDate: formData.examDate || '待定',
             formData: formData
         });
         
@@ -94,9 +187,17 @@ app.post('/api/submit-payment-proof', upload.single('paymentProof'), async (req,
             };
         }
         
-            // 添加时间戳 - 使用北京时间
-    const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
-    paymentData.paymentSubmissionTime = beijingTime.toISOString();
+        // 转换考试选项代码为中文名称
+        if (paymentData.examSessions) {
+            paymentData.examSessionsChinese = convertExamSessionsToChinese(paymentData.examSessions);
+            paymentData.examSessionsDisplay = generateExamSessionsDisplay(paymentData.examSessions);
+            paymentData.examLevel = extractExamLevels(paymentData.examSessions).join('、');
+            paymentData.examDate = generateExamDate(paymentData.examSessions);
+        }
+        
+        // 添加时间戳 - 使用北京时间
+        const beijingTime = new Date(new Date().getTime() + (8 * 60 * 60 * 1000));
+        paymentData.paymentSubmissionTime = beijingTime.toISOString();
         
         // 存储到内存数组
         paymentSubmissions.push(paymentData);
@@ -105,6 +206,10 @@ app.post('/api/submit-payment-proof', upload.single('paymentProof'), async (req,
             localSave: 'Success (Memory)',
             dataCount: paymentSubmissions.length,
             studentName: `${paymentData.firstName} ${paymentData.lastName}`,
+            examSessions: paymentData.examSessionsChinese || '未选择考试科目',
+            examSessionsDisplay: paymentData.examSessionsDisplay || '未选择考试科目',
+            examLevel: paymentData.examLevel || '未选择等级',
+            examDate: paymentData.examDate || '待定',
             paymentProof: paymentData.paymentProof ? 
                 `${paymentData.paymentProof.originalName} (${paymentData.paymentProof.filename})` : 
                 'No file'
@@ -129,6 +234,28 @@ app.get('/api/submissions', (req, res) => {
 // API endpoint to get all payment submissions
 app.get('/api/payment-submissions', (req, res) => {
     res.json(paymentSubmissions);
+});
+
+// 开发配置API端点
+app.get('/api/dev-config', (req, res) => {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const devConfigPath = path.join(__dirname, '..', 'dev-config.json');
+        
+        if (fs.existsSync(devConfigPath)) {
+            const configData = fs.readFileSync(devConfigPath, 'utf8');
+            const config = JSON.parse(configData);
+            console.log('🔧 开发配置已加载:', config);
+            res.json(config);
+        } else {
+            console.log('No dev-config.json found, running in production mode');
+            res.json({ isDevelopment: false });
+        }
+    } catch (error) {
+        console.error('Error reading dev-config.json:', error);
+        res.json({ isDevelopment: false });
+    }
 });
 
 // 模板文件下载
