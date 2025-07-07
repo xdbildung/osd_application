@@ -15,11 +15,11 @@
     {
       "source": "/setup",
       "destination": "/api/index.js"
-    },
-
-    {
-      "source": "/((?!styles\\.css|script\\.js|payment_QR_example\\.png|SDI_exam_notification\\.pdf).*)",
-      "destination": "/api/index.js"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30
+    }
+  }
 } 

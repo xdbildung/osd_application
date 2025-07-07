@@ -127,6 +127,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // 静态文件服务
 app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // API endpoint for form submission
 app.post('/api/submit', async (req, res) => {
