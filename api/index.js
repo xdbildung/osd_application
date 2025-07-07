@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 
@@ -125,8 +126,35 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 静态文件服务
-app.use(express.static(path.join(__dirname, '..')));
+// 根路径处理 - 提供index.html
+app.get('/', (req, res) => {
+    try {
+        // 在Vercel环境中，尝试读取index.html
+        const indexPath = path.join(__dirname, '..', 'index.html');
+        if (fs.existsSync(indexPath)) {
+            res.sendFile(indexPath);
+        } else {
+            // 如果找不到文件，返回基本的HTML响应
+            res.status(404).send(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>页面未找到</title>
+                    <meta charset="UTF-8">
+                </head>
+                <body>
+                    <h1>页面未找到</h1>
+                    <p>请检查URL是否正确。</p>
+                    <p>如果问题持续存在，请联系技术支持。</p>
+                </body>
+                </html>
+            `);
+        }
+    } catch (error) {
+        console.error('Error serving index.html:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 // API endpoint for form submission
 app.post('/api/submit', async (req, res) => {
@@ -307,12 +335,6 @@ app.get('/download-template', (req, res) => {
             </html>
         `);
     }
-});
-
-
-// 主页面
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 // 管理页面

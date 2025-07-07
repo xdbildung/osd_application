@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "public/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -9,17 +14,8 @@
       "destination": "/api/index.js"
     },
     {
-      "source": "/admin",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/setup",
-      "destination": "/api/index.js"
-    },
-
-    {
-      "source": "/((?!styles\\.css|script\\.js|payment_QR_example\\.png|SDI_exam_notification\\.pdf).*)",
+      "source": "/((?!styles\\.css|script\\.js|.*\\.png|.*\\.pdf|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico|.*\\.webp|.*\\.docx?).*)",
       "destination": "/api/index.js"
     }
   ]
-} 
+}
