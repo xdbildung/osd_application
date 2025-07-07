@@ -1,6 +1,6 @@
 {
   "name": "sdi-exam-registration-form",
-  "version": "1.5.0",
+  "version": "1.7.5",
   "description": "SDI成都奥德考试中心报名表 - 在线报名系统",
   "main": "server.js",
   "scripts": {
