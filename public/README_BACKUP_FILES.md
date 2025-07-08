@@ -6,9 +6,6 @@
 ## 备份文件列表
 - `script.js.backup` - 包含完整费用计算功能的脚本文件备份
 - `styles.css.backup` - 样式文件备份  
-- `SDI_exam_notification.pdf.backup` - 考试通知PDF文件备份
-- `payment_QR_example.png.backup` - 支付二维码示例图片备份
-- `SDI_exam_notification.docx.backup` - 考试通知Word文档备份
 - `template-readme.txt.backup` - 模板说明文件备份
 
 ## 重要提醒

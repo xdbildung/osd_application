@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场次选择滚动测试 - ÖSD报名系统</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .test-section {
+            background-color: #e7f3fe;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #0056b3;
+        }
+        .test-instructions {
+            background-color: #fff3cd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+        .test-case {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+        }
+        .test-case h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        .test-case ol {
+            margin-left: 20px;
+        }
+        .test-case li {
+            margin-bottom: 5px;
+        }
+        .spacer {
+            height: 200px;
+            background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 300px;
+            font-size: 12px;
+        }
+        .quick-actions {
+            position: fixed;
+            top: 150px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .quick-actions button {
+            display: block;
+            margin: 5px 0;
+            padding: 8px 12px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+        }
+        .quick-actions button:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-section">
+            <h1>🎯 场次选择滚动功能测试</h1>
+            <p><strong>测试版本:</strong> v1.8.7</p>
+            <p><strong>专项测试:</strong> 场次选择但未选考试科目时的自动滚动定位</p>
+        </div>
+
+        <div class="test-instructions">
+            <h3>🎯 测试目标</h3>
+            <p>验证当用户勾选了考试场次（北京或成都），但没有勾选任何该考场的考试科目时，系统能够：</p>
+            <ul>
+                <li>显示正确的错误提示信息</li>
+                <li>自动滚动到对应考场的标题位置</li>
+                <li>将该考场的标题位置显示在屏幕中央</li>
+                <li>在移动端和PC端都能正常工作</li>
+            </ul>
+        </div>
+
+        <div class="spacer">
+            测试区域 - 增加页面高度，便于观察滚动效果
+        </div>
+
+        <form id="registrationForm">
+            <!-- 基本信息（已预填） -->
+            <div class="form-group">
+                <label for="firstName">名字（拼音） <span class="required">*</span></label>
+                <input type="text" id="firstName" name="firstName" value="Zhang" required>
+                <div class="error-hint" id="firstName-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">姓氏（拼音） <span class="required">*</span></label>
+                <input type="text" id="lastName" name="lastName" value="Wei" required>
+                <div class="error-hint" id="lastName-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="gender">性别 <span class="required">*</span></label>
+                <select id="gender" name="gender" required>
+                    <option value="">请选择性别</option>
+                    <option value="male" selected>男</option>
+                    <option value="female">女</option>
+                </select>
+                <div class="error-hint" id="gender-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="birthDate">出生日期 <span class="required">*</span></label>
+                <input type="date" id="birthDate" name="birthDate" value="1995-01-01" required>
+                <div class="error-hint" id="birthDate-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="birthPlace">出生地（拼音） <span class="required">*</span></label>
+                <input type="text" id="birthPlace" name="birthPlace" value="Beijing" required>
+                <div class="error-hint" id="birthPlace-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="nationality">国籍 <span class="required">*</span></label>
+                <select id="nationality" name="nationality" required>
+                    <option value="">请选择...</option>
+                    <option value="China" selected>中国</option>
+                    <option value="Other">其他</option>
+                </select>
+                <div class="error-hint" id="nationality-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">邮箱地址 <span class="required">*</span></label>
+                <input type="email" id="email" name="email" value="test@example.com" required>
+                <div class="error-hint" id="email-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber">手机号码 <span class="required">*</span></label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" value="13800138000" required>
+                <div class="error-hint" id="phoneNumber-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="firstTimeExam">是否为首次参加ÖSD奥德考试 <span class="required">*</span></label>
+                <select id="firstTimeExam" name="firstTimeExam" required>
+                    <option value="">请选择</option>
+                    <option value="Yes" selected>是</option>
+                    <option value="No">否</option>
+                </select>
+                <div class="error-hint" id="firstTimeExam-error"></div>
+            </div>
+
+            <div class="spacer">
+                分隔区域 - 测试滚动距离
+            </div>
+
+            <!-- 场次选择 - 测试重点 -->
+            <div class="form-group">
+                <label>选择考试场次 <span class="required">*</span></label>
+                <div class="session-selection">
+                    <label class="session-option">
+                        <input type="checkbox" name="selectedVenues" value="北京" data-venue="北京" data-date="2025年9月6日">
+                        <span class="session-info">
+                            <strong>北京考场</strong>
+                            <small>考试日期：2025年9月6日</small>
+                        </span>
+                    </label>
+                    <label class="session-option">
+                        <input type="checkbox" name="selectedVenues" value="成都" data-venue="成都" data-date="2025年8月27日">
+                        <span class="session-info">
+                            <strong>成都考场</strong>
+                            <small>考试日期：2025年8月27日</small>
+                        </span>
+                    </label>
+                </div>
+                <div class="error-hint" id="selectedVenues-error"></div>
+            </div>
+
+            <div class="spacer">
+                分隔区域 - 观察滚动目标位置
+            </div>
+
+            <!-- 北京考场选项 -->
+            <div class="form-group venue-options" id="beijingOptions" style="display: none;">
+                <label>北京考场 - 2025年9月6日 考试科目</label>
+                <div class="exam-venue-container">
+                    <div class="level-section">
+                        <h4>A1等级</h4>
+                        <div class="exam-type-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="examSessions" value="A1_BJ_VIP" data-level="A1" data-location="北京">
+                                <span>A1全科（VIP专场）</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-case">
+                    <h4>🎯 北京考场测试说明</h4>
+                    <p>当勾选了"北京考场"但没有勾选"A1全科（VIP专场）"时，应该自动滚动到此区域的标题"北京考场 - 2025年9月6日 考试科目"位置。</p>
+                </div>
+            </div>
+
+            <div class="spacer">
+                分隔区域 - 观察不同考场间的距离
+            </div>
+
+            <!-- 成都考场选项 -->
+            <div class="form-group venue-options" id="chengduOptions" style="display: none;">
+                <label>成都考场 - 2025年8月27日 考试科目</label>
+                <div class="exam-venue-container">
+                    <div class="level-section">
+                        <h4>A1等级</h4>
+                        <div class="exam-type-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="examSessions" value="A1_CD_Full" data-level="A1" data-location="成都">
+                                <span>A1全科</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="level-section">
+                        <h4>A2等级</h4>
+                        <div class="exam-type-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="examSessions" value="A2_CD_Full" data-level="A2" data-location="成都">
+                                <span>A2全科</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-case">
+                    <h4>🎯 成都考场测试说明</h4>
+                    <p>当勾选了"成都考场"但没有勾选任何考试科目时，应该自动滚动到此区域的标题"成都考场 - 2025年8月27日 考试科目"位置。</p>
+                </div>
+            </div>
+
+            <div class="spacer">
+                底部分隔区域 - 确保有足够滚动空间
+            </div>
+
+            <button type="submit" class="submit-btn">提交报名申请</button>
+        </form>
+
+        <div id="successMessage" class="success-message hidden">
+            <h2>测试完成</h2>
+            <p>如果您看到这个消息，说明表单验证通过了所有检查。</p>
+        </div>
+    </div>
+
+    <!-- 调试信息面板 -->
+    <div class="debug-info">
+        <h4 style="margin: 0 0 10px 0;">调试信息</h4>
+        <div><strong>设备类型:</strong> <span id="deviceType"></span></div>
+        <div><strong>视口尺寸:</strong> <span id="viewportSize"></span></div>
+        <div><strong>滚动位置:</strong> <span id="scrollPosition">0</span></div>
+        <div><strong>最后错误:</strong> <span id="lastError">无</span></div>
+    </div>
+
+    <!-- 快速操作面板 -->
+    <div class="quick-actions">
+        <h4 style="margin: 0 0 10px 0; font-size: 14px;">快速测试</h4>
+        <button onclick="testBeijingOnly()">只选北京考场</button>
+        <button onclick="testChengduOnly()">只选成都考场</button>
+        <button onclick="testBothVenues()">选择两个考场</button>
+        <button onclick="clearSelections()">清空选择</button>
+        <button onclick="scrollToTop()">回到顶部</button>
+    </div>
+
+    <script src="/script.js"></script>
+    <script>
+        // 更新调试信息
+        function updateDebugInfo() {
+            document.getElementById('deviceType').textContent = window.innerWidth <= 768 ? '移动端' : 'PC端';
+            document.getElementById('viewportSize').textContent = `${window.innerWidth}x${window.innerHeight}`;
+            document.getElementById('scrollPosition').textContent = Math.round(window.pageYOffset);
+        }
+
+        // 监听滚动和窗口变化
+        window.addEventListener('scroll', updateDebugInfo);
+        window.addEventListener('resize', updateDebugInfo);
+        updateDebugInfo();
+
+        // 快速测试函数
+        function testBeijingOnly() {
+            clearSelections();
+            document.querySelector('input[value="北京"]').checked = true;
+            document.querySelector('input[value="北京"]').dispatchEvent(new Event('change'));
+            document.getElementById('lastError').textContent = '已选择北京考场，未选择考试科目';
+        }
+
+        function testChengduOnly() {
+            clearSelections();
+            document.querySelector('input[value="成都"]').checked = true;
+            document.querySelector('input[value="成都"]').dispatchEvent(new Event('change'));
+            document.getElementById('lastError').textContent = '已选择成都考场，未选择考试科目';
+        }
+
+        function testBothVenues() {
+            clearSelections();
+            document.querySelector('input[value="北京"]').checked = true;
+            document.querySelector('input[value="成都"]').checked = true;
+            document.querySelector('input[value="北京"]').dispatchEvent(new Event('change'));
+            document.querySelector('input[value="成都"]').dispatchEvent(new Event('change'));
+            document.getElementById('lastError').textContent = '已选择两个考场，未选择任何考试科目';
+        }
+
+        function clearSelections() {
+            // 清空考场选择
+            document.querySelectorAll('input[name="selectedVenues"]').forEach(input => {
+                input.checked = false;
+                input.dispatchEvent(new Event('change'));
+            });
+            // 清空考试科目选择
+            document.querySelectorAll('input[name="examSessions"]').forEach(input => {
+                input.checked = false;
+            });
+            // 清除错误提示
+            document.querySelectorAll('.venue-error').forEach(error => error.remove());
+            document.querySelectorAll('.error-hint').forEach(hint => hint.textContent = '');
+            document.getElementById('lastError').textContent = '已清空所有选择';
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 监听表单提交，记录滚动目标
+        const originalScrollToErrorField = window.scrollToErrorField;
+        if (typeof originalScrollToErrorField === 'function') {
+            window.scrollToErrorField = function(element) {
+                if (element) {
+                    const elementInfo = element.tagName + (element.id ? '#' + element.id : '') + (element.className ? '.' + element.className.split(' ')[0] : '');
+                    document.getElementById('lastError').textContent = `滚动到: ${elementInfo}`;
+                }
+                return originalScrollToErrorField.call(this, element);
+            };
+        }
+
+        // 添加控制台日志监听
+        const originalLog = console.log;
+        console.log = function(...args) {
+            if (args[0] && args[0].includes('🎯')) {
+                document.getElementById('lastError').textContent = args.join(' ');
+            }
+            originalLog.apply(console, args);
+        };
+    </script>
+</body>
+</html> 
