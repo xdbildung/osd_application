@@ -307,11 +307,11 @@ document.addEventListener('DOMContentLoaded', function() {
             'A2_CD_Full': 1650,     // 成都A2全科
             'A2_CD_Written': 1000,  // 成都A2笔试
             'A2_CD_Oral': 650,      // 成都A2口试
-            'B1_CD_Full': 1600,     // 成都B1全科
-            'B1_CD_Listening': 400, // 成都B1听力
-            'B1_CD_Oral': 400,      // 成都B1口语
-            'B1_CD_Reading': 400,   // 成都B1阅读
-            'B1_CD_Written': 400    // 成都B1写作
+            'B1_CD_Full': 2000,     // 成都B1全科
+            'B1_CD_Listening': 600, // 成都B1听力
+            'B1_CD_Oral': 600,      // 成都B1口语
+            'B1_CD_Reading': 600,   // 成都B1阅读
+            'B1_CD_Written': 800    // 成都B1写作
         };
         
         let totalFee = 0;
@@ -980,8 +980,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 isValid = false;
                 const errorField = document.getElementById(fieldId);
                 if (errorField && !firstErrorElement) {
-                    firstErrorElement = errorField;
-                    console.log(`❌ 第一个错误字段: ${fieldId}`);
+                    firstErrorElement = errorField.closest('.form-group') || errorField;
+                    console.log(`❌ 第一个错误字段: ${fieldId}, 滚动目标:`, firstErrorElement);
                 }
             }
         });
@@ -991,7 +991,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!validateField('otherNationality')) {
                 isValid = false;
                 if (!firstErrorElement) {
-                    firstErrorElement = document.getElementById('otherNationality');
+                    const errorField = document.getElementById('otherNationality');
+                    firstErrorElement = errorField.closest('.form-group') || errorField;
                     console.log('❌ 第一个错误字段: otherNationality');
                 }
             }
@@ -1003,7 +1004,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = false;
             showError('selectedVenues', '请至少选择一个考试场次');
             if (!firstErrorElement) {
-                firstErrorElement = document.querySelector('input[name="selectedVenues"]');
+                firstErrorElement = document.getElementById('venueSelection');
                 console.log('❌ 第一个错误字段: selectedVenues');
             }
         } else {
@@ -1071,14 +1072,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 isValid = false;
                 showError('passportUpload', '护照文件大小不能超过5MB');
                 if (!firstErrorElement) {
-                    firstErrorElement = passportFile;
+                    const errorField = document.getElementById('passportUpload');
+                    firstErrorElement = errorField.closest('.form-group') || errorField;
                     console.log('❌ 第一个错误字段: passportUpload (文件过大)');
                 }
             } else if (!allowedTypes.includes(file.type)) {
                 isValid = false;
                 showError('passportUpload', '护照文件请上传jpg、png或pdf格式');
                 if (!firstErrorElement) {
-                    firstErrorElement = passportFile;
+                    const errorField = document.getElementById('passportUpload');
+                    firstErrorElement = errorField.closest('.form-group') || errorField;
                     console.log('❌ 第一个错误字段: passportUpload (格式错误)');
                 }
             }

@@ -8,23 +8,56 @@
 const fs = require('fs');
 const path = require('path');
 
-const staticFiles = [
+// 需要同步的文件列表
+const filesToSync = [
     'styles.css',
-    'script.js'
+    'script.js',
+    'index.html' // 新增 index.html
 ];
 
-console.log('🔄 同步静态文件...');
+console.log('🔄 开始同步静态文件...');
 
-staticFiles.forEach(file => {
-    const srcPath = path.join('public', file);
-    const destPath = file;
-    
-    if (fs.existsSync(srcPath)) {
-        fs.copyFileSync(srcPath, destPath);
-        console.log(`✅ 已复制: ${file}`);
+filesToSync.forEach(file => {
+    const rootPath = file;
+    const publicPath = path.join('public', file);
+
+    const rootExists = fs.existsSync(rootPath);
+    const publicExists = fs.existsSync(publicPath);
+
+    if (!rootExists && !publicExists) {
+        console.warn(`- ⚠️ 文件在两处均不存在，跳过: ${file}`);
+        return;
+    }
+
+    if (rootExists && !publicExists) {
+        console.log(`- 📥 public/${file} 不存在，从根目录复制...`);
+        fs.copyFileSync(rootPath, publicPath);
+        console.log(`  ✅ ${rootPath} -> ${publicPath}`);
+        return;
+    }
+
+    if (!rootExists && publicExists) {
+        console.log(`- 📥 ${file} 不存在，从 public/ 目录复制...`);
+        fs.copyFileSync(publicPath, rootPath);
+        console.log(`  ✅ ${publicPath} -> ${rootPath}`);
+        return;
+    }
+
+    // Both exist, compare modification times
+    const rootStat = fs.statSync(rootPath);
+    const publicStat = fs.statSync(publicPath);
+
+    if (rootStat.mtimeMs > publicStat.mtimeMs) {
+        console.log(`- 🔄 根目录中的 ${file} 是最新版本，同步到 public/ ...`);
+        fs.copyFileSync(rootPath, publicPath);
+        console.log(`  ✅ ${rootPath} -> ${publicPath}`);
+    } else if (publicStat.mtimeMs > rootStat.mtimeMs) {
+        console.log(`- 🔄 public/ 中的 ${file} 是最新版本，同步到根目录...`);
+        fs.copyFileSync(publicPath, rootPath);
+        console.log(`  ✅ ${publicPath} -> ${rootPath}`);
     } else {
-        console.log(`❌ 文件不存在: ${srcPath}`);
+        console.log(`- ✅ 文件 ${file} 版本一致，无需同步。`);
     }
 });
 
-console.log('🎉 静态文件同步完成！');
+console.log('\n🎉 静态文件同步完成！');

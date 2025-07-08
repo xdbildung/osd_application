@@ -13,7 +13,7 @@
 在开发过程中，我们遇到了以下问题：
 - 本地开发环境CSS文件找不到（404错误）
 - Vercel生产环境前端CSS文件无法加载
-- 修改CSS文档后本地和服务器版本不统一
+- 修改CSS或HTML文档后本地和服务器版本不统一
 
 ## 🏗️ Vercel静态文件处理机制
 
@@ -22,6 +22,7 @@
    - `public/` 目录中的文件会被Vercel直接映射到根路径
    - `public/styles.css` → 访问路径：`/styles.css`
    - `public/script.js` → 访问路径：`/script.js`
+   - `public/index.html` → 访问路径：`/`
 
 2. **vercel.json配置**
    ```json
@@ -40,32 +41,26 @@
 ## 🖥️ 本地开发vs生产环境差异
 
 ### 本地开发环境
-- **服务器启动方式**: `python3 -m http.server 8000 --directory .`
+- **服务器启动方式**: `node server.js`
 - **文件结构**: 从项目根目录提供服务
 - **访问路径**: 
-  - `public/styles.css` → `http://localhost:8000/public/styles.css`
-  - `styles.css` → `http://localhost:8000/styles.css`
+  - `public/styles.css` → 本地不直接访问，通过同步到根目录的 `styles.css`
+  - `styles.css` → `http://localhost:8080/styles.css`
+  - `index.html` → `http://localhost:8080/`
 
 ### Vercel生产环境
 - **文件结构**: `public/` 目录内容映射到根路径
 - **访问路径**: 
+  - `public/index.html` → `https://yourdomain.com/`
   - `public/styles.css` → `https://yourdomain.com/styles.css`
-  - 不能通过 `/public/styles.css` 访问
+  - 不能通过 `/public/` 路径访问
 
 ## ✅ 最佳实践
 
-### 1. 双重部署策略
-```bash
-# 项目结构
-project/
-├── public/           # 源文件存储
-│   ├── styles.css
-│   ├── script.js
-│   └── images/
-├── styles.css        # 复制到根目录（用于本地开发）
-├── script.js         # 复制到根目录（用于本地开发）
-└── index.html        # 使用根路径引用
-```
+### 1. 智能同步策略
+我们不再采用固定的单向覆盖，而是实现了一套智能同步机制。`index.html`, `styles.css`, `script.js` 这三个文件在根目录和 `public/` 目录下都存在副本。
+
+**核心逻辑**: 无论您修改了哪个位置的文件，运行同步脚本后，程序都会自动比较两个位置文件的**最后修改时间**，并将较旧的文件更新为最新版本。
 
 ### 2. HTML文件中的正确引用
 ```html
@@ -95,103 +90,106 @@ project/
 ```
 
 ### 4. 自动化同步脚本
-创建 `sync-assets.js` 脚本自动同步静态文件：
+为了确保根目录和 `public/` 目录下的静态文件版本一致，我们创建了 `sync-assets.js` 脚本。此脚本会自动检测哪个文件是最新版本，并进行双向同步。
+
+**脚本内容 (`sync-assets.js`)**:
 ```javascript
 const fs = require('fs');
 const path = require('path');
 
-const staticFiles = [
+// 需要同步的文件列表
+const filesToSync = [
     'styles.css',
     'script.js',
-    'payment_QR_example.png',
-    'SDI_exam_notification.pdf'
+    'index.html' // 新增 index.html
 ];
 
-staticFiles.forEach(file => {
-    const srcPath = path.join('public', file);
-    const destPath = file;
-    
-    if (fs.existsSync(srcPath)) {
-        fs.copyFileSync(srcPath, destPath);
-        console.log(`✅ 已复制: ${file}`);
+console.log('🔄 开始同步静态文件...');
+
+filesToSync.forEach(file => {
+    const rootPath = file;
+    const publicPath = path.join('public', file);
+
+    const rootExists = fs.existsSync(rootPath);
+    const publicExists = fs.existsSync(publicPath);
+
+    if (!rootExists && !publicExists) {
+        console.warn(`- ⚠️ 文件在两处均不存在，跳过: ${file}`);
+        return;
+    }
+
+    if (rootExists && !publicExists) {
+        console.log(`- 📥 public/${file} 不存在，从根目录复制...`);
+        fs.copyFileSync(rootPath, publicPath);
+        console.log(`  ✅ ${rootPath} -> ${publicPath}`);
+        return;
+    }
+
+    if (!rootExists && publicExists) {
+        console.log(`- 📥 ${file} 不存在，从 public/ 目录复制...`);
+        fs.copyFileSync(publicPath, rootPath);
+        console.log(`  ✅ ${publicPath} -> ${rootPath}`);
+        return;
+    }
+
+    // Both exist, compare modification times
+    const rootStat = fs.statSync(rootPath);
+    const publicStat = fs.statSync(publicPath);
+
+    if (rootStat.mtimeMs > publicStat.mtimeMs) {
+        console.log(`- 🔄 根目录中的 ${file} 是最新版本，同步到 public/ ...`);
+        fs.copyFileSync(rootPath, publicPath);
+        console.log(`  ✅ ${rootPath} -> ${publicPath}`);
+    } else if (publicStat.mtimeMs > rootStat.mtimeMs) {
+        console.log(`- 🔄 public/ 中的 ${file} 是最新版本，同步到根目录...`);
+        fs.copyFileSync(publicPath, rootPath);
+        console.log(`  ✅ ${publicPath} -> ${rootPath}`);
+    } else {
+        console.log(`- ✅ 文件 ${file} 版本一致，无需同步。`);
     }
 });
+
+console.log('\\n🎉 静态文件同步完成！');
 ```
 
 ## 🛠️ 常见问题解决方案
 
-### 问题1: CSS文件404错误
-**症状**: 浏览器控制台显示 `Failed to load resource: 404 (File not found)`
+### 问题1: CSS或页面布局404/显示异常
+**症状**: 浏览器控制台显示 `404` 错误，或页面样式、内容不是最新的。
 
 **解决方案**:
-1. 检查HTML文件中的路径引用
-2. 确保静态文件存在于正确位置
-3. 运行 `node sync-assets.js` 同步文件
+1.  **运行同步脚本**：这通常是首要步骤，确保两个位置的文件已同步。
+    ```bash
+    node sync-assets.js
+    ```
+2.  **检查HTML引用**：确保 `index.html` 中对 `styles.css` 和 `script.js` 的引用是根路径 (`/styles.css`)。
+3.  **强制刷新浏览器**：清除浏览器缓存（Ctrl+Shift+R 或 Cmd+Shift+R）。
 
-### 问题2: 本地和生产环境样式不一致
-**症状**: 本地显示正常，生产环境样式异常
-
-**解决方案**:
-1. 确保 `public/styles.css` 和根目录 `styles.css` 内容一致
-2. 运行同步脚本更新根目录文件
-3. 提交并推送到Git触发重新部署
-
-### 问题3: 修改CSS后更新不生效
-**症状**: 修改CSS文件后，网站样式未更新
+### 问题2: 本地和生产环境样式/内容不一致
+**症状**: 本地显示正常，但Vercel线上版本是旧的。
 
 **解决方案**:
-1. 确保修改的是 `public/styles.css`（源文件）
-2. 运行 `node sync-assets.js` 同步到根目录
-3. 提交更改到Git
-4. 等待Vercel自动部署
+1.  **确认同步**：运行 `node sync-assets.js`。
+2.  **确认提交**：确保所有相关文件（根目录和 `public/` 目录下的副本）都已通过 `git add .` 添加到暂存区。
+3.  **提交并推送**：`git commit` 并 `git push` 以触发Vercel的重新部署。
 
-## 📋 故障排除清单
+## 📋 开发工作流程
 
-### 本地开发环境检查
-- [ ] 是否从项目根目录启动服务器
-- [ ] 静态文件是否存在于根目录
-- [ ] HTML文件中是否使用正确的路径（`/styles.css`）
-- [ ] 是否运行了 `node sync-assets.js`
-
-### Vercel生产环境检查
-- [ ] `vercel.json` 是否正确配置静态文件排除
-- [ ] 静态文件是否存在于 `public/` 目录
-- [ ] HTML文件中是否使用根路径引用
-- [ ] 是否已提交并推送到Git
-
-### 开发工作流程
-1. **修改静态文件**: 始终修改 `public/` 目录中的源文件
-2. **同步文件**: 运行 `node sync-assets.js`
-3. **本地测试**: 使用 `./start-dev.sh` 启动本地服务器
-4. **提交更改**: `git add . && git commit -m "更新静态文件"`
-5. **推送部署**: `git push origin main`
-6. **验证部署**: 检查生产环境是否正常
-
-## 🚀 快速启动命令
-
-```bash
-# 启动本地开发服务器（自动处理端口冲突和文件同步）
-./start-dev.sh
-
-# 手动同步静态文件
-node sync-assets.js
-
-# 检查端口占用并清理
-lsof -ti:8000 | xargs kill -9 2>/dev/null || true
-
-# 快速提交和部署
-git add . && git commit -m "更新静态文件" && git push origin main
-```
+1.  **任意修改文件**: 您可以修改根目录或 `public/` 目录下的 `index.html`, `styles.css`, `script.js`。
+2.  **运行同步脚本**: 修改后，务必运行 `node sync-assets.js` 来同步文件。
+3.  **本地测试**: 使用 `./start-dev.sh` 或 `node server.js` 启动本地服务器进行测试。
+4.  **提交更改**: `git add . && git commit -m "你的提交信息"`。
+5.  **推送部署**: `git push origin main`。
+6.  **验证部署**: 检查生产环境是否正常。
 
 ## 📝 维护注意事项
 
-1. **始终编辑源文件**: 修改 `public/` 目录中的文件，不要直接修改根目录的副本
-2. **定期同步**: 每次修改静态文件后运行同步脚本
-3. **版本控制**: 确保 `public/` 目录和根目录的静态文件都被Git跟踪
-4. **测试部署**: 每次部署后验证生产环境是否正常
+1.  **同步是关键**: 记住，**修改文件后，同步是必要步骤**。新的脚本让您可以灵活地在任一位置编辑，但同步操作确保了版本的一致性。
+2.  **版本控制**: 确保 `public/` 目录和根目录下的所有静态文件副本都被Git正确跟踪。
+3.  **测试部署**: 每次部署后验证生产环境是否正常。
 
 ---
 
-**最后更新**: 2025年7月6日
-**版本**: 1.0.0
+**最后更新**: 2025年7月8日
+**版本**: 1.1.0
 **维护者**: AI Assistant
