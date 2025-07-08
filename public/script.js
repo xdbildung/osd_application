@@ -452,8 +452,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return bankTransferHtml.trim();
     }
 
-
-
     // 图片压缩函数
     // 统一文件转换和压缩函数：所有文件转为JPG格式并压缩到目标大小以下
     function convertToJpgAndCompress(file, targetSize = 1024 * 1024) {
@@ -931,10 +929,48 @@ document.addEventListener('DOMContentLoaded', function() {
         return isValid;
     }
 
+    // 滚动到错误字段的函数
+    function scrollToErrorField(element) {
+        if (!element) return;
+        
+        console.log('🎯 开始滚动到错误字段:', element.tagName, element.id || element.className);
+        
+        // 检测设备类型
+        const isMobile = window.innerWidth <= 768;
+        const offset = isMobile ? 100 : 120;
+        
+        // 计算滚动位置
+        const elementTop = element.getBoundingClientRect().top + window.pageYOffset;
+        const targetPosition = elementTop - offset;
+        
+        console.log(`📱 设备类型: ${isMobile ? '移动端' : 'PC端'}, 偏移量: ${offset}px`);
+        console.log(`📍 元素位置: ${elementTop}px, 目标位置: ${targetPosition}px`);
+        
+        // 平滑滚动到目标位置
+        window.scrollTo({
+            top: Math.max(0, targetPosition),
+            behavior: 'smooth'
+        });
+        
+        // 延迟聚焦，让滚动完成
+        setTimeout(() => {
+            if (element.focus && typeof element.focus === 'function') {
+                try {
+                    element.focus();
+                    console.log('✅ 成功聚焦到错误字段');
+                } catch (error) {
+                    console.log('⚠️ 聚焦失败:', error.message);
+                }
+            }
+        }, isMobile ? 800 : 600);
+    }
+
     // 验证整个表单
     function validateForm() {
         let isValid = true;
-        const errors = [];
+        let firstErrorElement = null;
+
+        console.log('🔍 开始表单验证...');
 
         // 验证所有必填字段
         const requiredFields = ['firstName', 'lastName', 'gender', 'birthDate', 'nationality', 'birthPlace', 'email', 'phoneNumber', 'firstTimeExam'];
@@ -942,6 +978,11 @@ document.addEventListener('DOMContentLoaded', function() {
         requiredFields.forEach(fieldId => {
             if (!validateField(fieldId)) {
                 isValid = false;
+                const errorField = document.getElementById(fieldId);
+                if (errorField && !firstErrorElement) {
+                    firstErrorElement = errorField;
+                    console.log(`❌ 第一个错误字段: ${fieldId}`);
+                }
             }
         });
 
@@ -949,6 +990,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (nationalitySelect.value === 'Other') {
             if (!validateField('otherNationality')) {
                 isValid = false;
+                if (!firstErrorElement) {
+                    firstErrorElement = document.getElementById('otherNationality');
+                    console.log('❌ 第一个错误字段: otherNationality');
+                }
             }
         }
 
@@ -957,6 +1002,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (checkedVenues.length === 0) {
             isValid = false;
             showError('selectedVenues', '请至少选择一个考试场次');
+            if (!firstErrorElement) {
+                firstErrorElement = document.querySelector('input[name="selectedVenues"]');
+                console.log('❌ 第一个错误字段: selectedVenues');
+            }
         } else {
             clearError('selectedVenues');
             
@@ -976,6 +1025,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     if (venueExamSessions.length === 0) {
                         isValid = false;
+                        console.log(`❌ 场次选择错误: ${venueValue}考场未选择考试科目`);
+                        
                         // 在场次选项区域添加错误提示
                         const errorDiv = venueOptions.querySelector('.venue-error');
                         if (!errorDiv) {
@@ -990,6 +1041,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             newErrorDiv.style.fontSize = '14px';
                             venueOptions.appendChild(newErrorDiv);
                         }
+                        
+                        // 设置第一个错误元素为场次选项区域的标题
+                        if (!firstErrorElement) {
+                            // 查找场次选项区域的标题（label元素）
+                            const venueTitle = venueOptions.querySelector('label');
+                            if (venueTitle) {
+                                firstErrorElement = venueTitle;
+                                console.log(`❌ 第一个错误字段: ${venueValue}考场标题`);
+                            } else {
+                                // 如果找不到标题，使用整个场次选项区域
+                                firstErrorElement = venueOptions;
+                                console.log(`❌ 第一个错误字段: ${venueValue}考场选项区域`);
+                            }
+                        }
                     }
                 }
             });
@@ -1003,12 +1068,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
             
             if (file.size > maxSize) {
-            isValid = false;
+                isValid = false;
                 showError('passportUpload', '护照文件大小不能超过5MB');
+                if (!firstErrorElement) {
+                    firstErrorElement = passportFile;
+                    console.log('❌ 第一个错误字段: passportUpload (文件过大)');
+                }
             } else if (!allowedTypes.includes(file.type)) {
-            isValid = false;
+                isValid = false;
                 showError('passportUpload', '护照文件请上传jpg、png或pdf格式');
+                if (!firstErrorElement) {
+                    firstErrorElement = passportFile;
+                    console.log('❌ 第一个错误字段: passportUpload (格式错误)');
+                }
+            }
         }
+
+        // 如果有错误，滚动到第一个错误字段
+        if (!isValid && firstErrorElement) {
+            console.log('🎯 验证失败，滚动到第一个错误字段');
+            scrollToErrorField(firstErrorElement);
+        } else if (isValid) {
+            console.log('✅ 表单验证通过');
         }
 
         return isValid;
@@ -1032,8 +1113,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-
-
     // 表单提交
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -1043,11 +1122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         existingErrors.forEach(error => error.remove());
         
         if (!validateForm()) {
-            // 滚动到第一个错误字段
-            const firstError = document.querySelector('.invalid');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            // 验证失败，validateForm函数已经处理了滚动到错误字段
             return;
         }
 
@@ -1061,8 +1136,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 处理考试场次数据
         const checkedSessions = Array.from(document.querySelectorAll('input[name="examSessions"]:checked'))
             .map(cb => cb.value);
-        
-
         
         // 处理国籍数据
         const finalNationality = nationalitySelect.value === 'Other' ? otherNationalityInput.value : nationalitySelect.value;
@@ -1294,7 +1367,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 页面加载完成后的初始化
     
     // 移动端上传选项功能
-
 
     // 处理付费凭证上传
     const paymentProofInput = document.getElementById('paymentProof');
