@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 生成3位随机数
         const randomNum = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
         
-        return `OSD-${month}${day}-${randomNum}`;
+        return `OSD${randomNum}`;
     }
 
     // 考试选项代码到中文名称的映射
