@@ -10,9 +10,7 @@ const path = require('path');
 
 const staticFiles = [
     'styles.css',
-    'script.js',
-    'payment_QR_example.png',
-    'SDI_exam_notification.pdf'
+    'script.js'
 ];
 
 console.log('🔄 同步静态文件...');
