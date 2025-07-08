@@ -143,6 +143,49 @@ select {
     font-weight: 500;
 }
 
+/* 错误字段样式 */
+.invalid {
+    border-color: #D9534F !important;
+    background-color: #fdf2f2 !important;
+    box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.1) !important;
+}
+
+/* 错误高亮动画效果 */
+.error-highlight {
+    animation: errorPulse 2s ease-in-out;
+    position: relative;
+}
+
+@keyframes errorPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.4);
+    }
+    25% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 8px rgba(217, 83, 79, 0.2);
+    }
+    50% {
+        transform: scale(1.01);
+        box-shadow: 0 0 0 12px rgba(217, 83, 79, 0.1);
+    }
+    75% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 8px rgba(217, 83, 79, 0.2);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(217, 83, 79, 0);
+    }
+}
+
+/* 成功字段样式 */
+.valid {
+    border-color: #28a745 !important;
+    background-color: #f8fff9 !important;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1) !important;
+}
+
 /* 考试场次选择 */
 .session-selection {
     display: grid;

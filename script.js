@@ -275,6 +275,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // 滚动到错误字段的函数
+    function scrollToErrorField(element) {
+        if (!element) return;
+        
+        // 添加高亮效果
+        element.classList.add('error-highlight');
+        
+        // 计算滚动位置，让错误字段在屏幕中间
+        const elementRect = element.getBoundingClientRect();
+        const absoluteElementTop = elementRect.top + window.pageYOffset;
+        const middle = absoluteElementTop - (window.innerHeight / 2);
+        
+        // 平滑滚动到目标位置
+        window.scrollTo({
+            top: middle,
+            behavior: 'smooth'
+        });
+        
+        // 2秒后移除高亮效果
+        setTimeout(() => {
+            element.classList.remove('error-highlight');
+        }, 2000);
+        
+        // 如果是输入框，自动聚焦
+        if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA') {
+            setTimeout(() => {
+                element.focus();
+            }, 500); // 等待滚动完成后再聚焦
+        }
+    }
+
     // 显示成功状态
     function showSuccess(fieldId) {
         const errorHint = document.getElementById(fieldId + '-error');
@@ -935,6 +966,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function validateForm() {
         let isValid = true;
         const errors = [];
+        let firstErrorElement = null;
 
         // 验证所有必填字段
         const requiredFields = ['firstName', 'lastName', 'gender', 'birthDate', 'nationality', 'birthPlace', 'email', 'phoneNumber', 'firstTimeExam'];
@@ -942,6 +974,10 @@ document.addEventListener('DOMContentLoaded', function() {
         requiredFields.forEach(fieldId => {
             if (!validateField(fieldId)) {
                 isValid = false;
+                errors.push({ fieldId, element: document.getElementById(fieldId) });
+                if (!firstErrorElement) {
+                    firstErrorElement = document.getElementById(fieldId);
+                }
             }
         });
 
@@ -949,6 +985,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (nationalitySelect.value === 'Other') {
             if (!validateField('otherNationality')) {
                 isValid = false;
+                errors.push({ fieldId: 'otherNationality', element: document.getElementById('otherNationality') });
+                if (!firstErrorElement) {
+                    firstErrorElement = document.getElementById('otherNationality');
+                }
             }
         }
 
@@ -957,6 +997,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (checkedVenues.length === 0) {
             isValid = false;
             showError('selectedVenues', '请至少选择一个考试场次');
+            errors.push({ fieldId: 'selectedVenues', element: document.querySelector('.session-selection') });
+            if (!firstErrorElement) {
+                firstErrorElement = document.querySelector('.session-selection');
+            }
         } else {
             clearError('selectedVenues');
             
@@ -990,6 +1034,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             newErrorDiv.style.fontSize = '14px';
                             venueOptions.appendChild(newErrorDiv);
                         }
+                        errors.push({ fieldId: venueOptionsId, element: venueOptions });
+                        if (!firstErrorElement) {
+                            firstErrorElement = venueOptions;
+                        }
                     }
                 }
             });
@@ -1003,12 +1051,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
             
             if (file.size > maxSize) {
-            isValid = false;
+                isValid = false;
                 showError('passportUpload', '护照文件大小不能超过5MB');
+                errors.push({ fieldId: 'passportUpload', element: document.getElementById('passportUpload').closest('.form-group') });
+                if (!firstErrorElement) {
+                    firstErrorElement = document.getElementById('passportUpload').closest('.form-group');
+                }
             } else if (!allowedTypes.includes(file.type)) {
-            isValid = false;
+                isValid = false;
                 showError('passportUpload', '护照文件请上传jpg、png或pdf格式');
+                errors.push({ fieldId: 'passportUpload', element: document.getElementById('passportUpload').closest('.form-group') });
+                if (!firstErrorElement) {
+                    firstErrorElement = document.getElementById('passportUpload').closest('.form-group');
+                }
+            }
         }
+
+        // 如果有错误，滚动到第一个错误字段
+        if (!isValid && firstErrorElement) {
+            scrollToErrorField(firstErrorElement);
         }
 
         return isValid;
@@ -1043,11 +1104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         existingErrors.forEach(error => error.remove());
         
         if (!validateForm()) {
-            // 滚动到第一个错误字段
-            const firstError = document.querySelector('.invalid');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            // 验证失败，validateForm函数已经处理了滚动到错误字段
             return;
         }
 
