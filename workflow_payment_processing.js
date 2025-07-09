@@ -26,7 +26,7 @@ const examSessionMapping = {
 
 // 考试场次代码到考试日期的映射
 const examDateMapping = {
-  'A1_BJ_VIP': '2025/9/6 (北京)',
+      'A1_BJ_VIP': '2025/9/13 (北京)',
   'A1_CD_Full': '2025/8/27 (成都)',
   'A1_CD_Written': '2025/8/27 (成都)',
   'A1_CD_Oral': '2025/8/27 (成都)',

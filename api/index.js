@@ -81,7 +81,7 @@ function generateExamDate(examSessions) {
     }
     
     const cityDateMap = {
-        'BJ': '2025/9/6 (北京)',
+        'BJ': '2025/9/13 (北京)',
         'CD': '2025/8/27 (成都)'
     };
     

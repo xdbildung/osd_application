@@ -783,7 +783,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 根据考试场次生成考试日期字符串
     function generateExamDateString(examSessions) {
         const cityDateMap = {
-            'BJ': '2025/9/6',
+            'BJ': '2025/9/13',
             'CD': '2025/8/27'
         };
         
