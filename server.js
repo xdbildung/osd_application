@@ -52,12 +52,12 @@ const upload = multer({
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' })); // 增加JSON body大小限制
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // 增加URL编码body大小限制
 
-// Serve static files
-app.use(express.static(path.join(__dirname)));
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files - 优化静态文件服务顺序
+app.use(express.static(path.join(__dirname, 'public'))); // 优先public目录
+app.use(express.static(path.join(__dirname))); // 然后是根目录
 app.use('/uploads', express.static(uploadsDir));
 
 // API endpoint for form submission
