@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ÖSD德语水平考试 - 在线报名 [实验版]</title>
+    <title>ÖSD德语水平考试 - 在线报名</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div class="container">
-        <div class="experimental-banner" style="background: linear-gradient(135deg, #ff6b6b, #4ecdc4); color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            🧪 实验版本 - 用于内部测试，请勿用于正式报名
-        </div>
         <h1>ÖSD 德语水平考试 - 在线报名</h1>
         <p class="description">
             <strong>尊敬的考生：</strong><br>
@@ -230,7 +227,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn">提交报名申请</button>
+            <button type="submit" class="submit-btn" disabled>报名截止</button>
         </form>
 
         <div id="successMessage" class="success-message hidden">
@@ -292,7 +289,7 @@
 
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">ÖSD 考试报名系统 v1.9.4-experimental</span>
+            <span class="version-text">ÖSD 考试报名系统 v1.9.4</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
@@ -415,6 +412,9 @@
         
         // 为护照上传添加事件监听器
         document.addEventListener('DOMContentLoaded', function() {
+            // 显示报名截止提示
+            alert('📢 重要通知：\n\n2025年ÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de');
+            
             const passportInput = document.getElementById('passportUpload');
             if (passportInput) {
                 passportInput.addEventListener('change', function() {
