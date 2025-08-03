@@ -227,7 +227,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn">提交报名申请</button>
+            <button type="submit" class="submit-btn" disabled>报名截止</button>
         </form>
 
         <div id="successMessage" class="success-message hidden">
@@ -412,6 +412,9 @@
         
         // 为护照上传添加事件监听器
         document.addEventListener('DOMContentLoaded', function() {
+            // 显示报名截止提示
+            alert('📢 重要通知：\n\n2025年ÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de');
+            
             const passportInput = document.getElementById('passportUpload');
             if (passportInput) {
                 passportInput.addEventListener('change', function() {
