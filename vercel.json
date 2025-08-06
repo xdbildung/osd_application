@@ -1,21 +1,51 @@
 {
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "public/**"
+  "version": 2,
+  "builds": [
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.png",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.jpg",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.pdf",
+      "use": "@vercel/static"
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "src": "/",
+      "dest": "/index.html"
     },
     {
-      "source": "/download-template",
-      "destination": "/api/index.js"
+      "src": "/test-registration-status",
+      "dest": "/test-registration-status.html"
     },
     {
-      "source": "/((?!styles\\.css|script\\.js|.*\\.png|.*\\.pdf|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico|.*\\.webp|.*\\.docx?).*)",
-      "destination": "/api/index.js"
+      "src": "/test-email-validation",
+      "dest": "/test-email-validation.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
