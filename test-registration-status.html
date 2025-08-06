@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报名状态测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status-open {
+            border-color: #4CAF50;
+            background-color: #f1f8e9;
+        }
+        .status-closed {
+            border-color: #f44336;
+            background-color: #ffebee;
+        }
+        .button {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background-color: #1976D2;
+        }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .config-info {
+            background-color: #e3f2fd;
+            border: 1px solid #2196F3;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 报名状态测试页面</h1>
+        
+        <div class="config-info">
+            <h3>🔧 当前配置状态</h3>
+            <div id="configStatus">正在加载配置...</div>
+        </div>
+        
+        <div class="status-card" id="registrationStatus">
+            <h3>📝 报名通道状态</h3>
+            <div id="statusDisplay">正在检查...</div>
+        </div>
+        
+        <div class="status-card">
+            <h3>🔘 提交按钮状态</h3>
+            <button type="button" class="button" id="testSubmitBtn">提交报名</button>
+            <div id="buttonStatus">按钮状态：正常</div>
+        </div>
+        
+        <div class="status-card">
+            <h3>🧪 测试操作</h3>
+            <button type="button" class="button" onclick="testConfig()">重新加载配置</button>
+            <button type="button" class="button" onclick="toggleRegistration()">切换报名状态</button>
+            <button type="button" class="button" onclick="window.location.href='/'">返回主页面</button>
+        </div>
+    </div>
+
+    <script>
+        let currentConfig = null;
+        
+        // 加载开发配置
+        async function loadDevConfig() {
+            try {
+                const response = await fetch('/api/dev-config');
+                const config = await response.json();
+                currentConfig = config;
+                
+                // 显示配置状态
+                const configStatus = document.getElementById('configStatus');
+                if (config.isDevelopment) {
+                    configStatus.innerHTML = `
+                        <div class="success">✅ 开发模式已启用</div>
+                        <p><strong>报名状态：</strong>${config.registrationClosed ? '已关闭' : '开放中'}</p>
+                        <p><strong>提交按钮：</strong>${config.submitButtonDisabled ? '已禁用' : '正常'}</p>
+                        <p><strong>按钮文本：</strong>${config.submitButtonText || '提交报名'}</p>
+                    `;
+                } else {
+                    configStatus.innerHTML = `
+                        <div class="error">❌ 生产模式</div>
+                        <p>当前运行在生产环境中，开发配置未生效</p>
+                    `;
+                }
+                
+                // 更新报名状态显示
+                updateRegistrationStatus(config);
+                
+                // 更新按钮状态
+                updateButtonStatus(config);
+                
+            } catch (error) {
+                console.error('加载配置失败:', error);
+                document.getElementById('configStatus').innerHTML = `
+                    <div class="error">❌ 配置加载失败</div>
+                    <p>错误信息：${error.message}</p>
+                `;
+            }
+        }
+        
+        // 更新报名状态显示
+        function updateRegistrationStatus(config) {
+            const statusCard = document.getElementById('registrationStatus');
+            const statusDisplay = document.getElementById('statusDisplay');
+            
+            if (config.registrationClosed) {
+                statusCard.className = 'status-card status-closed';
+                statusDisplay.innerHTML = `
+                    <div class="error">🚫 报名通道已关闭</div>
+                    <p>当前时间：${new Date().toLocaleString('zh-CN')}</p>
+                    <p>关闭消息：${config.closeMessage || '报名已截止'}</p>
+                `;
+            } else {
+                statusCard.className = 'status-card status-open';
+                statusDisplay.innerHTML = `
+                    <div class="success">✅ 报名通道开放中</div>
+                    <p>当前时间：${new Date().toLocaleString('zh-CN')}</p>
+                    <p>可以正常提交报名申请</p>
+                `;
+            }
+        }
+        
+        // 更新按钮状态
+        function updateButtonStatus(config) {
+            const testBtn = document.getElementById('testSubmitBtn');
+            const buttonStatus = document.getElementById('buttonStatus');
+            
+            if (config.submitButtonDisabled) {
+                testBtn.disabled = true;
+                buttonStatus.innerHTML = `<div class="error">按钮状态：已禁用</div>`;
+            } else {
+                testBtn.disabled = false;
+                buttonStatus.innerHTML = `<div class="success">按钮状态：正常</div>`;
+            }
+            
+            if (config.submitButtonText) {
+                testBtn.textContent = config.submitButtonText;
+            }
+        }
+        
+        // 测试配置
+        function testConfig() {
+            loadDevConfig();
+        }
+        
+        // 切换报名状态（仅用于测试）
+        function toggleRegistration() {
+            if (!currentConfig) {
+                alert('请先加载配置');
+                return;
+            }
+            
+            // 这里只是演示，实际应该修改 dev-config.json 文件
+            alert(`当前报名状态：${currentConfig.registrationClosed ? '已关闭' : '开放中'}\n\n要修改状态，请编辑 dev-config.json 文件中的 registrationClosed 值`);
+        }
+        
+        // 页面加载时自动加载配置
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDevConfig();
+        });
+    </script>
+</body>
+</html> 

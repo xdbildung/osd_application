@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮箱验证测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-note {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #495057;
+        }
+        .error-hint {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .error-hint.show {
+            display: block;
+        }
+        .success-hint {
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .success-hint.show {
+            display: block;
+        }
+        .test-results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .test-case {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .test-case.valid {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .test-case.invalid {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>邮箱验证功能测试</h1>
+    
+    <div class="form-group">
+        <label for="email">邮箱地址 <span style="color: red;">*</span></label>
+        <input type="email" id="email" name="email" required>
+        <div class="form-note">
+            <strong>重要提示：</strong>为确保您能及时收到关键的申请确认与后续通知邮件，我们需要您使用以下服务商的邮箱：@qq.com, @163.com, @hotmail.com 或 @outlook.com。感谢您的理解与配合。
+        </div>
+        <div class="error-hint" id="email-error"></div>
+        <div class="success-hint" id="email-success"></div>
+    </div>
+
+    <div class="test-results">
+        <h3>测试用例</h3>
+        <div class="test-case valid">
+            <strong>有效邮箱：</strong>
+            <ul>
+                <li>test@qq.com</li>
+                <li>user@163.com</li>
+                <li>example@hotmail.com</li>
+                <li>sample@outlook.com</li>
+            </ul>
+        </div>
+        <div class="test-case invalid">
+            <strong>无效邮箱：</strong>
+            <ul>
+                <li>test@yahoo.com</li>
+                <li>user@126.com</li>
+                <li>example@company.com</li>
+                <li>invalid-email</li>
+                <li>test@</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 邮箱验证函数
+        function validateEmail(email) {
+            // 基本邮箱格式验证
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                return { isValid: false, message: '请输入有效的邮箱地址格式' };
+            }
+            
+            // 检查邮箱域名是否在允许列表中
+            const allowedDomains = ['qq.com', '163.com', 'hotmail.com', 'outlook.com'];
+            const domain = email.split('@')[1].toLowerCase();
+            
+            if (!allowedDomains.includes(domain)) {
+                return { 
+                    isValid: false, 
+                    message: '请使用提示信息指定的邮箱' 
+                };
+            }
+            
+            return { isValid: true, message: '' };
+        }
+
+        // 显示错误信息
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(fieldId + '-error');
+            const successElement = document.getElementById(fieldId + '-success');
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+            if (successElement) {
+                successElement.classList.remove('show');
+            }
+        }
+
+        // 显示成功信息
+        function showSuccess(fieldId) {
+            const errorElement = document.getElementById(fieldId + '-error');
+            const successElement = document.getElementById(fieldId + '-success');
+            
+            if (errorElement) {
+                errorElement.classList.remove('show');
+            }
+            if (successElement) {
+                successElement.textContent = '✅ 邮箱格式正确';
+                successElement.classList.add('show');
+            }
+        }
+
+        // 清除错误信息
+        function clearError(fieldId) {
+            const errorElement = document.getElementById(fieldId + '-error');
+            const successElement = document.getElementById(fieldId + '-success');
+            
+            if (errorElement) {
+                errorElement.classList.remove('show');
+            }
+            if (successElement) {
+                successElement.classList.remove('show');
+            }
+        }
+
+        // 验证字段
+        function validateField(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (!field) return;
+
+            const value = field.value.trim();
+            
+            if (!value) {
+                clearError(fieldId);
+                return;
+            }
+
+            const validation = validateEmail(value);
+            
+            if (validation.isValid) {
+                showSuccess(fieldId);
+            } else {
+                showError(fieldId, validation.message);
+            }
+        }
+
+        // 添加事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            
+            if (emailInput) {
+                // 实时验证（输入时）
+                emailInput.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    if (value) {
+                        validateField('email');
+                    } else {
+                        clearError('email');
+                    }
+                });
+                
+                // 失去焦点时验证
+                emailInput.addEventListener('blur', function() {
+                    validateField('email');
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

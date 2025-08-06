@@ -67,9 +67,9 @@
 
             <div class="form-group">
                 <label for="email">邮箱地址 <span class="required">*</span></label>
-                <input type="email" id="email" name="email" required>
-                <div class="form-note">
-                    <strong>重要：</strong>所有官方通知将通过此邮箱发送，请确保准确无误。若在提交申请后未能及时收到确认邮件，请联系 <a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a>。
+                <input type="email" id="email" name="email" required placeholder="请输入有效的邮箱地址">
+                                <div class="form-note">
+                    <strong>重要提示：</strong>为确保您能及时收到关键的申请确认与后续通知邮件，我们需要您使用以下服务商的邮箱：@qq.com, @163.com, @hotmail.com 或 @outlook.com。感谢您的理解与配合。
                 </div>
                 <div class="error-hint" id="email-error"></div>
             </div>
@@ -227,7 +227,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn" disabled>报名截止</button>
+            <button type="submit" class="submit-btn">提交报名</button>
         </form>
 
         <div id="successMessage" class="success-message hidden">
@@ -289,7 +289,7 @@
 
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">ÖSD 考试报名系统 v1.9.5</span>
+            <span class="version-text">ÖSD 考试报名系统 v1.9.6</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
@@ -304,6 +304,7 @@
     </script>
     
     <script src="/script.js"></script>
+    <script src="/test-email.js"></script>
     
     <script>
         // 文件大小限制（1MB = 1024 * 1024 bytes）
@@ -412,8 +413,8 @@
         
         // 为护照上传添加事件监听器
         document.addEventListener('DOMContentLoaded', function() {
-            // 显示报名截止提示
-            alert('📢 重要通知：\n\n2025年ÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de');
+                    // 报名截止提示现在通过开发配置控制
+        // 如需显示提示，请在 dev-config.json 中设置 registrationClosed: true
             
             const passportInput = document.getElementById('passportUpload');
             if (passportInput) {

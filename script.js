@@ -88,6 +88,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 邮箱验证逻辑
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        // 实时验证（输入时）
+        emailInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value) {
+                validateField('email');
+            } else {
+                clearError('email');
+            }
+        });
+        
+        // 失去焦点时验证
+        emailInput.addEventListener('blur', function() {
+            validateField('email');
+        });
+    }
+
     // 场次选择逻辑
     const venueCheckboxes = document.querySelectorAll('input[name="selectedVenues"]');
     const beijingOptions = document.getElementById('beijingOptions');
@@ -848,10 +867,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 验证邮箱格式
+        // 验证邮箱格式
     function validateEmail(email) {
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailPattern.test(email);
+        // 基本邮箱格式验证
+        const emailPattern = /^[^s@]+@[^s@]+.[^s@]+$/;
+        if (!emailPattern.test(email)) {
+            return { isValid: false, message: '请输入有效的邮箱地址格式' };
+        }
+        
+        // 检查邮箱域名是否在允许列表中
+        const allowedDomains = ['qq.com', '163.com', 'hotmail.com', 'outlook.com'];
+        const domain = email.split('@')[1].toLowerCase();
+        
+        if (!allowedDomains.includes(domain)) {
+            return { 
+                isValid: false, 
+                message: '请使用提示信息指定的邮箱' 
+            };
+        }
+        
+        return { isValid: true, message: '' };
     }
 
     // 验证电话号码格式
@@ -877,9 +912,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // 特殊验证逻辑
             switch (fieldId) {
                 case 'email':
-                    if (!validateEmail(value)) {
+                    const emailValidation = validateEmail(value);
+                    if (!emailValidation.isValid) {
                         isValid = false;
-                        errorMessage = '请输入有效的邮箱地址（格式：xxxx@xxx.xxx）';
+                        errorMessage = emailValidation.message;
                     }
                     break;
                 case 'phoneNumber':
@@ -1789,8 +1825,30 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/dev-config');
             const config = await response.json();
             
-            if (config.isDevelopment && config.prefillData) {
-                prefillForm(config.prefillData);
+            if (config.isDevelopment) {
+                // 处理通道关闭设置
+                if (config.registrationClosed) {
+                    // 显示通道关闭提示
+                    if (config.closeMessage) {
+                        alert(config.closeMessage);
+                    }
+                    
+                    // 设置提交按钮状态
+                    const submitBtn = document.querySelector('.submit-btn');
+                    if (submitBtn) {
+                        if (config.submitButtonDisabled) {
+                            submitBtn.disabled = true;
+                        }
+                        if (config.submitButtonText) {
+                            submitBtn.textContent = config.submitButtonText;
+                        }
+                    }
+                }
+                
+                // 预填写表单数据
+                if (config.prefillData) {
+                    prefillForm(config.prefillData);
+                }
             }
         } catch (error) {
             // 生产环境，无需处理
