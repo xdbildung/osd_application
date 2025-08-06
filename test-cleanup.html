@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Config 清理测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .test-section {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧹 Production Config 清理测试</h1>
+    
+    <div class="container">
+        <h2>✅ 清理完成</h2>
+        <p>已成功删除 <code>production-config.js</code> 文件并清理所有相关引用。</p>
+        
+        <div class="success">
+            <strong>删除的文件：</strong>
+            <ul>
+                <li>production-config.js</li>
+            </ul>
+        </div>
+        
+        <div class="success">
+            <strong>修改的文件：</strong>
+            <ul>
+                <li>index.html - 删除脚本引用</li>
+                <li>public/index.html - 删除脚本引用</li>
+                <li>test-duplicate-alert.html - 删除测试按钮</li>
+                <li>.vercelignore - 删除保留配置</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>🔍 功能验证</h3>
+        <p>验证通道关闭功能是否正常工作：</p>
+        
+        <button onclick="testChannelClosed()">测试通道关闭功能</button>
+        <button onclick="testDuplicatePrevention()">测试防重复提示</button>
+        <button onclick="checkScriptFunctions()">检查脚本函数</button>
+        <button onclick="clearLog()">清空日志</button>
+        
+        <div class="log" id="testLog">
+            <p>点击测试按钮查看结果...</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>📋 预期结果</h3>
+        <ul>
+            <li>✅ 页面加载时只显示一次通道关闭提示</li>
+            <li>✅ 提交按钮显示"报名截止"且禁用</li>
+            <li>✅ 防重复提示机制正常工作</li>
+            <li>✅ 开发和生产环境都能正确显示通道关闭状态</li>
+        </ul>
+    </div>
+    
+    <div class="warning">
+        <h3>⚠️ 注意事项</h3>
+        <p>删除 <code>production-config.js</code> 后，所有通道关闭功能都由 <code>script.js</code> 统一管理。这样可以避免重复提示，简化代码结构。</p>
+    </div>
+
+    <script>
+        function log(message) {
+            const logElement = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<p>[${timestamp}] ${message}</p>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '<p>日志已清空...</p>';
+        }
+        
+        function testChannelClosed() {
+            log('🔍 测试通道关闭功能...');
+            
+            // 检查全局状态管理
+            if (typeof window.registrationClosedShown !== 'undefined') {
+                log('✅ 全局提示状态管理存在');
+            } else {
+                log('❌ 全局提示状态管理缺失');
+            }
+            
+            // 检查提示函数
+            if (typeof window.showRegistrationClosedAlert === 'function') {
+                log('✅ 通道关闭提示函数存在');
+            } else {
+                log('❌ 通道关闭提示函数缺失');
+            }
+            
+            // 检查生产环境函数
+            if (typeof window.applyProductionRegistrationClosed === 'function') {
+                log('✅ 生产环境通道关闭函数存在');
+            } else {
+                log('❌ 生产环境通道关闭函数缺失');
+            }
+            
+            log('✅ 通道关闭功能测试完成');
+        }
+        
+        function testDuplicatePrevention() {
+            log('🔄 测试防重复提示机制...');
+            
+            // 重置状态
+            window.registrationClosedShown = false;
+            log('🔄 重置提示状态');
+            
+            // 模拟多次调用
+            if (typeof window.showRegistrationClosedAlert === 'function') {
+                const message = "测试提示消息";
+                window.showRegistrationClosedAlert(message);
+                window.showRegistrationClosedAlert(message);
+                window.showRegistrationClosedAlert(message);
+                log('✅ 防重复提示测试完成（应该只显示一次）');
+            } else {
+                log('❌ 提示函数不存在，无法测试');
+            }
+        }
+        
+        function checkScriptFunctions() {
+            log('📜 检查脚本函数...');
+            
+            const functions = [
+                'showRegistrationClosedAlert',
+                'applyProductionRegistrationClosed',
+                'loadDevConfig'
+            ];
+            
+            functions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    log(`✅ ${funcName} 函数存在`);
+                } else {
+                    log(`❌ ${funcName} 函数缺失`);
+                }
+            });
+            
+            log('✅ 脚本函数检查完成');
+        }
+        
+        // 页面加载时显示测试说明
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 测试页面已加载');
+            log('📝 此页面用于验证删除 production-config.js 后的功能');
+        });
+    </script>
+</body>
+</html> 

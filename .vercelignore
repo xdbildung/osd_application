@@ -1,9 +1,6 @@
 # 开发配置文件
 dev-config.json
 
-# 保留生产配置文件
-!production-config.js
-
 # 备份文件
 backups/
 *.backup
