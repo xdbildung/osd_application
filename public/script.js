@@ -1806,11 +1806,48 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/dev-config');
             const config = await response.json();
             
-            if (config.isDevelopment && config.prefillData) {
-                prefillForm(config.prefillData);
+            if (config.isDevelopment) {
+                // 处理通道关闭设置
+                if (config.registrationClosed) {
+                    // 显示通道关闭提示
+                    if (config.closeMessage) {
+                        alert(config.closeMessage);
+                    }
+                    
+                    // 设置提交按钮状态
+                    const submitBtn = document.querySelector('.submit-btn');
+                    if (submitBtn) {
+                        if (config.submitButtonDisabled) {
+                            submitBtn.disabled = true;
+                        }
+                        if (config.submitButtonText) {
+                            submitBtn.textContent = config.submitButtonText;
+                        }
+                    }
+                }
+                
+                // 预填写表单数据
+                if (config.prefillData) {
+                    prefillForm(config.prefillData);
+                }
             }
         } catch (error) {
-            // 生产环境，无需处理
+            // 生产环境：直接应用通道关闭状态
+            applyProductionRegistrationClosed();
+        }
+    }
+
+    // 生产环境通道关闭设置
+    function applyProductionRegistrationClosed() {
+        // 显示通道关闭提示
+        const closeMessage = "📢 重要通知：\n\n2025年ÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de";
+        alert(closeMessage);
+        
+        // 设置提交按钮状态
+        const submitBtn = document.querySelector('.submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "报名截止";
         }
     }
 
