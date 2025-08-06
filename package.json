@@ -18,7 +18,7 @@
     "express",
     "nodejs"
   ],
-  "author": "xuezaideguo",
+  "author": "xuezaideguo <skee.chen@xuezaideguo.com>",
   "license": "MIT",
   "dependencies": {
     "archiver": "^5.3.2",
