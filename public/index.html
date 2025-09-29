@@ -115,17 +115,10 @@
                 <label>选择考试场次 <span class="required">*</span></label>
                 <div class="session-selection">
                     <label class="session-option">
-                        <input type="checkbox" name="selectedVenues" value="北京" data-venue="北京" data-date="2025年9月13日">
-                        <span class="session-info">
-                            <strong>北京考场</strong>
-                            <small>考试日期：2025年9月13日</small>
-                        </span>
-                    </label>
-                    <label class="session-option">
-                        <input type="checkbox" name="selectedVenues" value="成都" data-venue="成都" data-date="2025年8月27日">
+                        <input type="checkbox" name="selectedVenues" value="成都" data-venue="成都" data-date="2025年11月20日">
                         <span class="session-info">
                             <strong>成都考场</strong>
-                            <small>考试日期：2025年8月27日</small>
+                            <small>考试日期：2025年11月20日</small>
                         </span>
                     </label>
                 </div>
@@ -135,26 +128,8 @@
                 <div class="error-hint" id="selectedVenues-error"></div>
             </div>
 
-            <div class="form-group venue-options" id="beijingOptions" style="display: none;">
-                <label>北京考场 - 2025年9月13日 考试科目</label>
-                <div class="exam-venue-container">
-                    <div class="level-section">
-                        <h4>A1等级</h4>
-                        <div class="exam-type-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="examSessions" value="A1_BJ_VIP" data-level="A1" data-location="北京">
-                                <span>A1全科（VIP专场）</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-note">
-                    💡 北京考场仅提供 A1 全科 VIP 专场。
-                </div>
-            </div>
-
             <div class="form-group venue-options" id="chengduOptions" style="display: none;">
-                <label>成都考场 - 2025年8月27日 考试科目</label>
+                <label>成都考场 - 2025年11月20日 考试科目</label>
                 <div class="exam-venue-container">
                     <div class="level-section">
                         <h4>A1等级</h4>
@@ -227,7 +202,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn" disabled>报名截止</button>
+            <button type="submit" class="submit-btn">提交报名</button>
         </form>
 
         <div id="successMessage" class="success-message hidden">
@@ -289,7 +264,7 @@
 
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">ÖSD 考试报名系统 v1.9.7</span>
+            <span class="version-text">ÖSD 考试报名系统 v2.0.0</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
@@ -412,8 +387,8 @@
         
         // 为护照上传添加事件监听器
         document.addEventListener('DOMContentLoaded', function() {
-            // 显示报名截止提示
-            alert('📢 重要通知：\n\n2025年ÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de');
+            // 报名截止提示功能暂时禁用，如需启用请取消以下注释
+            // alert('📢 重要通知：\n\n2025年ÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de');
             
             const passportInput = document.getElementById('passportUpload');
             if (passportInput) {

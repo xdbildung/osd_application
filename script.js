@@ -109,7 +109,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 场次选择逻辑
     const venueCheckboxes = document.querySelectorAll('input[name="selectedVenues"]');
-    const beijingOptions = document.getElementById('beijingOptions');
     const chengduOptions = document.getElementById('chengduOptions');
 
     venueCheckboxes.forEach(checkbox => {
@@ -125,28 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // 显示/隐藏对应的考试选项
-            if (venue === '北京') {
-                if (isChecked) {
-                    beijingOptions.style.display = 'block';
-                    setTimeout(() => {
-                        beijingOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 100);
-                } else {
-                    beijingOptions.style.display = 'none';
-                    // 清除北京考场的所有选择
-                    const beijingExams = document.querySelectorAll('input[name="examSessions"][data-location="北京"]');
-                    beijingExams.forEach(exam => {
-                        exam.checked = false;
-                        exam.disabled = false;
-                        exam.closest('.checkbox-label').classList.remove('disabled');
-                    });
-                    // 清除北京考场的错误提示
-                    const beijingError = beijingOptions.querySelector('.venue-error');
-                    if (beijingError) {
-                        beijingError.remove();
-                    }
-                }
-            } else if (venue === '成都') {
+            if (venue === '成都') {
                 if (isChecked) {
                     chengduOptions.style.display = 'block';
                     setTimeout(() => {
@@ -220,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // 清除当前场次的错误提示
-            const currentVenueOptionsId = location === '北京' ? 'beijingOptions' : 'chengduOptions';
+            const currentVenueOptionsId = 'chengduOptions';
             const currentVenueOptions = document.getElementById(currentVenueOptionsId);
             if (currentVenueOptions) {
                 const venueError = currentVenueOptions.querySelector('.venue-error');
@@ -802,24 +780,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // 根据考试场次生成考试日期字符串
     function generateExamDateString(examSessions) {
         const cityDateMap = {
-            'BJ': '2025/9/13',
-            'CD': '2025/8/27'
+            'CD': '2025/11/20'
         };
         
         // 提取所有涉及的城市
         const cities = new Set();
         examSessions.forEach(session => {
             // 新的格式：A1_BJ_VIP, A1_CD_Written 等
-            if (session.includes('_BJ_')) {
-                cities.add('BJ');
-            } else if (session.includes('_CD_')) {
+            if (session.includes('_CD_')) {
                 cities.add('CD');
             }
         });
         
         // 根据城市生成日期字符串
         const cityDates = Array.from(cities).map(city => {
-            const cityName = city === 'BJ' ? '北京' : '成都';
+            const cityName = '成都';
             return `${cityDateMap[city]} (${cityName})`;
         }).sort(); // 按日期排序
         
