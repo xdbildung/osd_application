@@ -1805,45 +1805,46 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 加载开发配置并预填写表单
+    // 加载统一配置（本地与生产一致），缺省为开放状态
     async function loadDevConfig() {
         try {
-            const response = await fetch('/api/dev-config');
+            // 统一从静态配置获取，任何环境相同路径
+            const response = await fetch('/dev-config.json', { cache: 'no-store' });
+            if (!response.ok) throw new Error('dev-config.json not found');
             const config = await response.json();
-            
-            if (config.isDevelopment) {
-                // 处理通道关闭设置
-                if (config.registrationClosed) {
-                    // 显示通道关闭提示
-                    if (config.closeMessage) {
-                        showRegistrationClosedAlert(config.closeMessage);
-                    }
-                    
-                    // 设置提交按钮状态
-                    const submitBtn = document.querySelector('.submit-btn');
-                    if (submitBtn) {
-                        if (config.submitButtonDisabled) {
-                            submitBtn.disabled = true;
-                        }
-                        if (config.submitButtonText) {
-                            submitBtn.textContent = config.submitButtonText;
-                        }
+
+            const submitBtn = document.querySelector('.submit-btn');
+
+            // 处理通道关闭设置（统一）
+            if (config.registrationClosed) {
+                if (config.closeMessage) {
+                    showRegistrationClosedAlert(config.closeMessage);
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = !!config.submitButtonDisabled;
+                    if (config.submitButtonText) {
+                        submitBtn.textContent = config.submitButtonText;
                     }
                 }
-                
-                // 预填写表单数据
-                if (config.prefillData) {
-                    prefillForm(config.prefillData);
+            } else {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = config.submitButtonText || '提交报名';
                 }
             }
+
+            // 预填写表单数据（如配置）
+            if (config.prefillData) {
+                prefillForm(config.prefillData);
+            }
         } catch (error) {
-            // 本地开发环境：如果API调用失败，检查是否是本地环境
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                // 本地环境：静默处理，不显示通道关闭提示
-                console.log('本地开发环境：API调用失败，跳过通道关闭提示');
-            } else {
-                // 生产环境：直接应用通道关闭状态
-                applyProductionRegistrationClosed();
+            // 默认开放：无提示、按钮可点击
+            const submitBtn = document.querySelector('.submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                if (submitBtn.textContent === '报名截止') {
+                    submitBtn.textContent = '提交报名';
+                }
             }
         }
     }

@@ -58,6 +58,20 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' })); // 增加URL编�
 // Serve static files - 优化静态文件服务顺序
 app.use(express.static(path.join(__dirname, 'public'))); // 优先public目录
 app.use(express.static(path.join(__dirname))); // 然后是根目录
+// 统一提供静态配置，用于所有环境
+app.get('/dev-config.json', (req, res) => {
+    const devConfigPath = path.join(__dirname, 'dev-config.json');
+    if (fs.existsSync(devConfigPath)) {
+        res.sendFile(devConfigPath);
+    } else {
+        res.json({
+            isDevelopment: false,
+            registrationClosed: false,
+            submitButtonText: '提交报名',
+            submitButtonDisabled: false
+        });
+    }
+});
 app.use('/uploads', express.static(uploadsDir));
 
 // API endpoint for form submission
@@ -317,22 +331,7 @@ app.get('/api/google-apps-script', (req, res) => {
 });
 
 // API endpoint to get development configuration for local testing
-app.get('/api/dev-config', (req, res) => {
-    const devConfigPath = path.join(__dirname, 'dev-config.json');
-    
-    try {
-        if (fs.existsSync(devConfigPath)) {
-            const configContent = fs.readFileSync(devConfigPath, 'utf8');
-            const config = JSON.parse(configContent);
-            res.json(config);
-        } else {
-            res.json({ isDevelopment: false });
-        }
-    } catch (error) {
-        console.log('No dev-config.json found or error reading it, running in production mode');
-        res.json({ isDevelopment: false });
-    }
-});
+// 移除旧的 /api/dev-config，统一由 /dev-config.json 提供
 
 // 404 handler
 app.use((req, res) => {
