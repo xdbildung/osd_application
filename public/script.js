@@ -1812,6 +1812,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
+            // 更新“确认时限”显示
+            const deadlineLi = document.getElementById('deadlineReminder');
+            const deadlineText = (config && config.confirmationDeadlineDisplay) ? config.confirmationDeadlineDisplay : '2025年10月31日';
+            if (deadlineLi) {
+                deadlineLi.innerHTML = `<strong>确定时限：</strong>请务必在${deadlineText}前完成所有确认步骤`;
+            }
+
             if (config.prefillData) {
                 prefillForm(config.prefillData);
             }
@@ -1822,6 +1829,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (submitBtn.textContent === '报名截止') {
                     submitBtn.textContent = '提交报名';
                 }
+            }
+
+            // 兜底更新确认时限
+            const deadlineLi = document.getElementById('deadlineReminder');
+            if (deadlineLi) {
+                deadlineLi.innerHTML = `<strong>确定时限：</strong>请务必在2025年10月31日前完成所有确认步骤`;
             }
         }
     }
