@@ -101,12 +101,12 @@ const productionConfig = {
 ```bash
 # 开发环境（有dev-config.json）
 npm start
-# 访问: http://localhost:8080
+# 访问: http://localhost:8090
 
 # 生产环境模拟（删除dev-config.json）
 rm dev-config.json
 npm start
-# 访问: http://localhost:8080
+# 访问: http://localhost:8090
 ```
 
 ### Vercel部署

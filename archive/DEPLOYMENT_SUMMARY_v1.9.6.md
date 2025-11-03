@@ -58,10 +58,10 @@
 npm start
 
 # 访问地址
-http://localhost:8080
+http://localhost:8090
 
 # 测试页面
-http://localhost:8080/test-registration-status.html
+http://localhost:8090/test-registration-status.html
 ```
 
 ### 生产环境

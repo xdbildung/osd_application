@@ -51,8 +51,8 @@
 ### 开发环境
 1. 确保 `dev-config.json` 文件存在
 2. 启动服务器：`npm start`
-3. 访问：`http://localhost:8080`
-4. 测试页面：`http://localhost:8080/test-registration-status.html`
+3. 访问：`http://localhost:8090`
+4. 测试页面：`http://localhost:8090/test-registration-status.html`
 
 ### 生产环境
 1. 移除 `dev-config.json` 文件

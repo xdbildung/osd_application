@@ -81,9 +81,9 @@ ae2572b (origin/registration-closed) 版本更新至v1.9.5：关闭报名通道�
 ## 🌐 访问信息
 
 ### 开发环境
-- **本地地址**: `http://localhost:8080`
-- **测试页面**: `http://localhost:8080/test-registration-status.html`
-- **服务器**: Node.js (端口8080)
+- **本地地址**: `http://localhost:8090`
+- **测试页面**: `http://localhost:8090/test-registration-status.html`
+- **服务器**: Node.js (端口8090)
 
 ### 生产环境
 - **仓库地址**: `https://github.com/xuezaideguo/osd_application`
@@ -98,10 +98,10 @@ ae2572b (origin/registration-closed) 版本更新至v1.9.5：关闭报名通道�
 npm start
 
 # 访问地址
-http://localhost:8080
+http://localhost:8090
 
 # 测试功能
-http://localhost:8080/test-registration-status.html
+http://localhost:8090/test-registration-status.html
 ```
 
 ### 生产环境部署

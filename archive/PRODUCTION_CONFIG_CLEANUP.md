@@ -1,7 +1,7 @@
 # Production Config 清理总结
 
 ## 问题描述
-用户反映在本地测试环境（localhost:8080）打开页面时会出现两次提示信息，两次提示都出现在页面白屏时。经过分析发现，`script.js` 中已经有了完整的通道关闭逻辑，而 `production-config.js` 是重复的功能，导致重复显示提示。
+用户反映在本地测试环境（localhost:8090）打开页面时会出现两次提示信息，两次提示都出现在页面白屏时。经过分析发现，`script.js` 中已经有了完整的通道关闭逻辑，而 `production-config.js` 是重复的功能，导致重复显示提示。
 
 ## 解决方案
 删除 `production-config.js` 文件并清理所有相关引用，因为 `script.js` 中已经包含了完整的通道关闭逻辑。
@@ -81,7 +81,7 @@ function applyProductionRegistrationClosed() {
 
 ## 测试建议
 
-1. 在本地环境（localhost:8080）测试页面加载
+1. 在本地环境（localhost:8090）测试页面加载
 2. 验证只显示一次通道关闭提示
 3. 确认提交按钮状态正确
 4. 检查生产环境部署后的功能

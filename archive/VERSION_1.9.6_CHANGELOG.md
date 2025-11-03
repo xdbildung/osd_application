@@ -9,7 +9,7 @@
 
 ### 🔧 功能修复
 1. **邮箱验证功能同步**
-   - 修复了 `localhost:8000` 和 `localhost:8080` 之间邮箱验证功能不一致的问题
+   - 修复了 `localhost:8000` 和 `localhost:8090` 之间邮箱验证功能不一致的问题
    - 同步了邮箱服务商要求提示信息到所有相关文件
    - 统一了邮箱验证逻辑（支持 @qq.com, @163.com, @hotmail.com, @outlook.com）
 
@@ -51,14 +51,14 @@
 
 ## 兼容性
 - ✅ 支持 localhost:8000 (Python 服务器)
-- ✅ 支持 localhost:8080 (Node.js 服务器)
+- ✅ 支持 localhost:8090 (Node.js 服务器)
 - ✅ 所有功能在两个端口保持一致
 
 ## 部署说明
 1. 确保 `dev-config.json` 文件存在（开发环境）
 2. 启动 Node.js 服务器：`npm start`
-3. 访问 `http://localhost:8080` 进行测试
-4. 使用 `http://localhost:8080/test-registration-status.html` 查看状态
+3. 访问 `http://localhost:8090` 进行测试
+4. 使用 `http://localhost:8090/test-registration-status.html` 查看状态
 
 ## 注意事项
 - 本版本专门用于报名通道关闭状态

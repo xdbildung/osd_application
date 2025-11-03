@@ -1,0 +1,23 @@
+{
+  "isDevelopment": true,
+  "registrationClosed": true,
+  "closeMessage": "📢 重要通知：报名已截止……",
+  "submitButtonText": "报名截止",
+  "submitButtonDisabled": true,
+  "prefillData": {
+    "firstName": "Test",
+    "lastName": "User",
+    "gender": "male",
+    "birthDate": "1990-01-01",
+    "nationality": "China",
+    "birthPlace": "Beijing",
+    "email": "hakula1125@163.com",
+    "phoneNumber": "13800138000",
+    "firstTimeExam": "Yes",
+    "passportNumber": "后补",
+    "selectedVenues": ["成都"],
+    "examSessions": ["A1_CD_Full"]
+  }
+  ,
+  "confirmationDeadlineDisplay": "2025年10月31日"
+}

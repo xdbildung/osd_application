@@ -77,7 +77,7 @@
 
 ## 测试页面
 
-访问 `http://localhost:8080/test-registration-status.html` 可以查看当前配置状态和测试功能。
+访问 `http://localhost:8090/test-registration-status.html` 可以查看当前配置状态和测试功能。
 
 ## 注意事项
 
@@ -94,7 +94,7 @@
 - 检查 JSON 格式是否正确
 
 ### 问题2：API 404错误
-- 确认服务器正在运行（端口8080）
+- 确认服务器正在运行（端口8090）
 - 检查 `/api/dev-config` 端点是否正常
 
 ### 问题3：按钮状态不正确

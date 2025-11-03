@@ -90,7 +90,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 ## 部署状态
 
 ### 本地环境
-- ✅ 服务器运行在 http://localhost:8080
+- ✅ 服务器运行在 http://localhost:8090
 - ✅ 通道关闭逻辑正常工作
 - ✅ 防重复提示机制有效
 

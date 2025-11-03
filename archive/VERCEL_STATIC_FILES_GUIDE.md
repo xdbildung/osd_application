@@ -45,8 +45,8 @@
 - **文件结构**: 从项目根目录提供服务
 - **访问路径**: 
   - `public/styles.css` → 本地不直接访问，通过同步到根目录的 `styles.css`
-  - `styles.css` → `http://localhost:8080/styles.css`
-  - `index.html` → `http://localhost:8080/`
+  - `styles.css` → `http://localhost:8090/styles.css`
+  - `index.html` → `http://localhost:8090/`
 
 ### Vercel生产环境
 - **文件结构**: `public/` 目录内容映射到根路径

@@ -6,7 +6,7 @@ const multer = require('multer');
 const GoogleSheetsService = require('./googleSheetsService');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8090;
 
 // 初始化Google Sheets服务
 const googleSheetsService = new GoogleSheetsService();

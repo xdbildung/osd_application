@@ -2,13 +2,13 @@
 
 ## 问题描述
 
-用户在 `localhost:8000` 测试时新增的邮箱服务商要求提示信息在 `localhost:8080` 上不见了。
+用户在 `localhost:8000` 测试时新增的邮箱服务商要求提示信息在 `localhost:8090` 上不见了。
 
 ## 问题原因
 
 1. **不同服务器环境**：
    - `localhost:8000` - 使用 Python 简单 HTTP 服务器，服务 `public/` 目录
-   - `localhost:8080` - 使用 Node.js 服务器，服务根目录
+   - `localhost:8090` - 使用 Node.js 服务器，服务根目录
 
 2. **文件不同步**：
    - 根目录的 `index.html` 和 `script.js` 包含最新的邮箱验证功能
@@ -51,7 +51,7 @@
 
 ### 1. 访问不同端口
 - `http://localhost:8000/` - Python 服务器（public 目录）
-- `http://localhost:8080/` - Node.js 服务器（根目录）
+- `http://localhost:8090/` - Node.js 服务器（根目录）
 
 ### 2. 测试邮箱验证
 - ✅ 有效邮箱：test@qq.com, user@163.com, example@hotmail.com, sample@outlook.com
@@ -73,7 +73,7 @@
 ## 注意事项
 
 1. **服务器选择**：
-   - 开发测试：建议使用 `localhost:8080`（Node.js 服务器）
+   - 开发测试：建议使用 `localhost:8090`（Node.js 服务器）
    - 静态文件：可以使用 `localhost:8000`（Python 服务器）
 
 2. **功能一致性**：
@@ -88,7 +88,7 @@
 
 ✅ **问题已完全解决**！
 
-现在无论你访问 `localhost:8000` 还是 `localhost:8080`，都能看到：
+现在无论你访问 `localhost:8000` 还是 `localhost:8090`，都能看到：
 - 完整的邮箱服务商要求提示信息
 - 严格的邮箱验证功能
 - 一致的提交按钮状态（报名截止）

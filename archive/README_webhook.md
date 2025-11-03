@@ -153,11 +153,11 @@ forms/
 
 ```bash
 # 使用Python
-python3 -m http.server 8080
+python3 -m http.server 8090
 
 # 或使用Node.js
 npm install -g http-server
-http-server -p 8080
+http-server -p 8090
 
 # 或使用现有的server.js
 node server.js
@@ -166,7 +166,7 @@ node server.js
 ### 测试流程
 
 1. **前端测试**
-   - 访问 `http://localhost:8080/index-webhook.html`
+   - 访问 `http://localhost:8090/index-webhook.html`
    - 填写测试数据并提交
 
 2. **n8n测试**
