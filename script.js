@@ -1845,14 +1845,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 prefillForm(config.prefillData);
             }
         } catch (error) {
-            // 默认开放：无提示、按钮可点击
-            const submitBtn = document.querySelector('.submit-btn');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                if (submitBtn.textContent === '报名截止') {
-                    submitBtn.textContent = '提交报名';
-                }
-            }
+            console.warn('⚠️ 无法加载 dev-config.json，启用关闭通道的默认配置。', error);
+            applyProductionRegistrationClosed();
 
             // 兜底更新确认时限
             const deadlineLi = document.getElementById('deadlineReminder');

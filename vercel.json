@@ -28,6 +28,10 @@
     {
       "src": "*.pdf",
       "use": "@vercel/static"
+    },
+    {
+      "src": "dev-config.json",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
