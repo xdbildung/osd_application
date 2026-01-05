@@ -72,6 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const otherNationalityGroup = document.getElementById('otherNationalityGroup');
     const otherNationalityInput = document.getElementById('otherNationality');
 
+    // 初始化“重要通知”弹窗交互（关闭按钮/点遮罩关闭/ESC）
+    initRegistrationClosedModal();
+
     // 加载开发配置并预填写表单
     loadDevConfig();
 
@@ -1779,11 +1782,61 @@ document.addEventListener('DOMContentLoaded', function() {
     window.registrationClosedShown = false;
 
     // 显示通道关闭提示（防止重复显示）
-    function showRegistrationClosedAlert(message) {
+    const REGISTRATION_CLOSED_FALLBACK_TEXT =
+        "重要通知：\n\nÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de";
+
+    function getRegistrationClosedModal() {
+        return document.getElementById('registrationClosedModal');
+    }
+
+    function openRegistrationClosedModal() {
+        const modal = getRegistrationClosedModal();
+        if (!modal) return false;
+        modal.style.display = 'flex';
+        return true;
+    }
+
+    function closeRegistrationClosedModal() {
+        const modal = getRegistrationClosedModal();
+        if (!modal) return;
+        modal.style.display = 'none';
+    }
+
+    function initRegistrationClosedModal() {
+        const modal = getRegistrationClosedModal();
+        if (!modal) return;
+
+        modal.querySelectorAll('[data-modal-close]').forEach((btn) => {
+            btn.addEventListener('click', closeRegistrationClosedModal);
+        });
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                closeRegistrationClosedModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeRegistrationClosedModal();
+            }
+        });
+    }
+
+    function showRegistrationClosedAlert() {
         if (!window.registrationClosedShown) {
-            alert(message);
+            const opened = openRegistrationClosedModal();
+            if (!opened) {
+                alert(REGISTRATION_CLOSED_FALLBACK_TEXT);
+            }
             window.registrationClosedShown = true;
         }
+    }
+
+    // 仅允许在本地测试环境使用预填写
+    function isLocalTestHost() {
+        const host = (window.location && window.location.hostname) ? window.location.hostname : '';
+        return host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
     }
 
     // 加载统一配置（本地与生产一致），缺省为开放状态
@@ -1796,9 +1849,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = document.querySelector('.submit-btn');
 
             if (config.registrationClosed) {
-                if (config.closeMessage) {
-                    showRegistrationClosedAlert(config.closeMessage);
-                }
+                showRegistrationClosedAlert();
                 if (submitBtn) {
                     submitBtn.disabled = !!config.submitButtonDisabled;
                     if (config.submitButtonText) {
@@ -1819,7 +1870,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 deadlineLi.innerHTML = `<strong>确定时限：</strong>请务必在${deadlineText}前完成所有确认步骤`;
             }
 
-            if (config.prefillData) {
+            const isDevConfigEnabled = (config && typeof config.isDevelopment === 'boolean') ? config.isDevelopment : true;
+            if (isLocalTestHost() && isDevConfigEnabled && config.prefillData) {
                 prefillForm(config.prefillData);
             }
         } catch (error) {
@@ -1837,8 +1889,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 生产环境通道关闭设置
     function applyProductionRegistrationClosed() {
         // 显示通道关闭提示
-        const closeMessage = "📢 重要通知：\n\n2025年ÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de";
-        showRegistrationClosedAlert(closeMessage);
+        showRegistrationClosedAlert();
         
         // 设置提交按钮状态
         const submitBtn = document.querySelector('.submit-btn');

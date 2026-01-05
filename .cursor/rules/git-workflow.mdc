@@ -1,0 +1,5 @@
+# Git Workflow: [MVP MODE]
+
+> Current Status: Fast iteration.
+> Rule: Direct push to `main` is allowed (and pushing to feature branches is allowed).
+> Upgrade: Change this to "Production Mode" when going live.

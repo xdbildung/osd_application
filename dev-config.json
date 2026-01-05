@@ -1,7 +1,7 @@
 {
   "isDevelopment": true,
   "registrationClosed": true,
-  "closeMessage": "📢 重要通知：报名已截止……",
+  "closeMessage": "重要通知：\n\nÖSD德语水平考试报名已截止！\n\n本次考试报名通道已于指定时间关闭，感谢您的关注。\n如有疑问，请联系：info@sdi-osd.de",
   "submitButtonText": "报名截止",
   "submitButtonDisabled": true,
   "prefillData": {

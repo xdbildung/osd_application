@@ -262,9 +262,31 @@
         </div>
     </div>
 
+    <!-- 报名截止弹窗 -->
+    <div id="registrationClosedModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>重要通知</h2>
+                <button type="button" class="modal-close" data-modal-close aria-label="关闭">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="notice-content">
+                    <p><strong>ÖSD德语水平考试报名已截止！</strong></p>
+                    <p>
+                        本次考试报名通道已于指定时间关闭，感谢您的关注。<br>
+                        如有疑问，请联系：<a href="mailto:info@sdi-osd.de">info@sdi-osd.de</a>
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn" data-modal-close>我知道了</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">ÖSD 考试报名系统 v2.0.0</span>
+            <span class="version-text">ÖSD 考试报名系统 v2.0.1</span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
@@ -274,13 +296,12 @@
         // 配置PDF.js worker
         if (typeof pdfjsLib !== 'undefined') {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-            console.log('📚 PDF.js库加载成功，支持PDF转JPG功能');
         }
     </script>
     
     <script src="/script.js"></script>
     <script src="/test-email.js"></script>
-    
+
     <script>
         // 文件大小限制（1MB = 1024 * 1024 bytes）
         const MAX_FILE_SIZE = 1024 * 1024; // 1MB
@@ -317,10 +338,8 @@
                     function compressRecursive(currentQuality) {
                         canvas.toBlob((blob) => {
                             if (blob.size <= maxSize || currentQuality <= 0.1) {
-                                console.log(`📸 图片压缩完成: ${Math.round(file.size/1024)}KB → ${Math.round(blob.size/1024)}KB`);
                                 resolve(blob);
                             } else {
-                                console.log(`🔄 继续压缩: ${Math.round(blob.size/1024)}KB, 质量: ${currentQuality}`);
                                 compressRecursive(currentQuality - 0.1);
                             }
                         }, 'image/jpeg', currentQuality);
@@ -388,9 +407,6 @@
         
         // 为护照上传添加事件监听器
         document.addEventListener('DOMContentLoaded', function() {
-                    // 报名截止提示现在通过开发配置控制
-        // 如需显示提示，请在 dev-config.json 中设置 registrationClosed: true
-            
             const passportInput = document.getElementById('passportUpload');
             if (passportInput) {
                 passportInput.addEventListener('change', function() {
