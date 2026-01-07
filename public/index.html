@@ -123,7 +123,7 @@
                     </label>
                 </div>
                 <div class="form-note">
-                    💡 您可以同时选择多个考场参加不同等级的考试
+                    💡 您只能同时选择1个考场参加1个等级的考试
                 </div>
                 <div class="error-hint" id="selectedVenues-error"></div>
             </div>
@@ -200,6 +200,16 @@
                 <div class="form-note">
                     💡 选择全科后，同等级的单科选项将自动禁用。
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label for="couponCode">专属代码（可选）</label>
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <input type="text" id="couponCode" name="couponCode" placeholder="请输入专属代码" style="flex: 1;">
+                    <button type="button" id="validateCouponBtn" class="action-btn" style="padding: 10px 20px; white-space: nowrap;">验证专属代码</button>
+                </div>
+                <div class="error-hint" id="couponCode-error"></div>
+                <div id="couponStatus" style="margin-top: 8px; font-size: 14px;"></div>
             </div>
 
             <button type="submit" class="submit-btn">提交报名</button>

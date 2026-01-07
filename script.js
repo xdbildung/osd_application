@@ -1,3 +1,206 @@
+// ============================================
+// Supabase 配置和初始化
+// ============================================
+const SUPABASE_URL = 'https://totxnqrbgvppdrziynpz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_j9PE3FzvHbAzDOoBgr1NZw_zEw7MksE';
+
+// 初始化 Supabase 客户端（使用 REST API，无需额外库）
+let supabaseClient = null;
+
+// 全局数据存储
+let examSessionsData = []; // 存储从数据库加载的场次数据
+let examProductsData = []; // 存储从数据库加载的产品数据
+let validatedCoupon = null; // 存储已验证的专属代码信息
+let selectedSessionId = null; // 当前选中的场次ID
+
+// ============================================
+// 地点映射配置（支持动态扩展）
+// ============================================
+const LOCATION_MAPPINGS = {
+    'BJ': '北京',
+    'CD': '成都',
+    'GZ': '广州',
+    'HZ': '杭州',
+    'NJ': '南京',
+    'QD': '青岛',
+    'SH': '上海',
+    'SZ': '深圳',
+    'WX': '无锡',
+    'XA': '西安',
+    'ZZ': '郑州'
+    // 可根据需要添加更多城市
+};
+
+// 地点代码转中文名称
+function getLocationName(locationCode) {
+    if (!locationCode) return locationCode;
+    // 如果已经是中文名称，直接返回
+    if (Object.values(LOCATION_MAPPINGS).includes(locationCode)) {
+        return locationCode;
+    }
+    // 转换为大写以支持不同大小写格式
+    const code = locationCode.toString().toUpperCase();
+    return LOCATION_MAPPINGS[code] || locationCode;
+}
+
+// 中文名称转地点代码
+function getLocationCode(locationName) {
+    if (!locationName) return locationName;
+    // 如果已经是代码格式，直接返回
+    if (LOCATION_MAPPINGS[locationName.toUpperCase()]) {
+        return locationName.toUpperCase();
+    }
+    // 查找对应的代码
+    for (const [code, name] of Object.entries(LOCATION_MAPPINGS)) {
+        if (name === locationName) {
+            return code;
+        }
+    }
+    return locationName;
+}
+
+// Supabase REST API 辅助函数
+async function supabaseQuery(table, options = {}) {
+    const { select = '*', filter = '', order = '', limit = null } = options;
+    
+    let url = `${SUPABASE_URL}/rest/v1/${table}?select=${select}`;
+    
+    if (filter) {
+        url += `&${filter}`;
+    }
+    
+    if (order) {
+        url += `&order=${order}`;
+    }
+    
+    if (limit) {
+        url += `&limit=${limit}`;
+    }
+    
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Supabase query failed: ${response.status} ${response.statusText}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error(`Error querying ${table}:`, error);
+        throw error;
+    }
+}
+
+// 加载考试场次数据
+async function loadExamSessions() {
+    try {
+        console.log('🔄 正在从 Supabase 加载考试场次数据...');
+        const sessions = await supabaseQuery('exam_sessions', {
+            select: '*',
+            filter: 'is_active=eq.true',
+            order: 'date.asc'
+        });
+        
+        examSessionsData = sessions;
+        console.log('✅ 成功加载场次数据:', sessions.length, '个场次');
+        return sessions;
+    } catch (error) {
+        console.error('❌ 加载场次数据失败:', error);
+        // 如果加载失败，显示错误提示但不阻止页面使用
+        showNotification('加载考试场次数据失败，请刷新页面重试', 'error');
+        return [];
+    }
+}
+
+// 加载考试产品数据
+async function loadExamProducts() {
+    try {
+        console.log('🔄 正在从 Supabase 加载产品价格数据...');
+        const products = await supabaseQuery('exam_products', {
+            select: '*',
+            filter: 'is_active=eq.true',
+            order: 'level.asc,module_type.asc'
+        });
+        
+        examProductsData = products;
+        console.log('✅ 成功加载产品数据:', products.length, '个产品');
+        return products;
+    } catch (error) {
+        console.error('❌ 加载产品数据失败:', error);
+        showNotification('加载产品价格数据失败，请刷新页面重试', 'error');
+        return [];
+    }
+}
+
+// 验证专属代码
+async function validateCouponCode(couponCode, sessionId) {
+    if (!couponCode || !couponCode.trim()) {
+        return { valid: false, message: '请输入专属代码' };
+    }
+    
+    if (!sessionId) {
+        return { valid: false, message: '请先选择考试场次' };
+    }
+    
+    try {
+        console.log('🔄 正在验证专属代码:', couponCode, '场次ID:', sessionId);
+        
+        // 查询专属代码：检查code、is_active和session_id
+        const coupons = await supabaseQuery('coupons', {
+            select: '*',
+            filter: `code=eq.${encodeURIComponent(couponCode.trim())}&is_active=eq.true&session_id=eq.${sessionId}`
+        });
+        
+        if (coupons.length === 0) {
+            return { valid: false, message: '专属代码无效或不适用于此场次' };
+        }
+        
+        const coupon = coupons[0];
+        
+        validatedCoupon = coupon;
+        console.log('✅ 专属代码验证成功:', coupon);
+        return { valid: true, message: '专属代码验证成功！', coupon: coupon };
+    } catch (error) {
+        console.error('❌ 验证专属代码失败:', error);
+        return { valid: false, message: '验证专属代码时发生错误，请稍后重试' };
+    }
+}
+
+// 显示通知消息
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#2196F3'};
+        color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10000;
+        max-width: 400px;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
 // 移动端检测和调试工具函数
 function getMobileInfo() {
     const userAgent = navigator.userAgent;
@@ -64,7 +267,198 @@ function getBeijingTimeString() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+// ============================================
+// 动态生成场次和产品HTML的函数
+// ============================================
+
+// 格式化日期显示
+function formatDateForDisplay(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}年${month}月${day}日`;
+}
+
+// 动态生成场次选择HTML
+function renderExamSessions(sessions) {
+    const sessionSelectionContainer = document.querySelector('.session-selection');
+    if (!sessionSelectionContainer) {
+        console.error('找不到场次选择容器');
+        return;
+    }
+    
+    // 清空现有内容
+    sessionSelectionContainer.innerHTML = '';
+    
+    if (sessions.length === 0) {
+        sessionSelectionContainer.innerHTML = '<p style="color: #999; padding: 20px; text-align: center;">暂无可用考试场次</p>';
+        return;
+    }
+    
+    sessions.forEach(session => {
+        const locationName = getLocationName(session.location);
+        const dateDisplay = formatDateForDisplay(session.date);
+        const isActive = session.is_active !== false;
+        
+        // 格式化报名截止日期
+        let deadlineDisplay = '';
+        if (session.is_active_until) {
+            const deadlineDate = new Date(session.is_active_until);
+            const year = deadlineDate.getFullYear();
+            const month = String(deadlineDate.getMonth() + 1).padStart(2, '0');
+            const day = String(deadlineDate.getDate()).padStart(2, '0');
+            deadlineDisplay = `报名截止：${year}年${month}月${day}日`;
+        }
+        
+        const sessionOption = document.createElement('label');
+        sessionOption.className = 'session-option';
+        if (!isActive) {
+            sessionOption.style.opacity = '0.5';
+            sessionOption.style.cursor = 'not-allowed';
+        }
+        
+        sessionOption.innerHTML = `
+            <input 
+                type="checkbox" 
+                name="selectedVenues" 
+                value="${locationName}" 
+                data-venue="${locationName}" 
+                data-date="${dateDisplay}"
+                data-session-id="${session.id}"
+                data-session-date="${session.date}"
+                data-deadline="${session.is_active_until || ''}"
+                ${!isActive ? 'disabled' : ''}
+            >
+            <span class="session-info">
+                <strong>${locationName}考场</strong>
+                <small>考试日期：${dateDisplay}</small>
+                ${deadlineDisplay ? `<small style="color: #ff9800; display: block; margin-top: 2px;">${deadlineDisplay}</small>` : ''}
+                ${!isActive ? '<small style="color: #f44336; display: block; margin-top: 4px;">报名已截止</small>' : ''}
+            </span>
+        `;
+        
+        sessionSelectionContainer.appendChild(sessionOption);
+    });
+}
+
+// 动态生成产品选项HTML
+function renderExamProducts(session, products) {
+    // 根据场次ID找到对应的场次数据
+    const sessionData = examSessionsData.find(s => s.id === session.id);
+    if (!sessionData) {
+        console.error('找不到场次数据:', session.id);
+        return;
+    }
+    
+    const locationCode = getLocationCode(session.location);
+    const levels = sessionData.levels || [];
+    
+    // 创建场次选项容器
+    const venueOptionsId = `${locationCode.toLowerCase()}Options`;
+    let venueOptionsContainer = document.getElementById(venueOptionsId);
+    
+    if (!venueOptionsContainer) {
+        // 如果容器不存在，创建一个新的
+        venueOptionsContainer = document.createElement('div');
+        venueOptionsContainer.className = 'form-group venue-options';
+        venueOptionsContainer.id = venueOptionsId;
+        venueOptionsContainer.style.display = 'none';
+        
+        const sessionSelection = document.querySelector('.session-selection').parentElement;
+        sessionSelection.insertAdjacentElement('afterend', venueOptionsContainer);
+    }
+    
+    const dateDisplay = formatDateForDisplay(session.date);
+    const locationName = getLocationName(session.location);  // 🔧 修复：转换地点代码为中文
+    venueOptionsContainer.innerHTML = `
+        <label>${locationName}考场 - ${dateDisplay} 考试科目</label>
+        <div class="exam-venue-container" id="${venueOptionsId}-container"></div>
+        <div class="form-note">
+            💡 选择全科后，同等级的单科选项将自动禁用。
+        </div>
+    `;
+    
+    const container = venueOptionsContainer.querySelector(`#${venueOptionsId}-container`);
+    
+    // 按等级分组产品
+    const productsByLevel = {};
+    levels.forEach(level => {
+        productsByLevel[level] = products.filter(p => 
+            p.level === level && 
+            p.location === locationCode && 
+            p.is_active !== false
+        );
+    });
+    
+    // 为每个等级生成HTML
+    Object.keys(productsByLevel).sort().forEach(level => {
+        const levelProducts = productsByLevel[level];
+        if (levelProducts.length === 0) return;
+        
+        const levelSection = document.createElement('div');
+        levelSection.className = 'level-section';
+        
+        const levelTitle = document.createElement('h4');
+        levelTitle.textContent = `${level}等级`;
+        levelSection.appendChild(levelTitle);
+        
+        const examTypeGroup = document.createElement('div');
+        examTypeGroup.className = 'exam-type-group';
+        
+        // 先添加全科选项
+        const fullProduct = levelProducts.find(p => p.module_type === 'Full');
+        if (fullProduct) {
+            const fullLabel = document.createElement('label');
+            fullLabel.className = 'checkbox-label';
+            fullLabel.innerHTML = `
+                <input 
+                    type="checkbox" 
+                    name="examSessions" 
+                    value="${fullProduct.code}" 
+                    data-level="${level}" 
+                    data-location="${session.location}"
+                    data-product-id="${fullProduct.id}"
+                >
+                <span>${fullProduct.name}</span>
+            `;
+            examTypeGroup.appendChild(fullLabel);
+        }
+        
+        // 添加单科选项
+        const singleProducts = levelProducts.filter(p => p.module_type !== 'Full');
+        if (singleProducts.length > 0) {
+            const singleModulesDiv = document.createElement('div');
+            singleModulesDiv.className = 'single-modules';
+            singleModulesDiv.style.marginLeft = '20px';
+            
+            singleProducts.forEach(product => {
+                const singleLabel = document.createElement('label');
+                singleLabel.className = 'checkbox-label';
+                singleLabel.innerHTML = `
+                    <input 
+                        type="checkbox" 
+                        name="examSessions" 
+                        value="${product.code}" 
+                        data-level="${level}" 
+                        data-location="${session.location}"
+                        data-single="true"
+                        data-product-id="${product.id}"
+                    >
+                    <span>${product.name}</span>
+                `;
+                singleModulesDiv.appendChild(singleLabel);
+            });
+            
+            examTypeGroup.appendChild(singleModulesDiv);
+        }
+        
+        levelSection.appendChild(examTypeGroup);
+        container.appendChild(levelSection);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
     const form = document.getElementById('registrationForm');
     const successMessage = document.getElementById('successMessage');
     const submitBtn = document.querySelector('.submit-btn');
@@ -74,6 +468,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 加载开发配置并预填写表单
     loadDevConfig();
+    
+    // 从 Supabase 加载数据
+    try {
+        await Promise.all([
+            loadExamSessions(),
+            loadExamProducts()
+        ]);
+        
+        // 渲染场次选择
+        if (examSessionsData.length > 0) {
+            renderExamSessions(examSessionsData);
+        } else {
+            console.warn('⚠️ 没有可用的考试场次');
+            const sessionSelectionContainer = document.querySelector('.session-selection');
+            if (sessionSelectionContainer) {
+                sessionSelectionContainer.innerHTML = '<p style="color: #999; padding: 20px; text-align: center;">暂无可用考试场次，请稍后再试</p>';
+            }
+        }
+    } catch (error) {
+        console.error('❌ 初始化数据加载失败:', error);
+        showNotification('加载数据失败，请刷新页面重试', 'error');
+    }
 
     // 国籍选择逻辑
     nationalitySelect.addEventListener('change', function() {
@@ -107,98 +523,277 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 场次选择逻辑
-    const venueCheckboxes = document.querySelectorAll('input[name="selectedVenues"]');
-    const chengduOptions = document.getElementById('chengduOptions');
-
-    venueCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const venue = this.value;
-            const isChecked = this.checked;
+    // 场次选择逻辑（使用事件委托，支持动态生成的元素）
+    // 🔒 限制：只能选择1天的考试
+    document.addEventListener('change', function(e) {
+        if (e.target.name === 'selectedVenues') {
+            const checkbox = e.target;
+            const venue = checkbox.value;
+            const sessionId = checkbox.dataset.sessionId;
+            const isChecked = checkbox.checked;
             
             // 更新选项样式
             if (isChecked) {
-                this.closest('.session-option').classList.add('selected');
+                checkbox.closest('.session-option').classList.add('selected');
+                selectedSessionId = sessionId;
+                
+                // 🔒 禁用其他所有场次（只能选1天）
+                const allVenueCheckboxes = document.querySelectorAll('input[name="selectedVenues"]');
+                allVenueCheckboxes.forEach(cb => {
+                    if (cb !== checkbox) {
+                        // 取消其他场次的选中状态
+                        if (cb.checked) {
+                            cb.checked = false;
+                            cb.closest('.session-option').classList.remove('selected');
+                            
+                            // 隐藏该场次的考试选项
+                            const otherVenue = cb.value;
+                            const otherLocationCode = getLocationCode(otherVenue);
+                            const otherVenueOptionsId = `${otherLocationCode.toLowerCase()}Options`;
+                            const otherVenueOptions = document.getElementById(otherVenueOptionsId);
+                            if (otherVenueOptions) {
+                                otherVenueOptions.style.display = 'none';
+                            }
+                        }
+                        
+                        // 禁用其他场次
+                        cb.disabled = true;
+                        const sessionOption = cb.closest('.session-option');
+                        if (sessionOption) {
+                            sessionOption.style.opacity = '0.5';
+                            sessionOption.style.cursor = 'not-allowed';
+                            sessionOption.style.pointerEvents = 'none';
+                        }
+                    }
+                });
+                
+                console.log('✅ 已选择场次，其他场次已禁用');
             } else {
-                this.closest('.session-option').classList.remove('selected');
+                checkbox.closest('.session-option').classList.remove('selected');
+                if (selectedSessionId === sessionId) {
+                    selectedSessionId = null;
+                }
+                
+                // 🔓 解除对其他场次的禁用
+                const anyChecked = document.querySelector('input[name="selectedVenues"]:checked');
+                if (!anyChecked) {
+                    const allVenueCheckboxes = document.querySelectorAll('input[name="selectedVenues"]');
+                    allVenueCheckboxes.forEach(cb => {
+                        // 恢复场次（除非是原本就禁用的）
+                        const wasOriginallyDisabled = cb.getAttribute('disabled') === 'disabled' && cb !== checkbox;
+                        if (!wasOriginallyDisabled) {
+                            cb.disabled = false;
+                            const sessionOption = cb.closest('.session-option');
+                            if (sessionOption) {
+                                sessionOption.style.opacity = '1';
+                                sessionOption.style.cursor = 'pointer';
+                                sessionOption.style.pointerEvents = 'auto';
+                            }
+                        }
+                    });
+                    console.log('✅ 已取消选择，所有场次已恢复');
+                }
+            }
+            
+            // 找到对应的场次数据
+            const sessionData = examSessionsData.find(s => s.id === sessionId);
+            if (!sessionData) {
+                console.error('找不到场次数据:', sessionId);
+                return;
             }
             
             // 显示/隐藏对应的考试选项
-            if (venue === '成都') {
-                if (isChecked) {
-                    chengduOptions.style.display = 'block';
+            const locationCode = getLocationCode(venue);
+            const venueOptionsId = `${locationCode.toLowerCase()}Options`;
+            const venueOptions = document.getElementById(venueOptionsId);
+            
+            if (isChecked) {
+                // 如果选项容器不存在，先渲染产品
+                if (!venueOptions || !venueOptions.querySelector('.exam-venue-container')) {
+                    renderExamProducts({ id: sessionId, location: venue, date: sessionData.date }, examProductsData);
+                }
+                
+                const optionsContainer = document.getElementById(venueOptionsId);
+                if (optionsContainer) {
+                    optionsContainer.style.display = 'block';
                     setTimeout(() => {
-                        chengduOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        optionsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 100);
-                } else {
-                    chengduOptions.style.display = 'none';
-                    // 清除成都考场的所有选择
-                    const chengduExams = document.querySelectorAll('input[name="examSessions"][data-location="成都"]');
-                    chengduExams.forEach(exam => {
+                }
+            } else {
+                if (venueOptions) {
+                    venueOptions.style.display = 'none';
+                    // 清除该考场的所有选择
+                    const venueExams = document.querySelectorAll(`input[name="examSessions"][data-location="${venue}"]`);
+                    venueExams.forEach(exam => {
                         exam.checked = false;
                         exam.disabled = false;
                         exam.closest('.checkbox-label').classList.remove('disabled');
                     });
-                    // 清除成都考场的错误提示
-                    const chengduError = chengduOptions.querySelector('.venue-error');
-                    if (chengduError) {
-                        chengduError.remove();
+                    // 清除错误提示
+                    const venueError = venueOptions.querySelector('.venue-error');
+                    if (venueError) {
+                        venueError.remove();
                     }
                 }
             }
             
             // 清除场次选择的错误提示
             clearError('selectedVenues');
-        });
+            
+            // 如果取消场次选择，清除专属代码
+            if (!isChecked && validatedCoupon && validatedCoupon.session_id === sessionId) {
+                validatedCoupon = null;
+                const couponInput = document.getElementById('couponCode');
+                const couponStatus = document.getElementById('couponStatus');
+                if (couponInput) couponInput.value = '';
+                if (couponStatus) couponStatus.innerHTML = '';
+                // 重新计算费用
+                updateFeeDisplay();
+            }
+        }
     });
 
-    // 考试场次选择逻辑
-    const examSessionCheckboxes = document.querySelectorAll('input[name="examSessions"]');
-    examSessionCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const level = this.dataset.level;
-            const location = this.dataset.location;
-            const isSingle = this.dataset.single === 'true';
+    // 专属代码验证按钮事件
+    const validateCouponBtn = document.getElementById('validateCouponBtn');
+    const couponCodeInput = document.getElementById('couponCode');
+    const couponStatus = document.getElementById('couponStatus');
+    
+    if (validateCouponBtn && couponCodeInput) {
+        validateCouponBtn.addEventListener('click', async function() {
+            const couponCode = couponCodeInput.value.trim();
+            const sessionCheckbox = document.querySelector('input[name="selectedVenues"]:checked');
             
-            if (this.checked && !isSingle) {
-                // 如果选择了全科，禁用同级别同地点的单科
-                const singleModules = document.querySelectorAll(`input[name="examSessions"][data-level="${level}"][data-location="${location}"][data-single="true"]`);
-                singleModules.forEach(module => {
-                    module.disabled = true;
-                    module.checked = false;
-                    module.closest('.checkbox-label').classList.add('disabled');
-                });
-            } else if (!this.checked && !isSingle) {
-                // 如果取消选择全科，启用同级别同地点的单科
-                const singleModules = document.querySelectorAll(`input[name="examSessions"][data-level="${level}"][data-location="${location}"][data-single="true"]`);
-                singleModules.forEach(module => {
-                    module.disabled = false;
-                    module.closest('.checkbox-label').classList.remove('disabled');
-                });
-            } else if (this.checked && isSingle) {
-                // 如果选择了单科，检查是否需要禁用全科
-                const allSingleModules = document.querySelectorAll(`input[name="examSessions"][data-level="${level}"][data-location="${location}"][data-single="true"]`);
-                const checkedSingleModules = Array.from(allSingleModules).filter(module => module.checked);
+            if (!sessionCheckbox) {
+                showNotification('请先选择考试场次', 'error');
+                return;
+            }
+            
+            const sessionId = sessionCheckbox.dataset.sessionId;
+            
+            if (!couponCode) {
+                showNotification('请输入专属代码', 'error');
+                return;
+            }
+            
+            // 显示验证中状态
+            validateCouponBtn.disabled = true;
+            validateCouponBtn.textContent = '验证中...';
+            couponStatus.innerHTML = '<span style="color: #2196F3;">正在验证...</span>';
+            
+            try {
+                const result = await validateCouponCode(couponCode, sessionId);
                 
-                if (checkedSingleModules.length === allSingleModules.length) {
-                    // 如果所有单科都被选中，禁用全科
-                    const fullExam = document.querySelector(`input[name="examSessions"][data-level="${level}"][data-location="${location}"]:not([data-single])`);
-                    if (fullExam) {
-                        fullExam.disabled = true;
-                        fullExam.closest('.checkbox-label').classList.add('disabled');
+                if (result.valid) {
+                    couponStatus.innerHTML = '<span style="color: #4CAF50;">✅ 专属代码验证成功！</span>';
+                    showNotification('专属代码验证成功！', 'success');
+                    // 重新计算费用
+                    updateFeeDisplay();
+                } else {
+                    couponStatus.innerHTML = `<span style="color: #f44336;">❌ ${result.message}</span>`;
+                    showNotification(result.message, 'error');
+                    validatedCoupon = null;
+                }
+            } catch (error) {
+                console.error('验证专属代码时发生错误:', error);
+                couponStatus.innerHTML = '<span style="color: #f44336;">❌ 验证失败，请稍后重试</span>';
+                showNotification('验证失败，请稍后重试', 'error');
+                validatedCoupon = null;
+            } finally {
+                validateCouponBtn.disabled = false;
+                validateCouponBtn.textContent = '验证专属代码';
+            }
+        });
+        
+        // 专属代码输入框变化时清除验证状态
+        couponCodeInput.addEventListener('input', function() {
+            if (validatedCoupon) {
+                validatedCoupon = null;
+                couponStatus.innerHTML = '';
+                updateFeeDisplay();
+            }
+        });
+    }
+    
+    // 考试场次选择逻辑（使用事件委托，支持动态生成的元素）
+    // 新增限制：只能选择1个等级
+    document.addEventListener('change', function(e) {
+        if (e.target.name === 'examSessions') {
+            const checkbox = e.target;
+            const level = checkbox.dataset.level;
+            const location = checkbox.dataset.location;
+            const isSingle = checkbox.dataset.single === 'true';
+            
+            if (checkbox.checked) {
+                // 🔒 新增：禁用其他等级的考试（只能选1个等级）
+                const allExamCheckboxes = document.querySelectorAll('input[name="examSessions"]');
+                allExamCheckboxes.forEach(cb => {
+                    if (cb.dataset.level !== level) {
+                        cb.disabled = true;
+                        cb.checked = false;
+                        cb.closest('.checkbox-label').classList.add('disabled');
+                        cb.closest('.checkbox-label').style.opacity = '0.5';
+                    }
+                });
+                
+                if (!isSingle) {
+                    // 如果选择了全科，禁用同级别同地点的单科
+                    const singleModules = document.querySelectorAll(`input[name="examSessions"][data-level="${level}"][data-location="${location}"][data-single="true"]`);
+                    singleModules.forEach(module => {
+                        module.disabled = true;
+                        module.checked = false;
+                        module.closest('.checkbox-label').classList.add('disabled');
+                    });
+                } else {
+                    // 如果选择了单科，检查是否需要禁用全科
+                    const allSingleModules = document.querySelectorAll(`input[name="examSessions"][data-level="${level}"][data-location="${location}"][data-single="true"]`);
+                    const checkedSingleModules = Array.from(allSingleModules).filter(module => module.checked);
+                    
+                    if (checkedSingleModules.length === allSingleModules.length) {
+                        // 如果所有单科都被选中，禁用全科
+                        const fullExam = document.querySelector(`input[name="examSessions"][data-level="${level}"][data-location="${location}"]:not([data-single])`);
+                        if (fullExam) {
+                            fullExam.disabled = true;
+                            fullExam.closest('.checkbox-label').classList.add('disabled');
+                        }
                     }
                 }
-            } else if (!this.checked && isSingle) {
-                // 如果取消选择单科，启用全科
-                const fullExam = document.querySelector(`input[name="examSessions"][data-level="${level}"][data-location="${location}"]:not([data-single])`);
-                if (fullExam) {
-                    fullExam.disabled = false;
-                    fullExam.closest('.checkbox-label').classList.remove('disabled');
+            } else {
+                // 检查是否还有该等级的其他科目被选中
+                const sameLevelChecked = document.querySelector(`input[name="examSessions"][data-level="${level}"]:checked`);
+                
+                if (!sameLevelChecked) {
+                    // 🔓 如果该等级没有任何科目被选中，解除对其他等级的禁用
+                    const allExamCheckboxes = document.querySelectorAll('input[name="examSessions"]');
+                    allExamCheckboxes.forEach(cb => {
+                        cb.disabled = false;
+                        cb.closest('.checkbox-label').classList.remove('disabled');
+                        cb.closest('.checkbox-label').style.opacity = '1';
+                    });
+                }
+                
+                if (!isSingle) {
+                    // 如果取消选择全科，启用同级别同地点的单科
+                    const singleModules = document.querySelectorAll(`input[name="examSessions"][data-level="${level}"][data-location="${location}"][data-single="true"]`);
+                    singleModules.forEach(module => {
+                        if (!sameLevelChecked) {
+                            module.disabled = false;
+                        }
+                        module.closest('.checkbox-label').classList.remove('disabled');
+                    });
+                } else {
+                    // 如果取消选择单科，启用全科
+                    const fullExam = document.querySelector(`input[name="examSessions"][data-level="${level}"][data-location="${location}"]:not([data-single])`);
+                    if (fullExam && !sameLevelChecked) {
+                        fullExam.disabled = false;
+                        fullExam.closest('.checkbox-label').classList.remove('disabled');
+                    }
                 }
             }
             
             // 清除当前场次的错误提示
-            const currentVenueOptionsId = 'chengduOptions';
+            const locationCode = getLocationCode(location);
+            const currentVenueOptionsId = `${locationCode.toLowerCase()}Options`;
             const currentVenueOptions = document.getElementById(currentVenueOptionsId);
             if (currentVenueOptions) {
                 const venueError = currentVenueOptions.querySelector('.venue-error');
@@ -206,7 +801,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     venueError.remove();
                 }
             }
-        });
+            
+            // 更新费用显示
+            updateFeeDisplay();
+        }
     });
 
     // 文件上传处理
@@ -285,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 费用计算函数
+    // 费用计算函数（从数据库读取价格，支持专属代码）
     function calculateTotalFee(examSessions) {
         // 输入验证
         if (!examSessions || !Array.isArray(examSessions)) {
@@ -295,69 +893,150 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         }
         
-        // 费用表 - 更新为新的考试选项格式
-        const feeTable = {
-            'A1_BJ_VIP': 2000,      // 北京A1全科（VIP专场）
-            'A1_CD_Full': 1550,     // 成都A1全科
-            'A1_CD_Written': 950,   // 成都A1笔试
-            'A1_CD_Oral': 600,      // 成都A1口试
-            'A2_CD_Full': 1650,     // 成都A2全科
-            'A2_CD_Written': 1000,  // 成都A2笔试
-            'A2_CD_Oral': 650,      // 成都A2口试
-            'B1_CD_Full': 2000,     // 成都B1全科
-            'B1_CD_Listening': 600, // 成都B1听力
-            'B1_CD_Oral': 600,      // 成都B1口语
-            'B1_CD_Reading': 600,   // 成都B1阅读
-            'B1_CD_Written': 800    // 成都B1写作
-        };
+        if (examProductsData.length === 0) {
+            console.warn('⚠️ 产品数据未加载，使用默认价格');
+            return {
+                totalFee: 0,
+                details: []
+            };
+        }
+        
+        // 🆕 检查是否选择了某个等级的所有单科，如果是则按全科计算
+        const processedSessions = checkAndConvertToFullCourse(examSessions);
         
         let totalFee = 0;
         const feeDetails = [];
+        const useCoupon = validatedCoupon !== null;
         
-        examSessions.forEach(session => {
-            if (feeTable[session]) {
-                const fee = feeTable[session];
-                totalFee += fee;
-                
-                // 解析考试选项名称用于显示
-                let description = '';
-                if (session === 'A1_BJ_VIP') {
-                    description = '北京 A1全科（VIP专场）';
-                } else if (session === 'A1_CD_Full') {
-                    description = '成都 A1全科';
-                } else if (session === 'A2_CD_Full') {
-                    description = '成都 A2全科';
-                } else if (session === 'B1_CD_Full') {
-                    description = '成都 B1全科';
-                } else if (session.startsWith('A1_CD_')) {
-                    const type = session.includes('Written') ? '笔试' : '口试';
-                    description = `成都 A1${type}`;
-                } else if (session.startsWith('A2_CD_')) {
-                    const type = session.includes('Written') ? '笔试' : '口试';
-                    description = `成都 A2${type}`;
-                } else if (session.startsWith('B1_CD_')) {
-                    const typeMap = {
-                        'Listening': '听力',
-                        'Oral': '口语',
-                        'Reading': '阅读',
-                        'Written': '写作'
-                    };
-                    const type = typeMap[session.split('_')[2]] || session.split('_')[2];
-                    description = `成都 B1${type}`;
-                }
-                
-                feeDetails.push({
-                    session: session,
-                    fee: fee,
-                    description: description
-                });
+        processedSessions.forEach(sessionCode => {
+            // 从数据库查找对应的产品
+            const product = examProductsData.find(p => p.code === sessionCode);
+            
+            if (!product) {
+                console.warn(`⚠️ 找不到产品: ${sessionCode}`);
+                return;
             }
+            
+            // 确定使用原价还是折后价
+            // 只有全科考试且已输入有效专属代码时才使用折后价
+            let fee = product.price_original; // 默认使用原价（单位：分）
+            let isDiscounted = false;
+            
+            if (useCoupon && product.module_type === 'Full' && product.price_discounted !== null) {
+                fee = product.price_discounted;
+                isDiscounted = true;
+            }
+            
+            // 转换为元（除以100）
+            const feeInYuan = fee / 100;
+            totalFee += feeInYuan;
+            
+            feeDetails.push({
+                session: sessionCode,
+                fee: feeInYuan,
+                description: product.name,
+                originalFee: product.price_original / 100,
+                discountedFee: product.price_discounted ? product.price_discounted / 100 : null,
+                isDiscounted: isDiscounted
+            });
         });
         
         return {
             totalFee: totalFee,
             details: feeDetails
         };
+    }
+    
+    // 🆕 检查并转换单科组合为全科
+    // 如果选择了某个等级的所有单科，自动转换为该等级的全科
+    function checkAndConvertToFullCourse(examSessions) {
+        // 解析选中的科目，按等级和地点分组
+        const levelMap = {};
+        
+        examSessions.forEach(code => {
+            const product = examProductsData.find(p => p.code === code);
+            if (!product) return;
+            
+            const key = `${product.level}_${product.location}`;
+            if (!levelMap[key]) {
+                levelMap[key] = {
+                    level: product.level,
+                    location: product.location,
+                    modules: [],
+                    codes: []
+                };
+            }
+            
+            levelMap[key].modules.push(product.module_type);
+            levelMap[key].codes.push(code);
+        });
+        
+        // 检查每个等级是否选择了所有单科
+        const result = [];
+        
+        Object.keys(levelMap).forEach(key => {
+            const group = levelMap[key];
+            const { level, location, modules, codes } = group;
+            
+            // 如果已经包含全科，直接使用
+            if (modules.includes('Full')) {
+                const fullCode = codes.find(c => c.includes('_Full'));
+                if (fullCode) {
+                    result.push(fullCode);
+                }
+                return;
+            }
+            
+            // 检查是否选择了所有单科
+            let allModulesSelected = false;
+            
+            if (level === 'A1' || level === 'A2') {
+                // A1 和 A2 需要选择 Written 和 Oral
+                allModulesSelected = modules.includes('Written') && modules.includes('Oral');
+            } else if (level === 'B1') {
+                // B1 需要选择 Listening、Reading、Oral 和 Written
+                allModulesSelected = 
+                    modules.includes('Listening') && 
+                    modules.includes('Reading') && 
+                    modules.includes('Oral') && 
+                    modules.includes('Written');
+            }
+            
+            if (allModulesSelected) {
+                // 查找对应的全科产品代码
+                const fullCourseCode = `${level}_${location}_Full`;
+                const fullProduct = examProductsData.find(p => p.code === fullCourseCode);
+                
+                if (fullProduct) {
+                    console.log(`✅ 检测到${level}等级所有单科已选中，自动转换为全科计算`);
+                    result.push(fullCourseCode);
+                } else {
+                    // 如果找不到全科产品，保留单科
+                    result.push(...codes);
+                }
+            } else {
+                // 如果不是所有单科，保留原样
+                result.push(...codes);
+            }
+        });
+        
+        return result;
+    }
+    
+    // 更新费用显示
+    function updateFeeDisplay() {
+        const checkedSessions = Array.from(document.querySelectorAll('input[name="examSessions"]:checked'))
+            .map(cb => cb.value);
+        
+        if (checkedSessions.length === 0) {
+            return;
+        }
+        
+        const calculation = calculateTotalFee(checkedSessions);
+        console.log('💰 费用计算:', calculation);
+        
+        // 这里可以添加费用显示逻辑，如果有费用显示区域的话
+        // 例如：document.getElementById('totalFeeDisplay').textContent = `¥${calculation.totalFee}`;
     }
 
     // 生成唯一的申请ID
@@ -372,34 +1051,19 @@ document.addEventListener('DOMContentLoaded', function() {
         return `OSD${randomNum}`;
     }
 
-    // 考试选项代码到中文名称的映射
-    const examSessionNameMap = {
-        'A1_BJ_VIP': '北京A1全科（VIP专场）',
-        'A1_CD_Full': '成都A1全科',
-        'A1_CD_Written': '成都A1笔试',
-        'A1_CD_Oral': '成都A1口试',
-        'A2_CD_Full': '成都A2全科',
-        'A2_CD_Written': '成都A2笔试',
-        'A2_CD_Oral': '成都A2口试',
-        'B1_CD_Full': '成都B1全科',
-        'B1_CD_Listening': '成都B1听力',
-        'B1_CD_Oral': '成都B1口语',
-        'B1_CD_Reading': '成都B1阅读',
-        'B1_CD_Written': '成都B1写作'
-    };
-
-    // 将考试选项代码转换为中文名称
+    // 将考试选项代码转换为中文名称（从数据库读取）
     function convertExamSessionsToChinese(examSessions) {
         if (!examSessions || !Array.isArray(examSessions)) {
             return '未选择考试科目';
         }
         
-        return examSessions.map(session => {
-            return examSessionNameMap[session] || session;
+        return examSessions.map(sessionCode => {
+            const product = examProductsData.find(p => p.code === sessionCode);
+            return product ? product.name : sessionCode;
         }).join('、');
     }
 
-    // 生成费用明细HTML用于邮件内容
+    // 生成费用明细HTML用于邮件内容（支持显示折扣信息）
     function generateFeeDetailsHtml(feeCalculation) {
         // 输入验证
         if (!feeCalculation || !feeCalculation.details || !Array.isArray(feeCalculation.details)) {
@@ -410,18 +1074,37 @@ document.addEventListener('DOMContentLoaded', function() {
             return '<div>未选择考试科目</div>';
         }
         
-        // 生成简化版费用明细HTML（避免特殊字符和复杂样式）
+        // 生成费用明细HTML（显示折扣信息）
         const feeItemsHtml = feeCalculation.details.map(detail => {
             // 转义特殊字符，确保JSON安全
             const safeDescription = detail.description.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            return `<div>${safeDescription}: ¥${detail.fee}</div>`;
+            
+            // 如果有折扣，显示原价和折后价
+            if (detail.isDiscounted && detail.originalFee !== detail.fee) {
+                return `<div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                    <span>${safeDescription}</span>
+                    <span>
+                        <span style="text-decoration: line-through; color: #999; margin-right: 8px;">¥${detail.originalFee}</span>
+                        <strong style="color: #4CAF50;">¥${detail.fee}</strong>
+                    </span>
+                </div>`;
+            } else {
+                return `<div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                    <span>${safeDescription}</span>
+                    <span><strong>¥${detail.fee}</strong></span>
+                </div>`;
+            }
         }).join('');
         
         // 简化的费用明细HTML（避免复杂嵌套和特殊字符）
         const simpleHtml = `<div>
             <h3>报名费用明细</h3>
             ${feeItemsHtml}
-            <div><strong>总计: ¥${feeCalculation.totalFee}</strong></div>
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 15px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold;">
+                <span>应付总额:</span>
+                <span style="color: #D9534F;">¥${feeCalculation.totalFee}</span>
+            </div>
             <p>请按照邮件指南完成缴费并上传付费凭证</p>
         </div>`;
         
@@ -777,28 +1460,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 根据考试场次生成考试日期字符串
+    // 根据考试场次生成考试日期字符串（从数据库读取）
     function generateExamDateString(examSessions) {
-        const cityDateMap = {
-            'CD': '2025/11/20'
-        };
+        if (!examSessions || examSessions.length === 0) {
+            return '待定';
+        }
         
-        // 提取所有涉及的城市
-        const cities = new Set();
-        examSessions.forEach(session => {
-            // 新的格式：A1_BJ_VIP, A1_CD_Written 等
-            if (session.includes('_CD_')) {
-                cities.add('CD');
+        // 从选中的场次checkbox获取日期信息
+        const selectedVenueCheckboxes = document.querySelectorAll('input[name="selectedVenues"]:checked');
+        const dates = [];
+        
+        selectedVenueCheckboxes.forEach(checkbox => {
+            const sessionId = checkbox.dataset.sessionId;
+            const sessionData = examSessionsData.find(s => s.id === sessionId);
+            
+            if (sessionData) {
+                const dateStr = sessionData.date;
+                const location = getLocationName(sessionData.location);
+                dates.push(`${dateStr} (${location})`);
             }
         });
         
-        // 根据城市生成日期字符串
-        const cityDates = Array.from(cities).map(city => {
-            const cityName = '成都';
-            return `${cityDateMap[city]} (${cityName})`;
-        }).sort(); // 按日期排序
-        
-        return cityDates.length > 0 ? cityDates.join(', ') : '待定';
+        return dates.length > 0 ? dates.join('； ') : '待定';
     }
 
     // 显示费用明细
@@ -839,6 +1522,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 existingDetails.remove();
             }
             feeInfoDiv.appendChild(feeDetailsContainer);
+        }
+    }
+    
+    // 🆕 更新报名截止日期提醒
+    function updateDeadlineReminder() {
+        const deadlineReminderElement = document.getElementById('deadlineReminder');
+        if (!deadlineReminderElement) return;
+        
+        // 获取选中的场次
+        const selectedVenueCheckbox = document.querySelector('input[name="selectedVenues"]:checked');
+        if (!selectedVenueCheckbox) return;
+        
+        const deadline = selectedVenueCheckbox.dataset.deadline;
+        if (deadline) {
+            const deadlineDate = new Date(deadline);
+            const year = deadlineDate.getFullYear();
+            const month = String(deadlineDate.getMonth() + 1).padStart(2, '0');
+            const day = String(deadlineDate.getDate()).padStart(2, '0');
+            const deadlineDisplay = `${year}年${month}月${day}日`;
+            
+            deadlineReminderElement.innerHTML = `<strong>确定时限：</strong>请务必在${deadlineDisplay}前完成所有确认步骤`;
         }
     }
 
@@ -1025,10 +1729,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const venueErrors = document.querySelectorAll('.venue-error');
             venueErrors.forEach(error => error.remove());
             
-            // 验证每个选中的场次都必须有对应的考试选项
-            checkedVenues.forEach(venue => {
-                const venueValue = venue.value;
-                const venueOptionsId = venueValue === '北京' ? 'beijingOptions' : 'chengduOptions';
+            // 验证每个选中的场次都必须有对应的考试选项，并检查is_active状态
+            checkedVenues.forEach(venueCheckbox => {
+                const venueValue = venueCheckbox.value;
+                const sessionId = venueCheckbox.dataset.sessionId;
+                
+                // 检查场次是否激活
+                const sessionData = examSessionsData.find(s => s.id === sessionId);
+                if (sessionData && sessionData.is_active === false) {
+                    isValid = false;
+                    showError('selectedVenues', '所选场次报名已截止');
+                    if (!firstErrorElement) {
+                        firstErrorElement = venueCheckbox.closest('.session-option');
+                    }
+                    return;
+                }
+                
+                // 找到对应的选项容器（动态生成的ID）
+                const locationCode = getLocationCode(venueValue);
+                const venueOptionsId = `${locationCode.toLowerCase()}Options`;
                 const venueOptions = document.getElementById(venueOptionsId);
                 
                 if (venueOptions && venueOptions.style.display !== 'none') {
@@ -1177,6 +1896,10 @@ document.addEventListener('DOMContentLoaded', function() {
         deadlineDate.setDate(deadlineDate.getDate() + 7);
         const deadlineDateString = deadlineDate.toISOString().split('T')[0]; // 格式: YYYY-MM-DD
 
+        // 获取专属代码信息
+        const couponCode = document.getElementById('couponCode')?.value.trim() || '';
+        const couponUsed = validatedCoupon ? validatedCoupon.code : null;
+        
         // 准备JSON数据对象
         const submitData = {
             applicationID: applicationID,
@@ -1207,7 +1930,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // 添加考试科目的中文显示名称
             examSessionsDisplay: examSessionsDisplay,
             // 添加格式化的时间戳用于邮件显示
-            originalSubmissionTimeFormatted: originalSubmissionTimeFormatted
+            originalSubmissionTimeFormatted: originalSubmissionTimeFormatted,
+            // 添加专属代码信息
+            couponCode: couponUsed,
+            couponApplied: !!couponUsed
         };
         
         console.log('📋 完整提交数据:', submitData);
@@ -1309,6 +2035,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 计算并显示费用
                 displayFeeCalculation(submitData.examSessions);
+                
+                // 🆕 更新报名截止日期提醒
+                updateDeadlineReminder();
                 
                 // 存储提交数据到localStorage
                 localStorage.setItem('formSubmission', JSON.stringify({

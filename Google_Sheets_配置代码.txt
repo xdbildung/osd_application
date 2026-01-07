@@ -1,0 +1,97 @@
+// ============================================
+// Google Sheets 节点 - 优化后的列映射配置
+// 不区分城市，使用正则表达式匹配所有城市
+// ============================================
+
+{
+  "mappingMode": "defineBelow",
+  "value": {
+    // ========================================
+    // 基础学生信息
+    // ========================================
+    "ChineseName": "={{ $json.body.lastName }}{{ $json.body.firstName }}",
+    "FirstName": "={{ $json.body.firstName }}",
+    "LastName": "={{ $json.body.lastName }}",
+    "Gender": "={{ $json.body.gender }}",
+    "BirthDate": "={{ $json.body.birthDate }}",
+    "Nationality": "={{ $json.body.nationality }}",
+    "BirthPlace": "={{ $json.body.birthPlace }}",
+    "Passport": "={{ $json.body.passportNumber }}",
+    "E-mail": "={{ $json.body.email }}",
+    "Mobile": "={{ $json.body.phoneNumber }}",
+    "First_Time": "={{ $json.body.firstTimeExam }}",
+    "applicationID": "={{ $json.body.applicationID }}",
+    "Reg_Time": "={{ $json.body.timestamp }}",
+    
+    // ========================================
+    // 🆕 考试信息（支持所有城市）
+    // ========================================
+    "ExamLocation": "={{ $json.body.examLocations }}",
+    "TestDate": "={{ $json.body.examDate }}",
+    
+    // ========================================
+    // 🆕 A1 等级科目（不区分城市，动态匹配）
+    // ========================================
+    "A1_Full": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^A1_[A-Z]+_Full$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    "A1_Written": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^A1_[A-Z]+_(Written|Full)$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    "A1_Oral": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^A1_[A-Z]+_(Oral|Full)$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    
+    // ========================================
+    // 🆕 A2 等级科目（不区分城市，动态匹配）
+    // ========================================
+    "A2_Full": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^A2_[A-Z]+_Full$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    "A2_Written": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^A2_[A-Z]+_(Written|Full)$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    "A2_Oral": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^A2_[A-Z]+_(Oral|Full)$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    
+    // ========================================
+    // 🆕 B1 等级科目（不区分城市，动态匹配）
+    // ========================================
+    "B1_Full": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^B1_[A-Z]+_Full$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    "B1_Listening": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^B1_[A-Z]+_(Listening|Full)$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    "B1_Reading": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^B1_[A-Z]+_(Reading|Full)$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    "B1_Oral": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^B1_[A-Z]+_(Oral|Full)$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    "B1_Written": "={{ $json.body.examSessions ? ($json.body.examSessions.some(s => s.match(/^B1_[A-Z]+_(Written|Full)$/)) ? 'TRUE' : 'FALSE') : 'FALSE' }}",
+    
+    // ========================================
+    // 🆕 费用和专属代码信息
+    // ========================================
+    "totalFee": "={{ $json.body.totalFee }}",
+    "CouponCode": "={{ $json.body.couponCodeUsed }}",
+    "CouponApplied": "={{ $json.body.hasCoupon ? 'TRUE' : 'FALSE' }}",
+    
+    // ========================================
+    // 其他状态
+    // ========================================
+    "PassportUploaded": "={{ $json.body.passportUpload ? 'TRUE' : 'FALSE' }}"
+  },
+  "matchingColumns": [],
+  "attemptToConvertTypes": false,
+  "convertFieldsToString": false
+}
+
+// ============================================
+// 使用说明：
+// ============================================
+// 1. 在 Google Sheets 中添加以下列（如果还没有）：
+//    - ExamLocation
+//    - A1_Full, A1_Written, A1_Oral
+//    - A2_Full, A2_Written, A2_Oral
+//    - B1_Full, B1_Listening, B1_Reading, B1_Oral, B1_Written
+//    - CouponCode, CouponApplied
+//
+// 2. 删除旧的按城市分列的列（可选）：
+//    - A1_CD_Written, A1_CD_Oral
+//    - A2_CD_Written, A2_CD_Oral
+//    - B1_CD_Listening, B1_CD_Oral, B1_CD_Reading, B1_CD_Written
+//    - A1_BJ_VIP
+//
+// 3. 在 n8n 的 Google Sheets 节点中：
+//    - 将上面的配置粘贴到 "Columns" 设置中
+//    - 保存节点
+//    - 测试执行
+//
+// 4. 验证：
+//    - 提交测试表单（选择不同城市）
+//    - 检查 Google Sheets 中的数据是否正确
+//
+// ============================================
