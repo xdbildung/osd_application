@@ -1899,7 +1899,28 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 获取专属代码信息
         const couponCode = document.getElementById('couponCode')?.value.trim() || '';
         const couponUsed = validatedCoupon ? validatedCoupon.code : null;
+
+        // 从选中的场次中提取报名截止日期 (is_active_until)
+        const selectedVenueCheckboxes = document.querySelectorAll('input[name="selectedVenues"]:checked');
+        let registrationDeadline = null;
+        let registrationDeadlineFormatted = null;
         
+        if (selectedVenueCheckboxes.length > 0) {
+            // 获取第一个选中场次的截止日期（通常所有场次应该有相同的截止日期）
+            const firstCheckbox = selectedVenueCheckboxes[0];
+            const deadlineStr = firstCheckbox.dataset.deadline;
+            
+            if (deadlineStr) {
+                registrationDeadline = deadlineStr; // ISO格式: YYYY-MM-DD
+                // 格式化为邮件显示格式: YYYY年MM月DD日
+                const deadlineDate = new Date(deadlineStr);
+                const year = deadlineDate.getFullYear();
+                const month = String(deadlineDate.getMonth() + 1).padStart(2, '0');
+                const day = String(deadlineDate.getDate()).padStart(2, '0');
+                registrationDeadlineFormatted = `${year}年${month}月${day}日`;
+            }
+        }
+
         // 准备JSON数据对象
         const submitData = {
             applicationID: applicationID,
@@ -1919,6 +1940,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             examDate: generateExamDateString(checkedSessions),
             timestamp: getBeijingTime(),
             deadlineDate: deadlineDateString, // 截止日期：当天日期+7天
+            // 🆕 添加报名截止日期（从数据库 exam_sessions 表的 is_active_until）
+            registrationDeadline: registrationDeadline, // ISO格式: YYYY-MM-DD
+            registrationDeadlineFormatted: registrationDeadlineFormatted, // 格式化显示: YYYY年MM月DD日
             // 添加费用信息用于邮件显示
             feeCalculation: feeCalculation,
             totalFee: feeCalculation ? feeCalculation.totalFee : 0,
