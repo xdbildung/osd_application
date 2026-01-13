@@ -32,6 +32,10 @@
   ],
   "routes": [
     {
+      "src": "/api/supabase",
+      "dest": "/api/supabase.js"
+    },
+    {
       "src": "/",
       "dest": "/index.html"
     },

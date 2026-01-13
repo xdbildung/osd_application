@@ -1,11 +1,9 @@
 // ============================================
-// Supabase 配置和初始化
+// Supabase 安全配置
 // ============================================
-const SUPABASE_URL = 'https://totxnqrbgvppdrziynpz.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_j9PE3FzvHbAzDOoBgr1NZw_zEw7MksE';
-
-// 初始化 Supabase 客户端（使用 REST API，无需额外库）
-let supabaseClient = null;
+// 🔒 安全提示：Supabase 凭据已移至后端 API 代理层
+// 前端不再直接访问 Supabase，而是通过 /api/supabase 代理
+const SUPABASE_PROXY_URL = '/api/supabase';
 
 // 全局数据存储
 let examSessionsData = []; // 存储从数据库加载的场次数据
@@ -59,42 +57,36 @@ function getLocationCode(locationName) {
     return locationName;
 }
 
-// Supabase REST API 辅助函数
+// 🔒 安全的 Supabase 查询函数（通过后端代理）
 async function supabaseQuery(table, options = {}) {
     const { select = '*', filter = '', order = '', limit = null } = options;
     
-    let url = `${SUPABASE_URL}/rest/v1/${table}?select=${select}`;
-    
-    if (filter) {
-        url += `&${filter}`;
-    }
-    
-    if (order) {
-        url += `&order=${order}`;
-    }
-    
-    if (limit) {
-        url += `&limit=${limit}`;
-    }
-    
     try {
-        const response = await fetch(url, {
-            method: 'GET',
+        // 通过后端 API 代理查询 Supabase
+        const response = await fetch(SUPABASE_PROXY_URL, {
+            method: 'POST',
             headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-            }
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                table: table,
+                options: {
+                    select: select,
+                    filter: filter,
+                    order: order,
+                    limit: limit
+                }
+            })
         });
         
         if (!response.ok) {
-            throw new Error(`Supabase query failed: ${response.status} ${response.statusText}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `API query failed: ${response.status}`);
         }
         
         return await response.json();
     } catch (error) {
-        console.error(`Error querying ${table}:`, error);
+        console.error(`❌ Error querying ${table}:`, error);
         throw error;
     }
 }
