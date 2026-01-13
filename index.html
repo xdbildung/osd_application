@@ -274,7 +274,7 @@
 
     <footer class="version-footer">
         <div class="version-info">
-            <span class="version-text">ÖSD 考试报名系统 v2.0.0</span>
+            <span class="version-text" id="app-version-display">ÖSD 考试报名系统 <span id="app-version">v2.0.0</span></span>
             <span class="copyright">© 2025 慕尼黑SDI语言大学</span>
         </div>
     </footer>
@@ -398,8 +398,22 @@
         
         // 为护照上传添加事件监听器
         document.addEventListener('DOMContentLoaded', function() {
-                    // 报名截止提示现在通过开发配置控制
-        // 如需显示提示，请在 dev-config.json 中设置 registrationClosed: true
+            // 加载版本信息
+            fetch('/version.json')
+                .then(res => res.json())
+                .then(data => {
+                    const versionEl = document.getElementById('app-version');
+                    if (versionEl) {
+                        const releaseDate = new Date(data.releaseDate).toLocaleDateString('zh-CN');
+                        versionEl.textContent = `v${data.version}`;
+                        versionEl.title = `发布日期: ${releaseDate}\n${data.description || ''}`;
+                        console.log(`📦 当前版本: v${data.version} (${releaseDate})`);
+                    }
+                })
+                .catch(err => console.log('⚠️ 无法加载版本信息'));
+                    
+            // 报名截止提示现在通过开发配置控制
+            // 如需显示提示，请在 dev-config.json 中设置 registrationClosed: true
             
             const passportInput = document.getElementById('passportUpload');
             if (passportInput) {

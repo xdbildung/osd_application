@@ -1,0 +1,12 @@
+{
+  "version": "2.0.0",
+  "releaseDate": "2026-01-12T10:30:00.000Z",
+  "description": "Supabase 安全保护更新",
+  "changes": [
+    "移除前端硬编码 Supabase 凭据",
+    "创建安全的 API 代理层",
+    "添加 CORS 支持",
+    "修复 Vercel Serverless Functions 配置",
+    "启用 Supabase RLS 安全策略"
+  ]
+}
