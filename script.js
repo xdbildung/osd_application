@@ -1886,20 +1886,34 @@ document.addEventListener('DOMContentLoaded', async function() {
         let registrationDeadline = null;
         let registrationDeadlineFormatted = null;
         
+        console.log('🔍 调试：选中的场次数量:', selectedVenueCheckboxes.length);
+        
         if (selectedVenueCheckboxes.length > 0) {
             // 获取第一个选中场次的截止日期（通常所有场次应该有相同的截止日期）
             const firstCheckbox = selectedVenueCheckboxes[0];
             const deadlineStr = firstCheckbox.dataset.deadline;
             
-            if (deadlineStr) {
+            console.log('🔍 调试：第一个场次的 data-deadline:', deadlineStr);
+            console.log('🔍 调试：第一个场次的所有 dataset:', firstCheckbox.dataset);
+            
+            if (deadlineStr && deadlineStr.trim() !== '') {
                 registrationDeadline = deadlineStr; // ISO格式: YYYY-MM-DD
                 // 格式化为邮件显示格式: YYYY年MM月DD日
-                const deadlineDate = new Date(deadlineStr);
-                const year = deadlineDate.getFullYear();
-                const month = String(deadlineDate.getMonth() + 1).padStart(2, '0');
-                const day = String(deadlineDate.getDate()).padStart(2, '0');
+                const deadlineDateObj = new Date(deadlineStr);
+                const year = deadlineDateObj.getFullYear();
+                const month = String(deadlineDateObj.getMonth() + 1).padStart(2, '0');
+                const day = String(deadlineDateObj.getDate()).padStart(2, '0');
                 registrationDeadlineFormatted = `${year}年${month}月${day}日`;
+                
+                console.log('✅ 成功提取报名截止日期:', {
+                    registrationDeadline,
+                    registrationDeadlineFormatted
+                });
+            } else {
+                console.warn('⚠️ 警告：场次的 data-deadline 为空！');
             }
+        } else {
+            console.warn('⚠️ 警告：没有选中任何场次！');
         }
 
         // 准备JSON数据对象
