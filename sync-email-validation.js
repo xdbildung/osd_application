@@ -9,20 +9,9 @@ console.log('🔄 开始同步邮箱验证功能...');
 const emailValidationFunction = `    // 验证邮箱格式
     function validateEmail(email) {
         // 基本邮箱格式验证
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
         if (!emailPattern.test(email)) {
             return { isValid: false, message: '请输入有效的邮箱地址格式' };
-        }
-        
-        // 检查邮箱域名是否在允许列表中
-        const allowedDomains = ['qq.com', '163.com', 'hotmail.com', 'outlook.com'];
-        const domain = email.split('@')[1].toLowerCase();
-        
-        if (!allowedDomains.includes(domain)) {
-            return { 
-                isValid: false, 
-                message: '请使用提示信息指定的邮箱' 
-            };
         }
         
         return { isValid: true, message: '' };
@@ -39,7 +28,7 @@ const emailValidationCall = `                case 'email':
 
 // 邮箱提示信息模板
 const emailNoteTemplate = `                <div class="form-note">
-                    <strong>重要提示：</strong>为确保您能及时收到关键的申请确认与后续通知邮件，我们需要您使用以下服务商的邮箱：@qq.com, @163.com, @hotmail.com 或 @outlook.com。感谢您的理解与配合。
+                    <strong>重要提示：</strong>为确保您能及时收到关键的申请确认与后续通知邮件，请您仔细确认您填写的邮箱地址是否正确。感谢您的理解与配合。
                 </div>`;
 
 // 需要同步的文件列表

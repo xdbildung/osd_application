@@ -1538,23 +1538,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-        // 验证邮箱格式
+                // 验证邮箱格式
     function validateEmail(email) {
         // 基本邮箱格式验证
-        const emailPattern = /^[^s@]+@[^s@]+.[^s@]+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(email)) {
             return { isValid: false, message: '请输入有效的邮箱地址格式' };
-        }
-        
-        // 检查邮箱域名是否在允许列表中
-        const allowedDomains = ['qq.com', '163.com', 'hotmail.com', 'outlook.com'];
-        const domain = email.split('@')[1].toLowerCase();
-        
-        if (!allowedDomains.includes(domain)) {
-            return { 
-                isValid: false, 
-                message: '请使用提示信息指定的邮箱' 
-            };
         }
         
         return { isValid: true, message: '' };
